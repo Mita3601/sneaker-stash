@@ -15,15 +15,27 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminCadeauRouteImport } from './routes/_authenticated/admin/cadeau'
+import { Route as AuthenticatedAdminDepotsRouteImport } from './routes/_authenticated/admin/depots'
+import { Route as AuthenticatedAdminInvestissementRouteImport } from './routes/_authenticated/admin/investissement'
+import { Route as AuthenticatedAdminParrainagesRouteImport } from './routes/_authenticated/admin/parrainages'
+import { Route as AuthenticatedAdminPromoteurRouteImport } from './routes/_authenticated/admin/promoteur'
+import { Route as AuthenticatedAdminRetraitRouteImport } from './routes/_authenticated/admin/retrait'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
+import { Route as AuthenticatedAppAboutRouteImport } from './routes/_authenticated/app/about'
 import { Route as AuthenticatedAppAccountDetailsRouteImport } from './routes/_authenticated/app/account-details'
 import { Route as AuthenticatedAppAddBankRouteImport } from './routes/_authenticated/app/add-bank'
 import { Route as AuthenticatedAppChangePasswordRouteImport } from './routes/_authenticated/app/change-password'
+import { Route as AuthenticatedAppDownloadRouteImport } from './routes/_authenticated/app/download'
+import { Route as AuthenticatedAppHistoryRouteImport } from './routes/_authenticated/app/history'
 import { Route as AuthenticatedAppMeRouteImport } from './routes/_authenticated/app/me'
 import { Route as AuthenticatedAppMissionsRouteImport } from './routes/_authenticated/app/missions'
 import { Route as AuthenticatedAppMyProductsRouteImport } from './routes/_authenticated/app/my-products'
 import { Route as AuthenticatedAppRechargeRouteImport } from './routes/_authenticated/app/recharge'
 import { Route as AuthenticatedAppRechargeHistoryRouteImport } from './routes/_authenticated/app/recharge-history'
+import { Route as AuthenticatedAppRegulationRouteImport } from './routes/_authenticated/app/regulation'
 import { Route as AuthenticatedAppSupportRouteImport } from './routes/_authenticated/app/support'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
@@ -58,9 +70,60 @@ const AuthRegisterRoute = AuthRegisterRouteImport.update({
   path: '/auth/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminCadeauRoute =
+  AuthenticatedAdminCadeauRouteImport.update({
+    id: '/cadeau',
+    path: '/cadeau',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDepotsRoute =
+  AuthenticatedAdminDepotsRouteImport.update({
+    id: '/depots',
+    path: '/depots',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminInvestissementRoute =
+  AuthenticatedAdminInvestissementRouteImport.update({
+    id: '/investissement',
+    path: '/investissement',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminParrainagesRoute =
+  AuthenticatedAdminParrainagesRouteImport.update({
+    id: '/parrainages',
+    path: '/parrainages',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPromoteurRoute =
+  AuthenticatedAdminPromoteurRouteImport.update({
+    id: '/promoteur',
+    path: '/promoteur',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRetraitRoute =
+  AuthenticatedAdminRetraitRouteImport.update({
+    id: '/retrait',
+    path: '/retrait',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAboutRoute = AuthenticatedAppAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppAccountDetailsRoute =
@@ -80,6 +143,17 @@ const AuthenticatedAppChangePasswordRoute =
     path: '/change-password',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDownloadRoute =
+  AuthenticatedAppDownloadRouteImport.update({
+    id: '/download',
+    path: '/download',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppHistoryRoute = AuthenticatedAppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppMeRoute = AuthenticatedAppMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -109,6 +183,12 @@ const AuthenticatedAppRechargeHistoryRoute =
     path: '/recharge-history',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppRegulationRoute =
+  AuthenticatedAppRegulationRouteImport.update({
+    id: '/regulation',
+    path: '/regulation',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppSupportRoute = AuthenticatedAppSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -134,63 +214,98 @@ const AuthenticatedAppWithdrawHistoryRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/admin/cadeau': typeof AuthenticatedAdminCadeauRoute
+  '/admin/depots': typeof AuthenticatedAdminDepotsRoute
+  '/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
+  '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/app/about': typeof AuthenticatedAppAboutRoute
   '/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
   '/app/add-bank': typeof AuthenticatedAppAddBankRoute
   '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
+  '/app/download': typeof AuthenticatedAppDownloadRoute
+  '/app/history': typeof AuthenticatedAppHistoryRoute
   '/app/me': typeof AuthenticatedAppMeRoute
   '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
   '/app/recharge': typeof AuthenticatedAppRechargeRoute
   '/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/app/regulation': typeof AuthenticatedAppRegulationRoute
   '/app/support': typeof AuthenticatedAppSupportRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/admin/cadeau': typeof AuthenticatedAdminCadeauRoute
+  '/admin/depots': typeof AuthenticatedAdminDepotsRoute
+  '/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
+  '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/app/about': typeof AuthenticatedAppAboutRoute
   '/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
   '/app/add-bank': typeof AuthenticatedAppAddBankRoute
   '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
+  '/app/download': typeof AuthenticatedAppDownloadRoute
+  '/app/history': typeof AuthenticatedAppHistoryRoute
   '/app/me': typeof AuthenticatedAppMeRoute
   '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
   '/app/recharge': typeof AuthenticatedAppRechargeRoute
   '/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/app/regulation': typeof AuthenticatedAppRegulationRoute
   '/app/support': typeof AuthenticatedAppSupportRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/_authenticated/admin/cadeau': typeof AuthenticatedAdminCadeauRoute
+  '/_authenticated/admin/depots': typeof AuthenticatedAdminDepotsRoute
+  '/_authenticated/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
+  '/_authenticated/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/_authenticated/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/_authenticated/admin/retrait': typeof AuthenticatedAdminRetraitRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/app/about': typeof AuthenticatedAppAboutRoute
   '/_authenticated/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
   '/_authenticated/app/add-bank': typeof AuthenticatedAppAddBankRoute
   '/_authenticated/app/change-password': typeof AuthenticatedAppChangePasswordRoute
+  '/_authenticated/app/download': typeof AuthenticatedAppDownloadRoute
+  '/_authenticated/app/history': typeof AuthenticatedAppHistoryRoute
   '/_authenticated/app/me': typeof AuthenticatedAppMeRoute
   '/_authenticated/app/missions': typeof AuthenticatedAppMissionsRoute
   '/_authenticated/app/my-products': typeof AuthenticatedAppMyProductsRoute
   '/_authenticated/app/recharge': typeof AuthenticatedAppRechargeRoute
   '/_authenticated/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/_authenticated/app/regulation': typeof AuthenticatedAppRegulationRoute
   '/_authenticated/app/support': typeof AuthenticatedAppSupportRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
   '/_authenticated/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/_authenticated/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -201,37 +316,60 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth/login'
     | '/auth/register'
+    | '/admin/cadeau'
+    | '/admin/depots'
+    | '/admin/investissement'
+    | '/admin/parrainages'
+    | '/admin/promoteur'
+    | '/admin/retrait'
+    | '/admin/users'
+    | '/app/about'
     | '/app/account-details'
     | '/app/add-bank'
     | '/app/change-password'
+    | '/app/download'
+    | '/app/history'
     | '/app/me'
     | '/app/missions'
     | '/app/my-products'
     | '/app/recharge'
     | '/app/recharge-history'
+    | '/app/regulation'
     | '/app/support'
     | '/app/team'
     | '/app/withdraw'
     | '/app/withdraw-history'
+    | '/admin/'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth/login'
     | '/auth/register'
+    | '/admin/cadeau'
+    | '/admin/depots'
+    | '/admin/investissement'
+    | '/admin/parrainages'
+    | '/admin/promoteur'
+    | '/admin/retrait'
+    | '/admin/users'
+    | '/app/about'
     | '/app/account-details'
     | '/app/add-bank'
     | '/app/change-password'
+    | '/app/download'
+    | '/app/history'
     | '/app/me'
     | '/app/missions'
     | '/app/my-products'
     | '/app/recharge'
     | '/app/recharge-history'
+    | '/app/regulation'
     | '/app/support'
     | '/app/team'
     | '/app/withdraw'
     | '/app/withdraw-history'
+    | '/admin'
     | '/app'
   id:
     | '__root__'
@@ -241,18 +379,30 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/auth/login'
     | '/auth/register'
+    | '/_authenticated/admin/cadeau'
+    | '/_authenticated/admin/depots'
+    | '/_authenticated/admin/investissement'
+    | '/_authenticated/admin/parrainages'
+    | '/_authenticated/admin/promoteur'
+    | '/_authenticated/admin/retrait'
+    | '/_authenticated/admin/users'
+    | '/_authenticated/app/about'
     | '/_authenticated/app/account-details'
     | '/_authenticated/app/add-bank'
     | '/_authenticated/app/change-password'
+    | '/_authenticated/app/download'
+    | '/_authenticated/app/history'
     | '/_authenticated/app/me'
     | '/_authenticated/app/missions'
     | '/_authenticated/app/my-products'
     | '/_authenticated/app/recharge'
     | '/_authenticated/app/recharge-history'
+    | '/_authenticated/app/regulation'
     | '/_authenticated/app/support'
     | '/_authenticated/app/team'
     | '/_authenticated/app/withdraw'
     | '/_authenticated/app/withdraw-history'
+    | '/_authenticated/admin/'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -307,11 +457,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/cadeau': {
+      id: '/_authenticated/admin/cadeau'
+      path: '/cadeau'
+      fullPath: '/admin/cadeau'
+      preLoaderRoute: typeof AuthenticatedAdminCadeauRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/depots': {
+      id: '/_authenticated/admin/depots'
+      path: '/depots'
+      fullPath: '/admin/depots'
+      preLoaderRoute: typeof AuthenticatedAdminDepotsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/investissement': {
+      id: '/_authenticated/admin/investissement'
+      path: '/investissement'
+      fullPath: '/admin/investissement'
+      preLoaderRoute: typeof AuthenticatedAdminInvestissementRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/parrainages': {
+      id: '/_authenticated/admin/parrainages'
+      path: '/parrainages'
+      fullPath: '/admin/parrainages'
+      preLoaderRoute: typeof AuthenticatedAdminParrainagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/promoteur': {
+      id: '/_authenticated/admin/promoteur'
+      path: '/promoteur'
+      fullPath: '/admin/promoteur'
+      preLoaderRoute: typeof AuthenticatedAdminPromoteurRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/retrait': {
+      id: '/_authenticated/admin/retrait'
+      path: '/retrait'
+      fullPath: '/admin/retrait'
+      preLoaderRoute: typeof AuthenticatedAdminRetraitRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/about': {
+      id: '/_authenticated/app/about'
+      path: '/about'
+      fullPath: '/app/about'
+      preLoaderRoute: typeof AuthenticatedAppAboutRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/account-details': {
@@ -333,6 +546,20 @@ declare module '@tanstack/react-router' {
       path: '/change-password'
       fullPath: '/app/change-password'
       preLoaderRoute: typeof AuthenticatedAppChangePasswordRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/download': {
+      id: '/_authenticated/app/download'
+      path: '/download'
+      fullPath: '/app/download'
+      preLoaderRoute: typeof AuthenticatedAppDownloadRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/history': {
+      id: '/_authenticated/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AuthenticatedAppHistoryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/me': {
@@ -370,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRechargeHistoryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/regulation': {
+      id: '/_authenticated/app/regulation'
+      path: '/regulation'
+      fullPath: '/app/regulation'
+      preLoaderRoute: typeof AuthenticatedAppRegulationRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/support': {
       id: '/_authenticated/app/support'
       path: '/support'
@@ -401,15 +635,44 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminCadeauRoute: typeof AuthenticatedAdminCadeauRoute
+  AuthenticatedAdminDepotsRoute: typeof AuthenticatedAdminDepotsRoute
+  AuthenticatedAdminInvestissementRoute: typeof AuthenticatedAdminInvestissementRoute
+  AuthenticatedAdminParrainagesRoute: typeof AuthenticatedAdminParrainagesRoute
+  AuthenticatedAdminPromoteurRoute: typeof AuthenticatedAdminPromoteurRoute
+  AuthenticatedAdminRetraitRoute: typeof AuthenticatedAdminRetraitRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminCadeauRoute: AuthenticatedAdminCadeauRoute,
+  AuthenticatedAdminDepotsRoute: AuthenticatedAdminDepotsRoute,
+  AuthenticatedAdminInvestissementRoute: AuthenticatedAdminInvestissementRoute,
+  AuthenticatedAdminParrainagesRoute: AuthenticatedAdminParrainagesRoute,
+  AuthenticatedAdminPromoteurRoute: AuthenticatedAdminPromoteurRoute,
+  AuthenticatedAdminRetraitRoute: AuthenticatedAdminRetraitRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAboutRoute: typeof AuthenticatedAppAboutRoute
   AuthenticatedAppAccountDetailsRoute: typeof AuthenticatedAppAccountDetailsRoute
   AuthenticatedAppAddBankRoute: typeof AuthenticatedAppAddBankRoute
   AuthenticatedAppChangePasswordRoute: typeof AuthenticatedAppChangePasswordRoute
+  AuthenticatedAppDownloadRoute: typeof AuthenticatedAppDownloadRoute
+  AuthenticatedAppHistoryRoute: typeof AuthenticatedAppHistoryRoute
   AuthenticatedAppMeRoute: typeof AuthenticatedAppMeRoute
   AuthenticatedAppMissionsRoute: typeof AuthenticatedAppMissionsRoute
   AuthenticatedAppMyProductsRoute: typeof AuthenticatedAppMyProductsRoute
   AuthenticatedAppRechargeRoute: typeof AuthenticatedAppRechargeRoute
   AuthenticatedAppRechargeHistoryRoute: typeof AuthenticatedAppRechargeHistoryRoute
+  AuthenticatedAppRegulationRoute: typeof AuthenticatedAppRegulationRoute
   AuthenticatedAppSupportRoute: typeof AuthenticatedAppSupportRoute
   AuthenticatedAppTeamRoute: typeof AuthenticatedAppTeamRoute
   AuthenticatedAppWithdrawRoute: typeof AuthenticatedAppWithdrawRoute
@@ -418,14 +681,18 @@ interface AuthenticatedAppRouteChildren {
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAboutRoute: AuthenticatedAppAboutRoute,
   AuthenticatedAppAccountDetailsRoute: AuthenticatedAppAccountDetailsRoute,
   AuthenticatedAppAddBankRoute: AuthenticatedAppAddBankRoute,
   AuthenticatedAppChangePasswordRoute: AuthenticatedAppChangePasswordRoute,
+  AuthenticatedAppDownloadRoute: AuthenticatedAppDownloadRoute,
+  AuthenticatedAppHistoryRoute: AuthenticatedAppHistoryRoute,
   AuthenticatedAppMeRoute: AuthenticatedAppMeRoute,
   AuthenticatedAppMissionsRoute: AuthenticatedAppMissionsRoute,
   AuthenticatedAppMyProductsRoute: AuthenticatedAppMyProductsRoute,
   AuthenticatedAppRechargeRoute: AuthenticatedAppRechargeRoute,
   AuthenticatedAppRechargeHistoryRoute: AuthenticatedAppRechargeHistoryRoute,
+  AuthenticatedAppRegulationRoute: AuthenticatedAppRegulationRoute,
   AuthenticatedAppSupportRoute: AuthenticatedAppSupportRoute,
   AuthenticatedAppTeamRoute: AuthenticatedAppTeamRoute,
   AuthenticatedAppWithdrawRoute: AuthenticatedAppWithdrawRoute,
@@ -437,12 +704,12 @@ const AuthenticatedAppRouteWithChildren =
   AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
 }
 
@@ -458,3 +725,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

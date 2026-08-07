@@ -54,6 +54,13 @@ export function shortDate(value: string | null | undefined) {
   });
 }
 
+export function maskPhone(value: string | null | undefined) {
+  if (!value) return "-";
+  const raw = String(value).trim();
+  if (raw.length <= 8) return raw;
+  return `${raw.slice(0, 6)}...${raw.slice(-2)}`;
+}
+
 /** Phone numbers are mapped to a stable internal email alias for authentication. */
 export function phoneToEmail(countryCode: string, phone: string) {
   const digits = `${countryCode}${phone}`.replace(/\D/g, "");
@@ -64,9 +71,11 @@ export function normalizePhone(countryCode: string, phone: string) {
   return `${countryCode}${phone.replace(/\D/g, "")}`;
 }
 
-export function nextClaimAt(lastClaim: string | null) {
-  if (!lastClaim) return 0;
-  return new Date(lastClaim).getTime() + 24 * 60 * 60 * 1000;
+export function nextClaimAt(lastClaim: string | null, purchaseDate?: string | null) {
+  const DAY = 24 * 60 * 60 * 1000;
+  if (lastClaim) return new Date(lastClaim).getTime() + DAY;
+  if (purchaseDate) return new Date(purchaseDate).getTime() + DAY;
+  return 0;
 }
 
 export function countdown(ms: number) {

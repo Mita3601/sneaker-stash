@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Headphones, TrendingUp, Wallet } from "lucide-react";
+import { Headphones, TrendingUp, Wallet, CalendarCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import hero from "@/assets/hero-banner.jpg";
@@ -19,7 +20,10 @@ export const Route = createFileRoute("/_authenticated/app/")({
         content: "Choisissez votre paire VIP et percevez un revenu quotidien sur toute sa durée.",
       },
       { property: "og:title", content: "Catalogue de paires — NikeStake" },
-      { property: "og:description", content: "9 niveaux VIP, revenus quotidiens et retraits 24/7." },
+      {
+        property: "og:description",
+        content: "9 niveaux VIP, revenus quotidiens et retraits 24/7.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -30,6 +34,12 @@ export const Route = createFileRoute("/_authenticated/app/")({
 function Products() {
   const qc = useQueryClient();
   const { data: profile } = useProfile();
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
@@ -57,6 +67,29 @@ function Products() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
+  const claimCheckin = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("claim_daily_checkin");
+      if (error) throw error;
+      return data as { reward?: number };
+    },
+    onSuccess: (data) => {
+      toast.success(`Pointage validé: +${fcfa(data?.reward ?? 100)}`);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const createdAtMs = profile?.created_at ? new Date(profile.created_at).getTime() : 0;
+  const lastCheckinMs = profile?.last_checkin_at ? new Date(profile.last_checkin_at).getTime() : 0;
+  const nextFromCreation = createdAtMs ? createdAtMs + 24 * 60 * 60 * 1000 : 0;
+  const nextFromLastCheckin = lastCheckinMs ? lastCheckinMs + 24 * 60 * 60 * 1000 : 0;
+  const nextCheckinAt = Math.max(nextFromCreation, nextFromLastCheckin);
+  const remaining = Math.max(0, nextCheckinAt - now);
+  const canCheckIn = Boolean(profile?.id) && remaining === 0;
 
   return (
     <>
@@ -103,6 +136,30 @@ function Products() {
             </div>
           </Link>
         </div>
+
+        <Card className="mt-4 border border-primary/15 bg-gradient-to-r from-primary/10 via-cyan-400/10 to-background">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-extrabold text-foreground">Pointage quotidien</p>
+              <p className="text-xs text-muted-foreground">
+                Tous les 24h, appuyez pour recevoir 100 FCFA.
+              </p>
+              <p className="mt-1 text-xs font-semibold text-primary">
+                {canCheckIn
+                  ? "Disponible maintenant"
+                  : `Prochain pointage dans ${new Date(remaining).toISOString().slice(11, 19)}`}
+              </p>
+            </div>
+            <Btn
+              className="shrink-0 px-3 py-2 text-xs"
+              disabled={!canCheckIn || claimCheckin.isPending}
+              onClick={() => claimCheckin.mutate()}
+            >
+              <CalendarCheck className="size-4" />
+              {claimCheckin.isPending ? "Validation..." : "Pointer"}
+            </Btn>
+          </div>
+        </Card>
       </section>
 
       <section className="grid grid-cols-2 gap-3 px-4 pb-6">

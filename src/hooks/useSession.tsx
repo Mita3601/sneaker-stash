@@ -15,50 +15,68 @@ export function useCurrentUser() {
 
 export function useProfile() {
   const qc = useQueryClient();
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
+
   const query = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", userId],
+    enabled: Boolean(userId),
     queryFn: async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) return null;
+      if (!userId) return null;
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", auth.user.id)
+        .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
+
+      if (!data) {
+        throw new Error("Profil introuvable pour l'utilisateur authentifié.");
+      }
+
       return data;
     },
+    retry: false,
   });
 
   useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      qc.removeQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["auth-user"] });
+      qc.invalidateQueries({ queryKey: ["is-admin"] });
+    });
+
     const channel = supabase
-      .channel("profile-live")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["profile"] });
-        },
-      )
+      .channel(`profile-live-${userId ?? "guest"}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => {
+        qc.invalidateQueries({ queryKey: ["profile"] });
+      })
       .subscribe();
+
     return () => {
+      authListener.subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
-  }, [qc]);
+  }, [qc, userId]);
 
   return query;
 }
 
 export function useIsAdmin() {
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
+
   return useQuery({
-    queryKey: ["is-admin"],
+    queryKey: ["is-admin", userId],
+    enabled: Boolean(userId),
     queryFn: async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) return false;
+      if (!userId) return false;
       const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", auth.user.id)
+        .eq("user_id", userId)
         .eq("role", "admin")
         .maybeSingle();
       return Boolean(data);

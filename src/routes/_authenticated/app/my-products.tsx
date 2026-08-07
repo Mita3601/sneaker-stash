@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import hero from "@/assets/hero-banner.jpg";
 import { Btn, Card, Empty, StatTile } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { countdown, fcfa, nextClaimAt, SNEAKER_IMAGES, shortDate } from "@/lib/app";
@@ -11,9 +12,15 @@ export const Route = createFileRoute("/_authenticated/app/my-products")({
   head: () => ({
     meta: [
       { title: "Mes paires — NikeStake" },
-      { name: "description", content: "Suivez vos paires actives et réclamez vos revenus quotidiens." },
+      {
+        name: "description",
+        content: "Suivez vos paires actives et réclamez vos revenus quotidiens.",
+      },
       { property: "og:title", content: "Mes paires — NikeStake" },
-      { property: "og:description", content: "Revenus quotidiens à réclamer toutes les 24 heures." },
+      {
+        property: "og:description",
+        content: "Revenus quotidiens à réclamer toutes les 24 heures.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -62,9 +69,19 @@ function MyProducts() {
 
   return (
     <>
-      <header className="bg-gradient-deep px-4 py-5 text-primary-foreground">
-        <p className="text-2xl font-extrabold">{fcfa(dailyTotal)}</p>
-        <p className="text-xs opacity-90">Les revenus quotidiens générés par mes paires</p>
+      <header className="relative overflow-hidden text-primary-foreground">
+        <img
+          src={hero}
+          alt="Sneakers Nike en fond"
+          width={1088}
+          height={608}
+          className="h-44 w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-deep/70" />
+        <div className="absolute inset-0 flex flex-col justify-end px-4 py-5">
+          <p className="text-2xl font-extrabold">{fcfa(dailyTotal)}</p>
+          <p className="text-xs opacity-90">Les revenus quotidiens générés par mes paires</p>
+        </div>
       </header>
 
       <div className="grid grid-cols-2 gap-3 p-4">
@@ -80,7 +97,7 @@ function MyProducts() {
           />
         ) : (
           items.map((item) => {
-            const ready = nextClaimAt(item.last_claim_date) <= now;
+            const ready = nextClaimAt(item.last_claim_date, item.purchase_date) <= now;
             return (
               <Card key={item.id} className="flex gap-3">
                 <img
@@ -110,7 +127,7 @@ function MyProducts() {
                         ? "Terminé"
                         : ready
                           ? `+ ${fcfa(item.products?.daily_yield)}`
-                          : countdown(nextClaimAt(item.last_claim_date) - now)}
+                          : countdown(nextClaimAt(item.last_claim_date, item.purchase_date) - now)}
                     </span>
                     <Btn
                       className="px-3 py-2 text-xs"

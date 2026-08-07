@@ -9,7 +9,10 @@ export const Route = createFileRoute("/_authenticated/app/withdraw-history")({
   head: () => ({
     meta: [
       { title: "Registres de retrait — NikeStake" },
-      { name: "description", content: "Historique de vos demandes de retrait, frais et montants nets." },
+      {
+        name: "description",
+        content: "Historique de vos demandes de retrait, frais et montants nets.",
+      },
       { property: "og:title", content: "Registres de retrait — NikeStake" },
       { property: "og:description", content: "Suivez le traitement de chaque retrait." },
       { property: "og:type", content: "website" },
@@ -26,7 +29,7 @@ function WithdrawHistory() {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
-        .eq("type", "withdrawal")
+        .eq("type", "withdraw")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;

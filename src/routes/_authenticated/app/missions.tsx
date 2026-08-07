@@ -83,7 +83,10 @@ function Missions() {
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                <div className="h-full rounded-full bg-gradient-primary" style={{ width: `${pct}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-primary"
+                  style={{ width: `${pct}%` }}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">

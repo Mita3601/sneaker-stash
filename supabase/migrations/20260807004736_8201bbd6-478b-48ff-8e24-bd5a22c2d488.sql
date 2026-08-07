@@ -108,7 +108,8 @@ grant select, insert, update, delete on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 grant select on public.user_roles to authenticated;
 grant all on public.user_roles to service_role;
-grant select on public.products to authenticated, anon;
+grant select on public.products to authenticated;
+grant select on public.products to anon;
 grant all on public.products to service_role;
 grant select, insert, update, delete on public.user_products to authenticated;
 grant all on public.user_products to service_role;
@@ -125,12 +126,12 @@ grant all on public.fraud_alerts to service_role;
 
 -- ============ HELPERS ============
 create or replace function public.has_role(_user_id uuid, _role public.app_role)
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql stable security definer set search_path = public, row_security = off as $$
   select exists (select 1 from public.user_roles where user_id = _user_id and role = _role);
 $$;
 
 create or replace function public.is_admin()
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql stable security definer set search_path = public, row_security = off as $$
   select public.has_role(auth.uid(), 'admin');
 $$;
 
@@ -151,6 +152,7 @@ create policy profiles_update_admin on public.profiles for update to authenticat
 
 create policy roles_select_own on public.user_roles for select to authenticated using (user_id = auth.uid() or public.is_admin());
 
+drop policy if exists products_read on public.products;
 create policy products_read on public.products for select to authenticated, anon using (true);
 create policy products_admin on public.products for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
@@ -426,16 +428,41 @@ alter publication supabase_realtime add table public.transactions;
 alter publication supabase_realtime add table public.user_products;
 
 -- ============ SEED ============
-insert into public.products (name, price, daily_yield, total_yield, vip_level) values
-('Air Force 1', 3000, 500, 30000, 'VIP1'),
-('Air Max 90', 7000, 1170, 70200, 'VIP2'),
-('Dunk Low', 15000, 2500, 150000, 'VIP3'),
-('Jordan 1', 30000, 5000, 300000, 'VIP4'),
-('Jordan 4', 60000, 10000, 600000, 'VIP5'),
-('Air Max 270', 120000, 20000, 1200000, 'VIP6'),
-('Vaporfly 3', 250000, 42000, 2520000, 'VIP7'),
-('Air Zoom Alphafly', 500000, 85000, 5100000, 'VIP8'),
-('Nike Mag Limited', 1000000, 175000, 10500000, 'VIP9');
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Air Force 1', 4000, 750, 45000, 'VIP1'
+where not exists (select 1 from public.products where name = 'Air Force 1');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Air Max 90', 8000, 1500, 90000, 'VIP2'
+where not exists (select 1 from public.products where name = 'Air Max 90');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Dunk Low', 15000, 2700, 162000, 'VIP3'
+where not exists (select 1 from public.products where name = 'Dunk Low');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Jordan 1', 20000, 4500, 270000, 'VIP4'
+where not exists (select 1 from public.products where name = 'Jordan 1');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Jordan 4', 50000, 10000, 600000, 'VIP5'
+where not exists (select 1 from public.products where name = 'Jordan 4');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Air Max 270', 120000, 22000, 1320000, 'VIP6'
+where not exists (select 1 from public.products where name = 'Air Max 270');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Vaporfly 3', 250000, 45000, 2700000, 'VIP7'
+where not exists (select 1 from public.products where name = 'Vaporfly 3');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Air Zoom Alphafly', 500000, 90000, 5400000, 'VIP8'
+where not exists (select 1 from public.products where name = 'Air Zoom Alphafly');
+
+insert into public.products (id, name, price, daily_yield, total_yield, vip_level)
+select gen_random_uuid(), 'Nike Mag Limited', 1000000, 120000, 7200000, 'VIP9'
+where not exists (select 1 from public.products where name = 'Nike Mag Limited');
 
 insert into public.missions (name, description, requirement_type, requirement_value, bonus_amount, icon_name, sort_order) values
 ('Inviter 3 investisseurs','Parrainez 3 membres qui rejoignent la plateforme','referrals',3,1000,'Users',1),

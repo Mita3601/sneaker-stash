@@ -7,140 +7,140 @@ PROJECT ARCHITECTURE
 text
 src/
 ├── pages/
-│   ├── auth/
-│   │   ├── Login.jsx
-│   │   └── Register.jsx
-│   ├── client/
-│   │   ├── Products.jsx        (Route: /)
-│   │   ├── MyProducts.jsx      (Route: /my-products)
-│   │   ├── Team.jsx            (Route: /team)
-│   │   └── Profile.jsx         (Route: /profile)
-│   ├── client/subpages/
-│   │   ├── WithdrawRequest.jsx
-│   │   ├── Missions.jsx
-│   │   ├── AccountDetails.jsx
-│   │   ├── RechargeHistory.jsx
-│   │   ├── WithdrawHistory.jsx
-│   │   ├── AddBank.jsx
-│   │   ├── Support.jsx
-│   │   └── ChangePassword.jsx
-│   └── admin/
-│       ├── AdminDashboard.jsx
-│       ├── UsersManagement.jsx
-│       ├── ProductsManagement.jsx
-│       ├── TransactionsValidation.jsx
-│       └── GenealogyTree.jsx
+│ ├── auth/
+│ │ ├── Login.jsx
+│ │ └── Register.jsx
+│ ├── client/
+│ │ ├── Products.jsx (Route: /)
+│ │ ├── MyProducts.jsx (Route: /my-products)
+│ │ ├── Team.jsx (Route: /team)
+│ │ └── Profile.jsx (Route: /profile)
+│ ├── client/subpages/
+│ │ ├── WithdrawRequest.jsx
+│ │ ├── Missions.jsx
+│ │ ├── AccountDetails.jsx
+│ │ ├── RechargeHistory.jsx
+│ │ ├── WithdrawHistory.jsx
+│ │ ├── AddBank.jsx
+│ │ ├── Support.jsx
+│ │ └── ChangePassword.jsx
+│ └── admin/
+│ ├── AdminDashboard.jsx
+│ ├── UsersManagement.jsx
+│ ├── ProductsManagement.jsx
+│ ├── TransactionsValidation.jsx
+│ └── GenealogyTree.jsx
 ├── components/
-│   ├── common/
-│   │   ├── BottomNav.jsx
-│   │   ├── ProductCard.jsx
-│   │   └── ProgressBar.jsx
-│   ├── modals/
-│   │   └── AnnouncementModal.jsx
-│   └── admin/
-│       └── FraudAlert.jsx
+│ ├── common/
+│ │ ├── BottomNav.jsx
+│ │ ├── ProductCard.jsx
+│ │ └── ProgressBar.jsx
+│ ├── modals/
+│ │ └── AnnouncementModal.jsx
+│ └── admin/
+│ └── FraudAlert.jsx
 ├── context/
-│   ├── AuthContext.jsx
-│   └── ProductContext.jsx
+│ ├── AuthContext.jsx
+│ └── ProductContext.jsx
 ├── hooks/
-│   ├── useAuth.js
-│   └── useProducts.js
+│ ├── useAuth.js
+│ └── useProducts.js
 ├── utils/
-│   ├── supabase.js
-│   └── validators.js
+│ ├── supabase.js
+│ └── validators.js
 └── types/
-    └── index.ts
+└── index.ts
 SUPABASE DATABASE SCHEMA
 TABLES
 sql
 -- Profiles (extends auth.users)
 CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  phone VARCHAR(20) UNIQUE NOT NULL,
-  country_code VARCHAR(10) NOT NULL,
-  referral_code VARCHAR(6) UNIQUE NOT NULL,
-  referred_by UUID REFERENCES profiles(id),
-  balance DECIMAL(12,2) DEFAULT 0,
-  role VARCHAR(20) DEFAULT 'user', -- 'user', 'promoter', 'admin'
-  is_frozen BOOLEAN DEFAULT FALSE,
-  total_deposits DECIMAL(12,2) DEFAULT 0,
-  total_withdrawals DECIMAL(12,2) DEFAULT 0,
-  total_bonus DECIMAL(12,2) DEFAULT 1500, -- Welcome bonus
-  created_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY REFERENCES auth.users(id),
+phone VARCHAR(20) UNIQUE NOT NULL,
+country_code VARCHAR(10) NOT NULL,
+referral_code VARCHAR(6) UNIQUE NOT NULL,
+referred_by UUID REFERENCES profiles(id),
+balance DECIMAL(12,2) DEFAULT 0,
+role VARCHAR(20) DEFAULT 'user', -- 'user', 'promoter', 'admin'
+is_frozen BOOLEAN DEFAULT FALSE,
+total_deposits DECIMAL(12,2) DEFAULT 0,
+total_withdrawals DECIMAL(12,2) DEFAULT 0,
+total_bonus DECIMAL(12,2) DEFAULT 1500, -- Welcome bonus
+created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Products (Nike sneakers)
 CREATE TABLE products (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  image_url TEXT,
-  price DECIMAL(10,2) NOT NULL,
-  daily_yield DECIMAL(5,2) NOT NULL, -- percentage
-  total_yield DECIMAL(5,2) NOT NULL,
-  vip_level VARCHAR(20), -- 'VIP1' to 'VIP9'
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+name VARCHAR(100) NOT NULL,
+image_url TEXT,
+price DECIMAL(10,2) NOT NULL,
+daily_yield DECIMAL(5,2) NOT NULL, -- percentage
+total_yield DECIMAL(5,2) NOT NULL,
+vip_level VARCHAR(20), -- 'VIP1' to 'VIP9'
+is_active BOOLEAN DEFAULT TRUE,
+created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- User Products (purchased sneakers)
 CREATE TABLE user_products (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  product_id UUID REFERENCES products(id),
-  purchase_date TIMESTAMP DEFAULT NOW(),
-  last_claim_date TIMESTAMP,
-  total_earned DECIMAL(12,2) DEFAULT 0,
-  status VARCHAR(20) DEFAULT 'active' -- 'active', 'completed'
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES profiles(id),
+product_id UUID REFERENCES products(id),
+purchase_date TIMESTAMP DEFAULT NOW(),
+last_claim_date TIMESTAMP,
+total_earned DECIMAL(12,2) DEFAULT 0,
+status VARCHAR(20) DEFAULT 'active' -- 'active', 'completed'
 );
 
 -- Transactions (all financial movements)
 CREATE TABLE transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  type VARCHAR(20) NOT NULL, -- 'deposit', 'withdraw', 'bonus', 'commission', 'yield'
-  amount DECIMAL(12,2) NOT NULL,
-  fee DECIMAL(12,2) DEFAULT 0, -- For withdrawals: 15% fee
-  net_amount DECIMAL(12,2), -- For withdrawals: amount - fee
-  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
-  reference VARCHAR(50),
-  description TEXT,
-  metadata JSONB,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES profiles(id),
+type VARCHAR(20) NOT NULL, -- 'deposit', 'withdraw', 'bonus', 'commission', 'yield'
+amount DECIMAL(12,2) NOT NULL,
+fee DECIMAL(12,2) DEFAULT 0, -- For withdrawals: 15% fee
+net_amount DECIMAL(12,2), -- For withdrawals: amount - fee
+status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+reference VARCHAR(50),
+description TEXT,
+metadata JSONB,
+created_at TIMESTAMP DEFAULT NOW(),
+updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Bank Accounts (Mobile Money/Bank)
 CREATE TABLE bank_accounts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  provider VARCHAR(20) NOT NULL, -- 'Wave', 'Orange', 'MTN', 'Moov'
-  account_number VARCHAR(30) NOT NULL,
-  account_name VARCHAR(100),
-  is_default BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES profiles(id),
+provider VARCHAR(20) NOT NULL, -- 'Wave', 'Orange', 'MTN', 'Moov'
+account_number VARCHAR(30) NOT NULL,
+account_name VARCHAR(100),
+is_default BOOLEAN DEFAULT FALSE,
+created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Missions (tasks)
 CREATE TABLE missions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  requirement_type VARCHAR(30), -- 'referrals', 'vip_purchase'
-  requirement_value INTEGER,
-  bonus_amount DECIMAL(10,2),
-  icon_name VARCHAR(50),
-  created_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+name VARCHAR(100) NOT NULL,
+description TEXT,
+requirement_type VARCHAR(30), -- 'referrals', 'vip_purchase'
+requirement_value INTEGER,
+bonus_amount DECIMAL(10,2),
+icon_name VARCHAR(50),
+created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- User Missions Progress
 CREATE TABLE user_missions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  mission_id UUID REFERENCES missions(id),
-  progress INTEGER DEFAULT 0,
-  is_completed BOOLEAN DEFAULT FALSE,
-  bonus_claimed BOOLEAN DEFAULT FALSE,
-  updated_at TIMESTAMP DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES profiles(id),
+mission_id UUID REFERENCES missions(id),
+progress INTEGER DEFAULT 0,
+is_completed BOOLEAN DEFAULT FALSE,
+bonus_claimed BOOLEAN DEFAULT FALSE,
+updated_at TIMESTAMP DEFAULT NOW()
 );
 POSTGRESQL TRIGGERS & FUNCTIONS
 Auto-generate Referral Code (6 alphanumeric)
@@ -148,9 +148,10 @@ sql
 CREATE OR REPLACE FUNCTION generate_referral_code()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.referral_code := UPPER(SUBSTRING(MD5(NEW.id::TEXT) FROM 1 FOR 6));
-  RETURN NEW;
+NEW.referral_code := UPPER(SUBSTRING(MD5(NEW.id::TEXT) FROM 1 FOR 6));
+RETURN NEW;
 END;
+
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER set_referral_code
@@ -164,11 +165,11 @@ BEGIN
   -- Credit 1,500 FCFA welcome bonus
   NEW.balance := NEW.balance + 1500;
   NEW.total_bonus := NEW.total_bonus + 1500;
-  
+
   -- Create bonus transaction
   INSERT INTO transactions (user_id, type, amount, status, description)
   VALUES (NEW.id, 'bonus', 1500, 'approved', 'Welcome bonus - 1,500 FCFA');
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -189,28 +190,28 @@ BEGIN
   -- Only for approved deposits
   IF NEW.type = 'deposit' AND NEW.status = 'approved' THEN
     SELECT referred_by INTO referrer_id FROM profiles WHERE id = NEW.user_id;
-    
+
     IF referrer_id IS NOT NULL THEN
       -- Level 1: 27%
       commission_amount := NEW.amount * 0.27;
       UPDATE profiles SET balance = balance + commission_amount, total_bonus = total_bonus + commission_amount WHERE id = referrer_id;
-      INSERT INTO transactions (user_id, type, amount, status, description) 
+      INSERT INTO transactions (user_id, type, amount, status, description)
       VALUES (referrer_id, 'commission', commission_amount, 'approved', 'Level 1 commission - ' || NEW.amount);
-      
+
       -- Level 2: 2%
       SELECT referred_by INTO upline_2_id FROM profiles WHERE id = referrer_id;
       IF upline_2_id IS NOT NULL THEN
         commission_amount := NEW.amount * 0.02;
         UPDATE profiles SET balance = balance + commission_amount, total_bonus = total_bonus + commission_amount WHERE id = upline_2_id;
-        INSERT INTO transactions (user_id, type, amount, status, description) 
+        INSERT INTO transactions (user_id, type, amount, status, description)
         VALUES (upline_2_id, 'commission', commission_amount, 'approved', 'Level 2 commission - ' || NEW.amount);
-        
+
         -- Level 3: 1%
         SELECT referred_by INTO upline_3_id FROM profiles WHERE id = upline_2_id;
         IF upline_3_id IS NOT NULL THEN
           commission_amount := NEW.amount * 0.01;
           UPDATE profiles SET balance = balance + commission_amount, total_bonus = total_bonus + commission_amount WHERE id = upline_3_id;
-          INSERT INTO transactions (user_id, type, amount, status, description) 
+          INSERT INTO transactions (user_id, type, amount, status, description)
           VALUES (upline_3_id, 'commission', commission_amount, 'approved', 'Level 3 commission - ' || NEW.amount);
         END IF;
       END IF;
@@ -553,12 +554,15 @@ INITIAL DATA SEED
 Products
 sql
 INSERT INTO products (name, price, daily_yield, total_yield, vip_level, image_url) VALUES
-('Air Force 1', 25000, 5, 80, 'VIP1', '/images/airforce1.png'),
-('Jordan 1', 35000, 7, 100, 'VIP2', '/images/jordan1.png'),
-('Dunk Low', 30000, 6, 90, 'VIP2', '/images/dunklow.png'),
-('Air Max', 20000, 4, 70, 'VIP1', '/images/airmax.png'),
-('Jordan 4', 45000, 8, 110, 'VIP3', '/images/jordan4.png'),
-('Yeezy 350', 40000, 7.5, 95, 'VIP3', '/images/yeezy350.png');
+('Air Force 1', 4000, 750, 45000, 'VIP1', '/images/airforce1.png'),
+('Air Max 90', 8000, 1500, 90000, 'VIP2', '/images/airmax90.png'),
+('Dunk Low', 15000, 2700, 162000, 'VIP3', '/images/dunklow.png'),
+('Jordan 1', 20000, 4500, 270000, 'VIP4', '/images/jordan1.png'),
+('Jordan 4', 50000, 10000, 600000, 'VIP5', '/images/jordan4.png'),
+('Air Max 270', 120000, 22000, 1320000, 'VIP6', '/images/airmax270.png'),
+('Vaporfly 3', 250000, 45000, 2700000, 'VIP7', '/images/vaporfly3.png'),
+('Air Zoom Alphafly', 500000, 90000, 5400000, 'VIP8', '/images/alphafly.png'),
+('Nike Mag Limited', 1000000, 120000, 7200000, 'VIP9', '/images/nike-mag.png');
 Missions
 sql
 INSERT INTO missions (name, description, requirement_type, requirement_value, bonus_amount, icon_name) VALUES
@@ -620,3 +624,4 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+$$
