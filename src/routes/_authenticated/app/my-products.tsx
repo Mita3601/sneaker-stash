@@ -1,0 +1,132 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Btn, Card, Empty, StatTile } from "@/components/ui-kit";
+import { supabase } from "@/integrations/supabase/client";
+import { countdown, fcfa, nextClaimAt, SNEAKER_IMAGES, shortDate } from "@/lib/app";
+
+export const Route = createFileRoute("/_authenticated/app/my-products")({
+  head: () => ({
+    meta: [
+      { title: "Mes paires — NikeStake" },
+      { name: "description", content: "Suivez vos paires actives et réclamez vos revenus quotidiens." },
+      { property: "og:title", content: "Mes paires — NikeStake" },
+      { property: "og:description", content: "Revenus quotidiens à réclamer toutes les 24 heures." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: MyProducts,
+});
+
+function MyProducts() {
+  const qc = useQueryClient();
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const { data: items = [] } = useQuery({
+    queryKey: ["my-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_products")
+        .select("*, products(*)")
+        .order("purchase_date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const claim = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc("claim_yield", { _user_product_id: id });
+      if (error) throw error;
+      return data as { gain: number };
+    },
+    onSuccess: (data) => {
+      toast.success(`${fcfa(data?.gain)} crédités sur votre solde`);
+      qc.invalidateQueries({ queryKey: ["my-products"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const active = items.filter((i) => i.status === "active");
+  const dailyTotal = active.reduce((sum, i) => sum + Number(i.products?.daily_yield ?? 0), 0);
+  const earned = items.reduce((sum, i) => sum + Number(i.total_earned ?? 0), 0);
+
+  return (
+    <>
+      <header className="bg-gradient-deep px-4 py-5 text-primary-foreground">
+        <p className="text-2xl font-extrabold">{fcfa(dailyTotal)}</p>
+        <p className="text-xs opacity-90">Les revenus quotidiens générés par mes paires</p>
+      </header>
+
+      <div className="grid grid-cols-2 gap-3 p-4">
+        <StatTile label="Nombre de paires" value={items.length} />
+        <StatTile label="Mes revenus" value={fcfa(earned)} />
+      </div>
+
+      <section className="space-y-3 px-4 pb-6">
+        {items.length === 0 ? (
+          <Empty
+            title="Aucune paire pour le moment"
+            text="Achetez une paire dans le catalogue pour commencer à générer des revenus."
+          />
+        ) : (
+          items.map((item) => {
+            const ready = nextClaimAt(item.last_claim_date) <= now;
+            return (
+              <Card key={item.id} className="flex gap-3">
+                <img
+                  src={SNEAKER_IMAGES[item.products?.vip_level ?? "VIP1"]}
+                  alt={item.products?.name ?? "Paire"}
+                  loading="lazy"
+                  width={512}
+                  height={512}
+                  className="size-20 rounded-xl object-cover"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold">{item.products?.name}</p>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-primary">
+                      {item.products?.vip_level}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Acheté le {shortDate(item.purchase_date)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Gagné : {fcfa(item.total_earned)} / {fcfa(item.products?.total_yield)}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-primary">
+                      {item.status === "completed"
+                        ? "Terminé"
+                        : ready
+                          ? `+ ${fcfa(item.products?.daily_yield)}`
+                          : countdown(nextClaimAt(item.last_claim_date) - now)}
+                    </span>
+                    <Btn
+                      className="px-3 py-2 text-xs"
+                      variant={ready && item.status === "active" ? "primary" : "ghost"}
+                      disabled={!ready || item.status !== "active" || claim.isPending}
+                      onClick={() => claim.mutate(item.id)}
+                    >
+                      Réclamer
+                    </Btn>
+                  </div>
+                </div>
+              </Card>
+            );
+          })
+        )}
+      </section>
+    </>
+  );
+}

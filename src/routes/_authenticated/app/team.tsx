@@ -1,0 +1,175 @@
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { Copy, UserPlus } from "lucide-react";
+import { toast } from "sonner";
+
+import { Btn, Card, Empty, StatTile } from "@/components/ui-kit";
+import { useProfile } from "@/hooks/useSession";
+import { supabase } from "@/integrations/supabase/client";
+import { fcfa, shortDate } from "@/lib/app";
+
+export const Route = createFileRoute("/_authenticated/app/team")({
+  head: () => ({
+    meta: [
+      { title: "Mon équipe — NikeStake" },
+      {
+        name: "description",
+        content: "Partagez votre code de parrainage et gagnez 27 %, 2 % et 1 % sur 3 niveaux.",
+      },
+      { property: "og:title", content: "Mon équipe — NikeStake" },
+      { property: "og:description", content: "Commissions instantanées sur 3 niveaux de parrainage." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: Team,
+});
+
+const LEVELS = [
+  { level: 1, rate: "27 %" },
+  { level: 2, rate: "2 %" },
+  { level: 3, rate: "1 %" },
+];
+
+function Team() {
+  const { data: profile } = useProfile();
+
+  const { data: team } = useQuery({
+    queryKey: ["team", profile?.id],
+    enabled: Boolean(profile?.id),
+    queryFn: async () => {
+      const { data: l1 = [] } = await supabase
+        .from("profiles")
+        .select("id, phone, created_at, total_deposits")
+        .eq("referred_by", profile!.id);
+      const l1Ids = (l1 ?? []).map((p) => p.id);
+      const { data: l2 = [] } = l1Ids.length
+        ? await supabase
+            .from("profiles")
+            .select("id, phone, created_at, total_deposits")
+            .in("referred_by", l1Ids)
+        : { data: [] as typeof l1 };
+      const l2Ids = (l2 ?? []).map((p) => p.id);
+      const { data: l3 = [] } = l2Ids.length
+        ? await supabase
+            .from("profiles")
+            .select("id, phone, created_at, total_deposits")
+            .in("referred_by", l2Ids)
+        : { data: [] as typeof l1 };
+      return { l1: l1 ?? [], l2: l2 ?? [], l3: l3 ?? [] };
+    },
+  });
+
+  const { data: commissions = 0 } = useQuery({
+    queryKey: ["commissions-total"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("amount")
+        .eq("type", "commission")
+        .eq("status", "approved");
+      if (error) throw error;
+      return (data ?? []).reduce((sum, t) => sum + Number(t.amount), 0);
+    },
+  });
+
+  const link =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/register?ref=${profile?.referral_code ?? ""}`
+      : "";
+
+  const counts = [team?.l1.length ?? 0, team?.l2.length ?? 0, team?.l3.length ?? 0];
+  const members = [
+    ...(team?.l1 ?? []).map((m) => ({ ...m, level: 1 })),
+    ...(team?.l2 ?? []).map((m) => ({ ...m, level: 2 })),
+    ...(team?.l3 ?? []).map((m) => ({ ...m, level: 3 })),
+  ];
+
+  async function copy(value: string, label: string) {
+    await navigator.clipboard.writeText(value);
+    toast.success(`${label} copié`);
+  }
+
+  return (
+    <>
+      <header className="flex items-center justify-between px-4 pt-4">
+        <h1 className="text-xl font-extrabold">Mon équipe</h1>
+      </header>
+
+      <div className="space-y-3 p-4">
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xl font-extrabold tracking-widest">{profile?.referral_code}</p>
+              <p className="text-xs text-muted-foreground">Code d&apos;invitation</p>
+            </div>
+            <Btn
+              className="px-3 py-2 text-xs"
+              onClick={() => copy(profile?.referral_code ?? "", "Code")}
+            >
+              <Copy className="size-4" /> Copier
+            </Btn>
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+            <p className="truncate text-xs text-muted-foreground">{link}</p>
+            <Btn variant="ghost" className="shrink-0 px-3 py-2 text-xs" onClick={() => copy(link, "Lien")}>
+              Copier le lien
+            </Btn>
+          </div>
+        </Card>
+
+        <Card className="p-0">
+          <div className="grid grid-cols-3 rounded-t-2xl bg-gradient-primary px-3 py-2 text-xs font-bold text-primary-foreground">
+            <span>Commission</span>
+            <span className="text-center">Invités</span>
+            <span className="text-right">Niveau</span>
+          </div>
+          {LEVELS.map((l, i) => (
+            <div key={l.level} className="grid grid-cols-3 border-t border-border px-3 py-3 text-sm">
+              <span className="font-semibold">{l.rate}</span>
+              <span className="text-center">{counts[i]}</span>
+              <span className="text-right text-muted-foreground">Niveau {l.level}</span>
+            </div>
+          ))}
+        </Card>
+
+        <div className="grid grid-cols-2 gap-3">
+          <StatTile label="Nombre d'invités" value={counts.reduce((a, b) => a + b, 0)} />
+          <StatTile label="Revenus sollicités" value={fcfa(commissions)} />
+        </div>
+
+        <Card className="bg-gradient-deep text-primary-foreground">
+          <p className="text-sm">
+            Lorsqu&apos;un ami que vous invitez s&apos;inscrit et investit, vous recevez
+            immédiatement une prime de 27 % du montant de son investissement. Niveau 2 : 2 %.
+            Niveau 3 : 1 %. La prime est créditée instantanément et retirable.
+          </p>
+        </Card>
+
+        {members.length === 0 ? (
+          <Empty
+            title="Aucun invité pour le moment"
+            text="Partagez votre code pour construire votre équipe."
+          />
+        ) : (
+          <Card className="space-y-3">
+            <p className="flex items-center gap-2 text-sm font-bold">
+              <UserPlus className="size-4 text-primary" /> Mon réseau
+            </p>
+            {members.map((m) => (
+              <div key={m.id} className="flex items-center justify-between border-t border-border pt-2 text-sm">
+                <div>
+                  <p className="font-semibold">{m.phone}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Niveau {m.level} · {shortDate(m.created_at)}
+                  </p>
+                </div>
+                <span className="text-xs font-bold text-primary">{fcfa(m.total_deposits)}</span>
+              </div>
+            ))}
+          </Card>
+        )}
+      </div>
+    </>
+  );
+}

@@ -1,0 +1,18 @@
+revoke execute on function public.purchase_product(uuid) from anon;
+revoke execute on function public.claim_yield(uuid) from anon;
+revoke execute on function public.request_withdrawal(numeric, uuid) from anon;
+revoke execute on function public.refresh_missions(uuid) from anon;
+revoke execute on function public.claim_mission(uuid) from anon;
+revoke execute on function public.create_deposit(numeric, text) from anon;
+revoke execute on function public.admin_review_transaction(uuid, boolean) from anon;
+revoke execute on function public.admin_adjust_balance(uuid, numeric, text) from anon;
+revoke execute on function public.admin_toggle_freeze(uuid, boolean, text) from anon;
+revoke execute on function public.admin_grant_product(uuid, uuid) from anon;
+revoke execute on function public.admin_set_role(uuid, public.app_role) from anon;
+revoke execute on function public.distribute_commissions(uuid, numeric) from anon;
+revoke execute on function public.has_role(uuid, public.app_role) from anon;
+revoke execute on function public.is_admin() from anon;
+revoke execute on function public.profiles_before_insert() from anon, authenticated;
+revoke execute on function public.profiles_after_insert() from anon, authenticated;
+revoke execute on function public.distribute_commissions(uuid, numeric) from authenticated;
+revoke execute on function public.refresh_missions(uuid) from authenticated;
