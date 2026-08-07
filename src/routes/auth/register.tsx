@@ -27,7 +27,7 @@ export const Route = createFileRoute("/auth/register")({
 function Register() {
   const navigate = useNavigate();
   const search = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const [country, setCountry] = useState(COUNTRIES[0].code);
+  const [country, setCountry] = useState(COUNTRIES[0]!.code);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -36,10 +36,22 @@ function Register() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (phone.replace(/\D/g, "").length < 8) return toast.error("Numéro de téléphone invalide");
-    if (password.length < 6) return toast.error("Le mot de passe doit contenir 6 caractères minimum");
-    if (password !== confirm) return toast.error("Les mots de passe ne correspondent pas");
-    if (!/^[A-Za-z0-9]{6}$/.test(code)) return toast.error("Code de parrainage invalide (6 caractères)");
+    if (phone.replace(/\D/g, "").length < 8) {
+      toast.error("Numéro de téléphone invalide");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Le mot de passe doit contenir 6 caractères minimum");
+      return;
+    }
+    if (password !== confirm) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+    if (!/^[A-Za-z0-9]{6}$/.test(code)) {
+      toast.error("Code de parrainage invalide (6 caractères)");
+      return;
+    }
 
     setLoading(true);
     try {

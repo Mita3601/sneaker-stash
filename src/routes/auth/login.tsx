@@ -23,7 +23,7 @@ export const Route = createFileRoute("/auth/login")({
 
 function Login() {
   const navigate = useNavigate();
-  const [country, setCountry] = useState(COUNTRIES[0].code);
+  const [country, setCountry] = useState(COUNTRIES[0]!.code);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
