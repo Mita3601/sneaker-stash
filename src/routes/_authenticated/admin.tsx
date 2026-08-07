@@ -119,7 +119,7 @@ function Admin() {
           <Card className="divide-y divide-border p-0">
             {alerts.map((a) => (
               <div key={a.id} className="px-4 py-3">
-                <p className="text-sm font-semibold">{a.alert_type}</p>
+                <p className="text-sm font-semibold">{a.reason ?? "Écart de solde"} · {fcfa(a.difference)}</p>
                 <p className="text-xs text-muted-foreground">{shortDate(a.created_at)}</p>
               </div>
             ))}
