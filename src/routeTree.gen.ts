@@ -15,9 +15,18 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
+import { Route as AuthenticatedAppAccountDetailsRouteImport } from './routes/_authenticated/app/account-details'
+import { Route as AuthenticatedAppAddBankRouteImport } from './routes/_authenticated/app/add-bank'
+import { Route as AuthenticatedAppChangePasswordRouteImport } from './routes/_authenticated/app/change-password'
 import { Route as AuthenticatedAppMeRouteImport } from './routes/_authenticated/app/me'
+import { Route as AuthenticatedAppMissionsRouteImport } from './routes/_authenticated/app/missions'
 import { Route as AuthenticatedAppMyProductsRouteImport } from './routes/_authenticated/app/my-products'
+import { Route as AuthenticatedAppRechargeRouteImport } from './routes/_authenticated/app/recharge'
+import { Route as AuthenticatedAppRechargeHistoryRouteImport } from './routes/_authenticated/app/recharge-history'
+import { Route as AuthenticatedAppSupportRouteImport } from './routes/_authenticated/app/support'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
+import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
+import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,40 +57,110 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppAccountDetailsRoute =
+  AuthenticatedAppAccountDetailsRouteImport.update({
+    id: '/account-details',
+    path: '/account-details',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppAddBankRoute = AuthenticatedAppAddBankRouteImport.update({
+  id: '/add-bank',
+  path: '/add-bank',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppChangePasswordRoute =
+  AuthenticatedAppChangePasswordRouteImport.update({
+    id: '/change-password',
+    path: '/change-password',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppMeRoute = AuthenticatedAppMeRouteImport.update({
   id: '/me',
   path: '/me',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppMissionsRoute =
+  AuthenticatedAppMissionsRouteImport.update({
+    id: '/missions',
+    path: '/missions',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppMyProductsRoute =
   AuthenticatedAppMyProductsRouteImport.update({
     id: '/my-products',
     path: '/my-products',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppRechargeRoute =
+  AuthenticatedAppRechargeRouteImport.update({
+    id: '/recharge',
+    path: '/recharge',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppRechargeHistoryRoute =
+  AuthenticatedAppRechargeHistoryRouteImport.update({
+    id: '/recharge-history',
+    path: '/recharge-history',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppSupportRoute = AuthenticatedAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppTeamRoute = AuthenticatedAppTeamRouteImport.update({
   id: '/team',
   path: '/team',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppWithdrawRoute =
+  AuthenticatedAppWithdrawRouteImport.update({
+    id: '/withdraw',
+    path: '/withdraw',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppWithdrawHistoryRoute =
+  AuthenticatedAppWithdrawHistoryRouteImport.update({
+    id: '/withdraw-history',
+    path: '/withdraw-history',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
+  '/app/add-bank': typeof AuthenticatedAppAddBankRoute
+  '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/app/me': typeof AuthenticatedAppMeRoute
+  '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
+  '/app/recharge': typeof AuthenticatedAppRechargeRoute
+  '/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/app/support': typeof AuthenticatedAppSupportRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
+  '/app/add-bank': typeof AuthenticatedAppAddBankRoute
+  '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/app/me': typeof AuthenticatedAppMeRoute
+  '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
+  '/app/recharge': typeof AuthenticatedAppRechargeRoute
+  '/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/app/support': typeof AuthenticatedAppSupportRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -91,9 +170,18 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/_authenticated/app/account-details': typeof AuthenticatedAppAccountDetailsRoute
+  '/_authenticated/app/add-bank': typeof AuthenticatedAppAddBankRoute
+  '/_authenticated/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/_authenticated/app/me': typeof AuthenticatedAppMeRoute
+  '/_authenticated/app/missions': typeof AuthenticatedAppMissionsRoute
   '/_authenticated/app/my-products': typeof AuthenticatedAppMyProductsRoute
+  '/_authenticated/app/recharge': typeof AuthenticatedAppRechargeRoute
+  '/_authenticated/app/recharge-history': typeof AuthenticatedAppRechargeHistoryRoute
+  '/_authenticated/app/support': typeof AuthenticatedAppSupportRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
+  '/_authenticated/app/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/_authenticated/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -103,18 +191,36 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth/login'
     | '/auth/register'
+    | '/app/account-details'
+    | '/app/add-bank'
+    | '/app/change-password'
     | '/app/me'
+    | '/app/missions'
     | '/app/my-products'
+    | '/app/recharge'
+    | '/app/recharge-history'
+    | '/app/support'
     | '/app/team'
+    | '/app/withdraw'
+    | '/app/withdraw-history'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth/login'
     | '/auth/register'
+    | '/app/account-details'
+    | '/app/add-bank'
+    | '/app/change-password'
     | '/app/me'
+    | '/app/missions'
     | '/app/my-products'
+    | '/app/recharge'
+    | '/app/recharge-history'
+    | '/app/support'
     | '/app/team'
+    | '/app/withdraw'
+    | '/app/withdraw-history'
     | '/app'
   id:
     | '__root__'
@@ -123,9 +229,18 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/auth/login'
     | '/auth/register'
+    | '/_authenticated/app/account-details'
+    | '/_authenticated/app/add-bank'
+    | '/_authenticated/app/change-password'
     | '/_authenticated/app/me'
+    | '/_authenticated/app/missions'
     | '/_authenticated/app/my-products'
+    | '/_authenticated/app/recharge'
+    | '/_authenticated/app/recharge-history'
+    | '/_authenticated/app/support'
     | '/_authenticated/app/team'
+    | '/_authenticated/app/withdraw'
+    | '/_authenticated/app/withdraw-history'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -180,11 +295,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/account-details': {
+      id: '/_authenticated/app/account-details'
+      path: '/account-details'
+      fullPath: '/app/account-details'
+      preLoaderRoute: typeof AuthenticatedAppAccountDetailsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/add-bank': {
+      id: '/_authenticated/app/add-bank'
+      path: '/add-bank'
+      fullPath: '/app/add-bank'
+      preLoaderRoute: typeof AuthenticatedAppAddBankRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/change-password': {
+      id: '/_authenticated/app/change-password'
+      path: '/change-password'
+      fullPath: '/app/change-password'
+      preLoaderRoute: typeof AuthenticatedAppChangePasswordRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/me': {
       id: '/_authenticated/app/me'
       path: '/me'
       fullPath: '/app/me'
       preLoaderRoute: typeof AuthenticatedAppMeRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/missions': {
+      id: '/_authenticated/app/missions'
+      path: '/missions'
+      fullPath: '/app/missions'
+      preLoaderRoute: typeof AuthenticatedAppMissionsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/my-products': {
@@ -194,6 +337,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppMyProductsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/recharge': {
+      id: '/_authenticated/app/recharge'
+      path: '/recharge'
+      fullPath: '/app/recharge'
+      preLoaderRoute: typeof AuthenticatedAppRechargeRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/recharge-history': {
+      id: '/_authenticated/app/recharge-history'
+      path: '/recharge-history'
+      fullPath: '/app/recharge-history'
+      preLoaderRoute: typeof AuthenticatedAppRechargeHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/support': {
+      id: '/_authenticated/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof AuthenticatedAppSupportRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/team': {
       id: '/_authenticated/app/team'
       path: '/team'
@@ -201,20 +365,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTeamRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/withdraw': {
+      id: '/_authenticated/app/withdraw'
+      path: '/withdraw'
+      fullPath: '/app/withdraw'
+      preLoaderRoute: typeof AuthenticatedAppWithdrawRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/withdraw-history': {
+      id: '/_authenticated/app/withdraw-history'
+      path: '/withdraw-history'
+      fullPath: '/app/withdraw-history'
+      preLoaderRoute: typeof AuthenticatedAppWithdrawHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAccountDetailsRoute: typeof AuthenticatedAppAccountDetailsRoute
+  AuthenticatedAppAddBankRoute: typeof AuthenticatedAppAddBankRoute
+  AuthenticatedAppChangePasswordRoute: typeof AuthenticatedAppChangePasswordRoute
   AuthenticatedAppMeRoute: typeof AuthenticatedAppMeRoute
+  AuthenticatedAppMissionsRoute: typeof AuthenticatedAppMissionsRoute
   AuthenticatedAppMyProductsRoute: typeof AuthenticatedAppMyProductsRoute
+  AuthenticatedAppRechargeRoute: typeof AuthenticatedAppRechargeRoute
+  AuthenticatedAppRechargeHistoryRoute: typeof AuthenticatedAppRechargeHistoryRoute
+  AuthenticatedAppSupportRoute: typeof AuthenticatedAppSupportRoute
   AuthenticatedAppTeamRoute: typeof AuthenticatedAppTeamRoute
+  AuthenticatedAppWithdrawRoute: typeof AuthenticatedAppWithdrawRoute
+  AuthenticatedAppWithdrawHistoryRoute: typeof AuthenticatedAppWithdrawHistoryRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAccountDetailsRoute: AuthenticatedAppAccountDetailsRoute,
+  AuthenticatedAppAddBankRoute: AuthenticatedAppAddBankRoute,
+  AuthenticatedAppChangePasswordRoute: AuthenticatedAppChangePasswordRoute,
   AuthenticatedAppMeRoute: AuthenticatedAppMeRoute,
+  AuthenticatedAppMissionsRoute: AuthenticatedAppMissionsRoute,
   AuthenticatedAppMyProductsRoute: AuthenticatedAppMyProductsRoute,
+  AuthenticatedAppRechargeRoute: AuthenticatedAppRechargeRoute,
+  AuthenticatedAppRechargeHistoryRoute: AuthenticatedAppRechargeHistoryRoute,
+  AuthenticatedAppSupportRoute: AuthenticatedAppSupportRoute,
   AuthenticatedAppTeamRoute: AuthenticatedAppTeamRoute,
+  AuthenticatedAppWithdrawRoute: AuthenticatedAppWithdrawRoute,
+  AuthenticatedAppWithdrawHistoryRoute: AuthenticatedAppWithdrawHistoryRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
