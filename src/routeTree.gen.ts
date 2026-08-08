@@ -40,6 +40,7 @@ import { Route as AuthenticatedAppSupportRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
+import { Route as ApiPublicWebhooksAshtechpayRouteImport } from './routes/api/public/webhooks/ashtechpay'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -211,6 +212,12 @@ const AuthenticatedAppWithdrawHistoryRoute =
     path: '/withdraw-history',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiPublicWebhooksAshtechpayRoute =
+  ApiPublicWebhooksAshtechpayRouteImport.update({
+    id: '/api/public/webhooks/ashtechpay',
+    path: '/api/public/webhooks/ashtechpay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -273,6 +281,7 @@ export interface FileRoutesByTo {
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -307,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/app/withdraw-history'
     | '/admin/'
     | '/app/'
+    | '/api/public/webhooks/ashtechpay'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/app/withdraw-history'
     | '/admin'
     | '/app'
+    | '/api/public/webhooks/ashtechpay'
   id:
     | '__root__'
     | '/'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/withdraw-history'
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
+    | '/api/public/webhooks/ashtechpay'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -411,6 +424,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  ApiPublicWebhooksAshtechpayRoute: typeof ApiPublicWebhooksAshtechpayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -632,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppWithdrawHistoryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/webhooks/ashtechpay': {
+      id: '/api/public/webhooks/ashtechpay'
+      path: '/api/public/webhooks/ashtechpay'
+      fullPath: '/api/public/webhooks/ashtechpay'
+      preLoaderRoute: typeof ApiPublicWebhooksAshtechpayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -721,17 +742,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  ApiPublicWebhooksAshtechpayRoute: ApiPublicWebhooksAshtechpayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
