@@ -101,6 +101,68 @@ export type Database = {
           },
         ]
       }
+      gift_code_redemptions: {
+        Row: {
+          created_at: string
+          gift_code_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gift_code_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gift_code_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_code_redemptions_gift_code_id_fkey"
+            columns: ["gift_code_id"]
+            isOneToOne: false
+            referencedRelation: "gift_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_codes: {
+        Row: {
+          amount: number
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          max_redemptions: number
+          redeemed_count: number
+        }
+        Insert: {
+          amount: number
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          max_redemptions?: number
+          redeemed_count?: number
+        }
+        Update: {
+          amount?: number
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          max_redemptions?: number
+          redeemed_count?: number
+        }
+        Relationships: []
+      }
       missions: {
         Row: {
           bonus_amount: number
@@ -698,15 +760,33 @@ export type Database = {
         Returns: Json
       }
       claim_daily_checkin: { Args: never; Returns: Json }
+      claim_gift_code: { Args: { _code: string }; Returns: Json }
       claim_mission: { Args: { _mission_id: string }; Returns: Json }
       claim_yield: { Args: { _user_product_id: string }; Returns: Json }
       create_deposit: {
         Args: { _amount: number; _reference: string }
         Returns: Json
       }
+      create_gateway_deposit: {
+        Args: { _amount: number; _metadata?: Json; _reference: string }
+        Returns: Json
+      }
+      create_gift_code: {
+        Args: {
+          _amount: number
+          _code: string
+          _duration_days: number
+          _max_redemptions: number
+        }
+        Returns: Json
+      }
       distribute_commissions: {
         Args: { _amount: number; _user_id: string }
         Returns: undefined
+      }
+      gateway_confirm_deposit: {
+        Args: { _metadata?: Json; _reference: string; _success: boolean }
+        Returns: Json
       }
       get_referral_tree: { Args: { _user_id: string }; Returns: Json }
       has_role: {
@@ -717,6 +797,25 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      list_gift_codes: {
+        Args: never
+        Returns: {
+          amount: number
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          max_redemptions: number
+          redeemed_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "gift_codes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       purchase_product: { Args: { _product_id: string }; Returns: Json }
       rebuild_profiles_and_user_products: { Args: never; Returns: undefined }
       refresh_missions: { Args: { _user_id: string }; Returns: undefined }
