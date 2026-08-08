@@ -4,20 +4,9 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-export function Card({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      className={cn(
-        "rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60",
-        className,
-      )}
-    >
+    <div className={cn("rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60", className)}>
       {children}
     </div>
   );
@@ -38,13 +27,7 @@ const variants: Record<string, string> = {
   success: "bg-success text-success-foreground",
 };
 
-export function Btn({
-  children,
-  variant = "primary",
-  className,
-  full,
-  ...rest
-}: BtnProps) {
+export function Btn({ children, variant = "primary", className, full, ...rest }: BtnProps) {
   return (
     <button
       {...rest}
@@ -64,13 +47,15 @@ export function Field({
   label,
   children,
   hint,
+  className,
 }: {
   label: string;
   children: ReactNode;
   hint?: string;
+  className?: string;
 }) {
   return (
-    <label className="block space-y-1.5">
+    <label className={cn("block space-y-1.5", className)}>
       <span className="text-sm font-semibold text-foreground">{label}</span>
       {children}
       {hint ? <span className="block text-xs text-muted-foreground">{hint}</span> : null}

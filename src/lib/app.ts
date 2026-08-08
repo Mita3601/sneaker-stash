@@ -21,10 +21,10 @@ export const SNEAKER_IMAGES: Record<string, string> = {
 };
 
 export const COUNTRIES = [
-  { code: "+225", label: "Côte d'Ivoire" },
-  { code: "+226", label: "Burkina Faso" },
-  { code: "+229", label: "Bénin" },
-  { code: "+237", label: "Cameroun" },
+  { code: "+225", label: "Côte d'Ivoire", flag: "🇨🇮" },
+  { code: "+226", label: "Burkina Faso", flag: "🇧🇫" },
+  { code: "+229", label: "Bénin", flag: "🇧🇯" },
+  { code: "+237", label: "Cameroun", flag: "🇨🇲" },
 ];
 
 export const PROVIDERS = ["Wave", "Orange", "MTN", "Moov"];
@@ -36,6 +36,10 @@ export const TELEGRAM = {
   group: "https://t.me/",
   channel: "https://t.me/",
   support: "https://t.me/",
+};
+
+export const WHATSAPP = {
+  group: "https://chat.whatsapp.com/",
 };
 
 export function fcfa(value: number | string | null | undefined) {

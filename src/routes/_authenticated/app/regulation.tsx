@@ -24,29 +24,6 @@ export const Route = createFileRoute("/_authenticated/app/regulation")({
   component: Regulation,
 });
 
-const PRODUCTS = [
-  { vip: "VIP1", name: "Air Force 1", price: 4000, daily: 750, total: 45000, days: 60 },
-  { vip: "VIP2", name: "Air Max 90", price: 8000, daily: 1500, total: 90000, days: 60 },
-  { vip: "VIP3", name: "Dunk Low", price: 15000, daily: 2700, total: 162000, days: 60 },
-  { vip: "VIP4", name: "Jordan 1", price: 20000, daily: 4500, total: 270000, days: 60 },
-  { vip: "VIP5", name: "Jordan 4", price: 50000, daily: 10000, total: 600000, days: 60 },
-  { vip: "VIP6", name: "Air Max 270", price: 120000, daily: 22000, total: 1320000, days: 60 },
-  { vip: "VIP7", name: "Vaporfly 3", price: 250000, daily: 45000, total: 2700000, days: 60 },
-  { vip: "VIP8", name: "Air Zoom Alphafly", price: 500000, daily: 90000, total: 5400000, days: 60 },
-  {
-    vip: "VIP9",
-    name: "Nike Mag Limited",
-    price: 1000000,
-    daily: 120000,
-    total: 7200000,
-    days: 60,
-  },
-];
-
-function formatFCFA(n: number) {
-  return `FCFA ${new Intl.NumberFormat("fr-FR").format(n)}`;
-}
-
 function Regulation() {
   return (
     <>
@@ -59,51 +36,49 @@ function Regulation() {
 
         <Card>
           <p className="text-base font-bold">Présentation</p>
-          <p className="text-sm text-muted-foreground">
-            Investissez intelligemment et recevez des revenus quotidiens automatiquement. Les
-            produits listés ci-dessous correspondent exactement aux offres disponibles sur la
-            plateforme — prix, revenu quotidien et rendement total.
+          <p className="text-sm text-muted-foreground mb-3">
+            Nike se spécialise dans la fourniture de solutions d'investissement en sneakers premium
+            sur le marché mondial. Investissez dans des collections Nike exclusives pour participer
+            à l'exploitation de la plateforme, générez facilement un revenu quotidien stable,
+            saisissez les opportunités offertes par le développement du marché des sneakers et
+            obtenez des rendements continus.
           </p>
-        </Card>
-
-        <Card>
-          <div className="overflow-auto">
-            <table className="w-full text-sm table-auto border-collapse">
-              <thead>
-                <tr className="text-left">
-                  <th className="p-2">Produit</th>
-                  <th className="p-2">Prix</th>
-                  <th className="p-2">Revenu quotidien</th>
-                  <th className="p-2">Revenu total</th>
-                  <th className="p-2">Temps</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PRODUCTS.map((p) => (
-                  <tr key={p.vip} className="border-t">
-                    <td className="p-2">
-                      {p.vip} — {p.name}
-                    </td>
-                    <td className="p-2">{formatFCFA(p.price)}</td>
-                    <td className="p-2">{formatFCFA(p.daily)}</td>
-                    <td className="p-2">{formatFCFA(p.total)}</td>
-                    <td className="p-2">{p.days} jours</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            Lorsqu'un ami que vous invitez s'inscrit et investit, vous recevez immédiatement une
+            prime de 27 % sur son investissement.
+          </p>
+          <p className="text-sm text-muted-foreground mb-3">
+            Lorsque les membres de votre équipe de deuxième niveau investissent, vous recevez une
+            prime de 2 %.
+          </p>
+          <p className="text-sm text-muted-foreground mb-3">
+            Lorsque les membres de votre équipe de troisième niveau investissent, vous recevez une
+            prime de 1 %.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Une fois que les membres de votre équipe ont investi, la prime est immédiatement
+            créditée sur votre compte et vous pouvez la retirer immédiatement.
+          </p>
         </Card>
 
         <Card className="space-y-2">
           <p className="text-sm font-bold">Règles essentielles</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Un seul compte par utilisateur est autorisé.</li>
-            <li>• Les retraits sont traités via les comptes bancaires enregistrés.</li>
+            <li>1. Investissez 4 000 FCFA et retirez 1500 FCFA immédiatement.</li>
+            <li>2. Bonus d'inscription : 1500 FCFA</li>
+            <li>3. Bonus de connexion quotidienne : 100 FCFA</li>
+            <li>4. Taux de rendement quotidien : 18,75%</li>
             <li>
-              • Les revenus sont versés automatiquement et peuvent être retirés selon les règles.
+              5. Invitez vos filleuls à investir et vous recevez immédiatement une prime de 27 % sur
+              leur investissement.
             </li>
-            <li>• Les comptes suspects peuvent être gelés après vérification.</li>
+            <li>
+              6. Vos revenus sont automatiquement versés sur votre compte 24 h/24 et peuvent être
+              retirés à tout moment de 08h a 18h.
+            </li>
+            <li>
+              7. Rejoignez le groupe Telegram pour en savoir plus sur les opportunités de gains.
+            </li>
           </ul>
         </Card>
 

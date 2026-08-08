@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/app/withdraw")({
   head: () => ({
     meta: [
       { title: "Retrait — NikeStake" },
-      { name: "description", content: "Demandez un retrait dès 1 000 FCFA vers votre compte mobile money." },
+      {
+        name: "description",
+        content: "Demandez un retrait dès 1 000 FCFA vers votre compte mobile money.",
+      },
       { property: "og:title", content: "Retrait — NikeStake" },
       { property: "og:description", content: "Retraits 24/7, frais de 15 %." },
       { property: "og:type", content: "website" },
@@ -126,6 +129,22 @@ function Withdraw() {
               {submit.isPending ? "Envoi..." : "Demander le retrait"}
             </Btn>
           </form>
+        </Card>
+
+        <Card className="space-y-2">
+          <p className="text-sm font-semibold">Informations importantes</p>
+          <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
+            <li>Montant minimum de retrait : 1 000 FCFA.</li>
+            <li>Frais de retrait : 15 % du montant retiré.</li>
+            <li>
+              Vous pouvez effectuer des retraits à tout moment. Les retraits sont disponibles sous
+              10 min à 1 heure.
+            </li>
+            <li>
+              Afin de protéger les intérêts de la plateforme et de ses membres, vous devez disposer
+              d’au moins un appareil pour activer la fonction de retrait.
+            </li>
+          </ul>
         </Card>
       </div>
     </>
