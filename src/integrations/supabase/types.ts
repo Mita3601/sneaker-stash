@@ -704,9 +704,17 @@ export type Database = {
         Args: { _amount: number; _reference: string }
         Returns: Json
       }
+      create_gateway_deposit: {
+        Args: { _amount: number; _metadata?: Json; _reference: string }
+        Returns: Json
+      }
       distribute_commissions: {
         Args: { _amount: number; _user_id: string }
         Returns: undefined
+      }
+      gateway_confirm_deposit: {
+        Args: { _metadata?: Json; _reference: string; _success: boolean }
+        Returns: Json
       }
       get_referral_tree: { Args: { _user_id: string }; Returns: Json }
       has_role: {
