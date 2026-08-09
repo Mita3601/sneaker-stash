@@ -4,18 +4,24 @@ language plpgsql
 security definer
 set search_path to 'public'
 as $function$
-declare tx public.transactions; gw_tx text;
+declare tx public.transactions; gw_tx text; local_ref text;
 begin
+  local_ref := coalesce(_reference, '');
   gw_tx := coalesce(_metadata->>'gateway_transaction_id', '');
 
   select * into tx from public.transactions
-  where type = 'deposit' and reference = _reference
+  where type = 'deposit' and reference = local_ref
   order by created_at desc limit 1;
 
-  if tx is null and gw_tx <> '' then
+  if tx is null then
     select * into tx from public.transactions
     where type = 'deposit'
-      and (metadata->>'gateway_transaction_id' = gw_tx or reference = gw_tx)
+      and (
+        metadata->>'gateway_transaction_id' = local_ref
+        or reference = local_ref
+        or metadata->>'local_reference' = local_ref
+        or (gw_tx <> '' and (metadata->>'gateway_transaction_id' = gw_tx or reference = gw_tx))
+      )
     order by created_at desc limit 1;
   end if;
 

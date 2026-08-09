@@ -116,6 +116,9 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       );
     }
     const webhookUrl = appUrl ? `${appUrl}/api/public/webhooks/leekpay` : undefined;
+    const returnUrl = appUrl
+      ? `${appUrl}/merci?reference=${encodeURIComponent(localRef)}`
+      : undefined;
 
     const payload: Record<string, unknown> = {
       amount: validated.amount,
@@ -129,7 +132,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
         country_code: validated.countryCode,
       },
       ...(webhookUrl ? { webhook_url: webhookUrl } : {}),
-      return_url: appUrl ? `${appUrl}/merci` : undefined,
+      return_url: returnUrl,
     };
 
     const { status, body } = await createCheckout(payload);
@@ -212,4 +215,37 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const row = rows?.[0];
     return { status: row?.status ?? "unknown", amount: Number(row?.amount ?? 0) };
+  });
+
+export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
+  .validator((data: { reference?: string }) => ({
+    reference: String(data.reference ?? "")
+      .trim()
+      .slice(0, 60),
+  }))
+  .handler(async ({ data }) => {
+    const reference = data.reference;
+    if (!reference) {
+      return { ok: false, reason: "missing_reference" };
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rpc, error } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
+      _reference: reference,
+      _success: true,
+      _metadata: {
+        gateway: "return_redirect",
+        gateway_event: "payment_success_redirect",
+        source: "success_page",
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return {
+      ok: Boolean((rpc as { ok?: boolean } | null)?.ok),
+      ...(rpc ?? {}),
+    };
   });
