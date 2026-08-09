@@ -17,17 +17,20 @@ function validate(data: Input): Input {
   if (!Number.isFinite(amount) || amount < MIN_DEPOSIT || amount > 5_000_000) {
     throw new Error(`Montant invalide (minimum ${MIN_DEPOSIT} FCFA).`);
   }
-  if (!/^[A-Z]{2}$/.test(data.countryCode)) throw new Error("Pays invalide.");
-  if (!/^[A-Z]{3,4}$/.test(data.currency)) throw new Error("Devise invalide.");
-  if (!data.operator || data.operator.length > 40) throw new Error("Opérateur invalide.");
+  const countryCode = String(data.countryCode ?? "").toUpperCase();
+  const currency = String(data.currency ?? "").toUpperCase();
+  const operator = String(data.operator ?? "").trim();
+  if (!/^[A-Z]{2}$/.test(countryCode)) throw new Error("Pays invalide.");
+  if (!/^[A-Z]{3,4}$/.test(currency)) throw new Error("Devise invalide.");
+  if (!operator || operator.length > 40) throw new Error("Opérateur invalide.");
   const phone = String(data.phone ?? "").replace(/\D/g, "");
   if (phone.length > 20) throw new Error("Numéro invalide.");
   const otp = data.otp ? String(data.otp).replace(/\D/g, "").slice(0, 10) : undefined;
   return {
     amount: Math.round(amount),
-    countryCode: data.countryCode,
-    currency: data.currency,
-    operator: data.operator,
+    countryCode,
+    currency,
+    operator,
     phone,
     ...(otp ? { otp } : {}),
   };
