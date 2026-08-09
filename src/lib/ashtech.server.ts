@@ -55,38 +55,47 @@ export async function fetchLinkConfig(): Promise<{
   fixedAmount: number | null;
   countries: LinkCountry[];
 }> {
-  const [linkRes, cfgRes] = await Promise.all([
-    fetch(`${ORIGIN}/api/payment-links/public/${linkSlug()}`, { headers: browserHeaders() }),
-    fetch(`${ORIGIN}/api/public/deposit-config`, { headers: browserHeaders() }),
-  ]);
+  try {
+    const [linkRes, cfgRes] = await Promise.all([
+      fetch(`${ORIGIN}/api/payment-links/public/${linkSlug()}`, { headers: browserHeaders() }),
+      fetch(`${ORIGIN}/api/public/deposit-config`, { headers: browserHeaders() }),
+    ]);
 
-  if (!linkRes.ok) throw new Error("Lien de paiement indisponible pour le moment.");
+    if (!linkRes.ok) {
+      // upstream service rejected the request (403/429/5xx). Return empty config so
+      // the UI can show a friendly message instead of crashing.
+      return { title: "Recharge", fixedAmount: null, countries: [] };
+    }
 
-  const link = (await linkRes.json()) as PublicLink;
-  const cfg = (await cfgRes.json()) as { countries?: LinkCountry[] };
+    const link = (await linkRes.json()) as PublicLink;
+    const cfg = (await cfgRes.json().catch(() => ({}))) as { countries?: LinkCountry[] };
 
-  const allowed = new Set(link.link?.allowedCountries ?? []);
-  const all = cfg.countries ?? [];
-  const countries = (allowed.size ? all.filter((c) => allowed.has(c.id)) : all).map((c) => ({
-    id: c.id,
-    code: c.code,
-    name: c.name,
-    flag: c.flag,
-    currency: c.currency,
-    operators: (c.operators ?? []).map((o) => ({
-      name: o.name,
-      paymentProvider: o.paymentProvider,
-      pixpayOperatorType: o.pixpayOperatorType ?? null,
-    })),
-  }));
+    const allowed = new Set(link.link?.allowedCountries ?? []);
+    const all = cfg.countries ?? [];
+    const countries = (allowed.size ? all.filter((c) => allowed.has(c.id)) : all).map((c) => ({
+      id: c.id,
+      code: c.code,
+      name: c.name,
+      flag: c.flag,
+      currency: c.currency,
+      operators: (c.operators ?? []).map((o) => ({
+        name: o.name,
+        paymentProvider: o.paymentProvider,
+        pixpayOperatorType: o.pixpayOperatorType ?? null,
+      })),
+    }));
 
-  const fixed = link.link?.isFixedAmount ? Number(link.link?.amount ?? 0) : null;
+    const fixed = link.link?.isFixedAmount ? Number(link.link?.amount ?? 0) : null;
 
-  return {
-    title: link.link?.title ?? "Recharge",
-    fixedAmount: fixed && fixed > 0 ? fixed : null,
-    countries,
-  };
+    return {
+      title: link.link?.title ?? "Recharge",
+      fixedAmount: fixed && fixed > 0 ? fixed : null,
+      countries,
+    };
+  } catch (err) {
+    // Network error or JSON parse error — degrade gracefully.
+    return { title: "Recharge", fixedAmount: null, countries: [] };
+  }
 }
 
 export type LinkPayPayload = {
