@@ -11,12 +11,12 @@ import { fcfa, WITHDRAW_FEE_RATE, WITHDRAW_MIN } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/withdraw")({
   head: () => ({
     meta: [
-      { title: "Retrait — NikeStake" },
+      { title: "Retrait — Nike" },
       {
         name: "description",
         content: "Demandez un retrait dès 1 000 FCFA vers votre compte mobile money.",
       },
-      { property: "og:title", content: "Retrait — NikeStake" },
+      { property: "og:title", content: "Retrait — Nike" },
       { property: "og:description", content: "Retraits 24/7, frais de 15 %." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -32,7 +32,7 @@ export function AnnouncementModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4">
       <div className="max-h-[85vh] w-full max-w-[400px] overflow-y-auto rounded-3xl bg-card shadow-glow">
         <div className="rounded-t-3xl bg-gradient-primary px-4 py-3 text-center text-base font-bold text-primary-foreground">
-          Bienvenue chez NikeStake !
+          Bienvenue chez Nike !
         </div>
         <ul className="space-y-3 p-4">
           {points.map((p) => (

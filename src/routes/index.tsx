@@ -13,13 +13,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "NikeStake — Staking de sneakers, revenus quotidiens" },
+      { title: "Nike — Staking de sneakers, revenus quotidiens" },
       {
         name: "description",
         content:
           "Investissez dans des paires de sneakers et percevez des revenus quotidiens. Bonus de bienvenue de 1 500 FCFA et commissions de parrainage sur 3 niveaux.",
       },
-      { property: "og:title", content: "NikeStake — Revenus quotidiens en sneakers" },
+      { property: "og:title", content: "Nike — Revenus quotidiens en sneakers" },
       {
         property: "og:description",
         content:
@@ -51,8 +51,8 @@ function Landing() {
           Faites travailler vos <span className="text-gradient-primary">sneakers</span>
         </h1>
         <p className="text-sm text-muted-foreground">
-          Achetez une paire, percevez un revenu chaque jour et retirez quand vous voulez.
-          1 500 FCFA offerts à l&apos;inscription.
+          Achetez une paire, percevez un revenu chaque jour et retirez quand vous voulez. 1 500 FCFA
+          offerts à l&apos;inscription.
         </p>
 
         <div className="grid gap-3">

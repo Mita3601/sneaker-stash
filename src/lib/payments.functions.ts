@@ -124,7 +124,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       amount: validated.amount,
       currency: validated.currency,
       description: `Dépôt ${localRef}`,
-      customer_email: `${localRef.toLowerCase()}@nikestake.app`,
+      customer_email: `${localRef.toLowerCase()}@nike.app`,
       metadata: {
         local_reference: localRef,
         operator: validated.operator,

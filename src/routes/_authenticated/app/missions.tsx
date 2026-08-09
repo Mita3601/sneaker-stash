@@ -11,12 +11,12 @@ import { fcfa } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/missions")({
   head: () => ({
     meta: [
-      { title: "Missions et récompenses — NikeStake" },
+      { title: "Missions et récompenses — Nike" },
       {
         name: "description",
         content: "Invitez des investisseurs et achetez des paires VIP pour débloquer des bonus.",
       },
-      { property: "og:title", content: "Missions et récompenses — NikeStake" },
+      { property: "og:title", content: "Missions et récompenses — Nike" },
       { property: "og:description", content: "Des bonus jusqu'à 10 000 FCFA à débloquer." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/admin/users")({
   head: () => ({
     meta: [
-      { title: "Admin - Utilisateurs — NikeStake" },
+      { title: "Admin - Utilisateurs — Nike" },
       { name: "description", content: "Gérez les utilisateurs de la plateforme." },
     ],
   }),
@@ -20,6 +20,7 @@ function AdminUsers() {
   const qc = useQueryClient();
   const [amount, setAmount] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["admin-users"],
@@ -80,10 +81,23 @@ function AdminUsers() {
     return acc;
   }, {});
 
+  const filteredProfiles = profiles.filter((profile) =>
+    profile.phone.toLowerCase().includes(query.trim().toLowerCase()),
+  );
+
   return (
     <div>
       <SubHeader title="Utilisateurs" to="/admin" />
       <div className="space-y-4 p-4">
+        <Card className="p-3">
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Rechercher un utilisateur..."
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </Card>
+
         <Card>
           <div className="flex items-center justify-between">
             <div>
@@ -137,7 +151,7 @@ function AdminUsers() {
         </Card>
 
         <div className="space-y-2">
-          {profiles.map((profile) => (
+          {filteredProfiles.map((profile) => (
             <Card key={profile.id} className="space-y-3">
               <div className="flex items-center justify-between gap-4">
                 <div>

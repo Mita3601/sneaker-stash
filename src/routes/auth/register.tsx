@@ -12,12 +12,12 @@ export const Route = createFileRoute("/auth/register")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Inscription — NikeStake" },
+      { title: "Inscription — Nike" },
       {
         name: "description",
-        content: "Créez votre compte NikeStake et recevez 1 500 FCFA de bonus de bienvenue.",
+        content: "Créez votre compte Nike et recevez 1 500 FCFA de bonus de bienvenue.",
       },
-      { property: "og:title", content: "Inscription — NikeStake" },
+      { property: "og:title", content: "Inscription — Nike" },
       { property: "og:description", content: "1 500 FCFA offerts dès votre inscription." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -35,8 +35,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [code, setCode] = useState((search?.get("ref") ?? "").toUpperCase());
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -54,8 +54,12 @@ function Register() {
       return;
     }
     const referralCode = code.trim().toUpperCase();
-    if (referralCode && !/^[A-Za-z0-9]{6}$/.test(referralCode)) {
-      toast.error("Code de parrainage invalide (6 caractères)");
+    if (!referralCode) {
+      toast.error("Le code de parrainage est obligatoire");
+      return;
+    }
+    if (!/^[A-Za-z0-9]{6}$/.test(referralCode)) {
+      toast.error("Code de parrainage invalide (6 caractères alphanumériques)");
       return;
     }
 
@@ -131,8 +135,8 @@ function Register() {
                 Just invest it
               </h1>
               <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                Ouvre ton compte NikeStake, profite d’un bonus de bienvenue et prends le contrôle de
-                tes sneakers premium.
+                Ouvre ton compte Nike, profite d’un bonus de bienvenue et prends le contrôle de tes
+                sneakers premium.
               </p>
             </div>
 
@@ -142,7 +146,7 @@ function Register() {
                   INSCRIPTION
                 </h2>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">
-                  Créez votre compte NikeStake et recevez un bonus de bienvenue de 1 500 FCFA.
+                  Créez votre compte Nike et recevez un bonus de bienvenue de 1 500 FCFA.
                 </p>
               </div>
 
@@ -153,7 +157,7 @@ function Register() {
                       <select
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
-                        className={`${inputClass} min-w-[96px] rounded-[28px] border-slate-200 bg-slate-100 px-4 py-3 text-slate-500 shadow-sm transition focus:border-slate-500`}
+                        className={`${inputClass} min-w-[72px] rounded-[28px] border-slate-200 bg-slate-100 px-3 py-3 text-slate-500 shadow-sm transition focus:border-slate-500`}
                         aria-label="Code pays"
                       >
                         {COUNTRIES.map((c) => (
@@ -225,7 +229,7 @@ function Register() {
 
                   <Field
                     label="Code de parrainage"
-                    hint="Optionnel — 6 caractères alphanumériques si renseigné"
+                    hint="Obligatoire — 6 caractères alphanumériques"
                     className="text-slate-900"
                   >
                     <input

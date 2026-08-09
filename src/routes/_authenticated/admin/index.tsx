@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
-      { title: "Tableau de bord admin — NikeStake" },
+      { title: "Tableau de bord admin — Nike" },
       { name: "description", content: "Accueil du tableau de bord administrateur." },
-      { property: "og:title", content: "Tableau de bord admin — NikeStake" },
+      { property: "og:title", content: "Tableau de bord admin — Nike" },
       {
         property: "og:description",
         content: "Gestion des utilisateurs, dépôts, retraits et promotions.",
@@ -84,6 +84,12 @@ function AdminDashboard() {
               className="block rounded-2xl border border-border px-4 py-4 text-sm font-semibold transition hover:bg-secondary/50"
             >
               Investissements
+            </Link>
+            <Link
+              to="/admin/products"
+              className="block rounded-2xl border border-border px-4 py-4 text-sm font-semibold transition hover:bg-secondary/50"
+            >
+              Produits
             </Link>
           </div>
         </Card>

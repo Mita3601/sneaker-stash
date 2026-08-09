@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as MerciRouteImport } from './routes/merci'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -20,6 +21,7 @@ import { Route as AuthenticatedAdminCadeauRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminDepotsRouteImport } from './routes/_authenticated/admin/depots'
 import { Route as AuthenticatedAdminInvestissementRouteImport } from './routes/_authenticated/admin/investissement'
 import { Route as AuthenticatedAdminParrainagesRouteImport } from './routes/_authenticated/admin/parrainages'
+import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminPromoteurRouteImport } from './routes/_authenticated/admin/promoteur'
 import { Route as AuthenticatedAdminRetraitRouteImport } from './routes/_authenticated/admin/retrait'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
@@ -50,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerciRoute = MerciRouteImport.update({
+  id: '/merci',
+  path: '/merci',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -99,6 +106,12 @@ const AuthenticatedAdminParrainagesRoute =
   AuthenticatedAdminParrainagesRouteImport.update({
     id: '/parrainages',
     path: '/parrainages',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProductsRoute =
+  AuthenticatedAdminProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminPromoteurRoute =
@@ -228,6 +241,7 @@ const ApiPublicWebhooksLeekpayRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/merci': typeof MerciRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
@@ -236,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/admin/depots': typeof AuthenticatedAdminDepotsRoute
   '/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
   '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
   '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -262,12 +277,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/merci': typeof MerciRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/admin/cadeau': typeof AuthenticatedAdminCadeauRoute
   '/admin/depots': typeof AuthenticatedAdminDepotsRoute
   '/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
   '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
   '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -296,6 +313,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/merci': typeof MerciRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
@@ -304,6 +322,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/depots': typeof AuthenticatedAdminDepotsRoute
   '/_authenticated/admin/investissement': typeof AuthenticatedAdminInvestissementRoute
   '/_authenticated/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
+  '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
   '/_authenticated/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -332,6 +351,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/merci'
     | '/admin'
     | '/app'
     | '/auth/login'
@@ -340,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin/depots'
     | '/admin/investissement'
     | '/admin/parrainages'
+    | '/admin/products'
     | '/admin/promoteur'
     | '/admin/retrait'
     | '/admin/users'
@@ -366,12 +387,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/merci'
     | '/auth/login'
     | '/auth/register'
     | '/admin/cadeau'
     | '/admin/depots'
     | '/admin/investissement'
     | '/admin/parrainages'
+    | '/admin/products'
     | '/admin/promoteur'
     | '/admin/retrait'
     | '/admin/users'
@@ -399,6 +422,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/merci'
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/auth/login'
@@ -407,6 +431,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/depots'
     | '/_authenticated/admin/investissement'
     | '/_authenticated/admin/parrainages'
+    | '/_authenticated/admin/products'
     | '/_authenticated/admin/promoteur'
     | '/_authenticated/admin/retrait'
     | '/_authenticated/admin/users'
@@ -435,6 +460,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  MerciRoute: typeof MerciRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiInternalJobsLeekExpireRoute: typeof ApiInternalJobsLeekExpireRoute
@@ -455,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merci': {
+      id: '/merci'
+      path: '/merci'
+      fullPath: '/merci'
+      preLoaderRoute: typeof MerciRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -518,6 +551,13 @@ declare module '@tanstack/react-router' {
       path: '/parrainages'
       fullPath: '/admin/parrainages'
       preLoaderRoute: typeof AuthenticatedAdminParrainagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/products': {
+      id: '/_authenticated/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/promoteur': {
@@ -682,6 +722,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDepotsRoute: typeof AuthenticatedAdminDepotsRoute
   AuthenticatedAdminInvestissementRoute: typeof AuthenticatedAdminInvestissementRoute
   AuthenticatedAdminParrainagesRoute: typeof AuthenticatedAdminParrainagesRoute
+  AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminPromoteurRoute: typeof AuthenticatedAdminPromoteurRoute
   AuthenticatedAdminRetraitRoute: typeof AuthenticatedAdminRetraitRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -693,6 +734,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDepotsRoute: AuthenticatedAdminDepotsRoute,
   AuthenticatedAdminInvestissementRoute: AuthenticatedAdminInvestissementRoute,
   AuthenticatedAdminParrainagesRoute: AuthenticatedAdminParrainagesRoute,
+  AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminPromoteurRoute: AuthenticatedAdminPromoteurRoute,
   AuthenticatedAdminRetraitRoute: AuthenticatedAdminRetraitRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
@@ -761,6 +803,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  MerciRoute: MerciRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   ApiInternalJobsLeekExpireRoute: ApiInternalJobsLeekExpireRoute,

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -11,12 +12,12 @@ export const Route = createFileRoute("/auth/login")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Connexion — NikeStake" },
+      { title: "Connexion — Nike" },
       {
         name: "description",
-        content: "Connectez-vous à votre compte NikeStake avec votre numéro de téléphone.",
+        content: "Connectez-vous à votre compte Nike avec votre numéro de téléphone.",
       },
-      { property: "og:title", content: "Connexion — NikeStake" },
+      { property: "og:title", content: "Connexion — Nike" },
       { property: "og:description", content: "Accédez à vos paires et à vos revenus quotidiens." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -31,6 +32,7 @@ function Login() {
   const selectedCountry = COUNTRIES.find((c) => c.code === country) ?? COUNTRIES[0]!;
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -40,12 +42,18 @@ function Login() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: phoneToEmail(country, phone),
-      password,
-    });
+    const email = phoneToEmail(country, phone);
+    let result = await supabase.auth.signInWithPassword({ email, password });
+
+    if (result.error) {
+      const oldEmail = email.replace(/@nike\.app$/i, "@nikestake.app");
+      if (oldEmail !== email) {
+        result = await supabase.auth.signInWithPassword({ email: oldEmail, password });
+      }
+    }
+
     setLoading(false);
-    if (error) {
+    if (result.error) {
       toast.error("Numéro ou mot de passe incorrect");
       return;
     }
@@ -73,8 +81,8 @@ function Login() {
                 Just invest it
               </h1>
               <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                Accédez à NikeStake, gérez vos investissements sneakers et suivez vos gains en temps
-                réel avec une interface fluide et confidentielle.
+                Accédez à Nike, gérez vos investissements sneakers et suivez vos gains en temps réel
+                avec une interface fluide et confidentielle.
               </p>
             </div>
 
@@ -106,7 +114,7 @@ function Login() {
 
                   <Field label="Numéro de téléphone" className="text-slate-900">
                     <div className="flex gap-3">
-                      <span className="inline-flex min-w-[96px] items-center justify-center rounded-[28px] border border-slate-200 bg-slate-100 px-4 py-3 text-slate-900">
+                      <span className="inline-flex min-w-[72px] items-center justify-center rounded-[28px] border border-slate-200 bg-slate-100 px-3 py-3 text-slate-900">
                         {selectedCountry.flag} {selectedCountry.code}
                       </span>
                       <input
@@ -120,13 +128,25 @@ function Login() {
                   </Field>
 
                   <Field label="Mot de passe" className="text-slate-900">
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Au moins 6 caractères"
-                      className={`${inputClass} rounded-[28px] border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-slate-900`}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Au moins 6 caractères"
+                        className={`${inputClass} rounded-[28px] border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-slate-900 shadow-sm transition focus:border-slate-900`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-slate-700"
+                        aria-label={
+                          showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+                        }
+                      >
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
                   </Field>
 
                   <Btn

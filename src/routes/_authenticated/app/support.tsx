@@ -8,9 +8,9 @@ import { TELEGRAM, WHATSAPP } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/support")({
   head: () => ({
     meta: [
-      { title: "Service client — NikeStake" },
-      { name: "description", content: "Contactez le support NikeStake par Telegram ou WhatsApp." },
-      { property: "og:title", content: "Service client — NikeStake" },
+      { title: "Service client — Nike" },
+      { name: "description", content: "Contactez le support Nike par Telegram ou WhatsApp." },
+      { property: "og:title", content: "Service client — Nike" },
       { property: "og:description", content: "Assistance rapide pour vos dépôts et retraits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

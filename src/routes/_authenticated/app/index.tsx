@@ -14,12 +14,12 @@ import { fcfa, SNEAKER_IMAGES } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
     meta: [
-      { title: "Catalogue de paires — NikeStake" },
+      { title: "Catalogue de paires — Nike" },
       {
         name: "description",
         content: "Choisissez votre paire VIP et percevez un revenu quotidien sur toute sa durée.",
       },
-      { property: "og:title", content: "Catalogue de paires — NikeStake" },
+      { property: "og:title", content: "Catalogue de paires — Nike" },
       {
         property: "og:description",
         content: "9 niveaux VIP, revenus quotidiens et retraits 24/7.",
@@ -44,11 +44,7 @@ function Products() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("is_active", true)
-        .order("price");
+      const { data, error } = await supabase.from("products").select("*").order("price");
       if (error) throw error;
       return data;
     },
@@ -95,7 +91,7 @@ function Products() {
     <>
       <AnnouncementModal />
       <header className="flex items-center justify-between px-4 pt-4">
-        <h1 className="text-xl font-extrabold">NikeStake</h1>
+        <h1 className="text-xl font-extrabold">Nike</h1>
         <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-primary">
           {fcfa(profile?.balance)}
         </span>
@@ -111,7 +107,7 @@ function Products() {
             className="h-40 w-full object-cover"
           />
           <div className="absolute inset-0 flex flex-col justify-end bg-gradient-deep/50 p-4 text-primary-foreground">
-            <p className="text-2xl font-extrabold">NikeStake</p>
+            <p className="text-2xl font-extrabold">Nike</p>
             <p className="text-xs opacity-90">La technologie au service de vos revenus</p>
           </div>
         </div>
@@ -184,13 +180,19 @@ function Products() {
                 <p className="text-[11px] text-muted-foreground">Revenu total</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <span className="text-sm font-extrabold">{fcfa(p.price)}</span>
-                  <Btn
-                    className="px-3 py-2 text-xs"
-                    disabled={buy.isPending}
-                    onClick={() => buy.mutate(p.id)}
-                  >
-                    Acheter
-                  </Btn>
+                  {!p.is_active ? (
+                    <Btn className="px-3 py-2 text-xs" disabled>
+                      Bientôt disponible
+                    </Btn>
+                  ) : (
+                    <Btn
+                      className="px-3 py-2 text-xs"
+                      disabled={buy.isPending}
+                      onClick={() => buy.mutate(p.id)}
+                    >
+                      Acheter
+                    </Btn>
+                  )}
                 </div>
               </Card>
             ))}

@@ -10,7 +10,7 @@ import { shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/admin/cadeau")({
   head: () => ({
     meta: [
-      { title: "Admin - Cadeaux — NikeStake" },
+      { title: "Admin - Cadeaux — Nike" },
       { name: "description", content: "Créez des coupons cadeaux pour les utilisateurs." },
     ],
   }),

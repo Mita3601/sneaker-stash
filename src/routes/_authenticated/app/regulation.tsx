@@ -7,12 +7,12 @@ import hero from "@/assets/image.jpg";
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({
     meta: [
-      { title: "Réglementation — NikeStake" },
+      { title: "Réglementation — Nike" },
       {
         name: "description",
-        content: "Règles d’utilisation et informations importantes de NikeStake.",
+        content: "Règles d’utilisation et informations importantes de Nike.",
       },
-      { property: "og:title", content: "Réglementation — NikeStake" },
+      { property: "og:title", content: "Réglementation — Nike" },
       {
         property: "og:description",
         content: "Lisez les règles de fonctionnement de la plateforme.",

@@ -12,10 +12,16 @@ import { PROVIDERS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/add-bank")({
   head: () => ({
     meta: [
-      { title: "Compte de retrait — NikeStake" },
-      { name: "description", content: "Ajoutez et gérez les comptes mobile money utilisés pour vos retraits." },
-      { property: "og:title", content: "Compte de retrait — NikeStake" },
-      { property: "og:description", content: "Enregistrez votre compte Wave, Orange, MTN ou Moov." },
+      { title: "Compte de retrait — Nike" },
+      {
+        name: "description",
+        content: "Ajoutez et gérez les comptes mobile money utilisés pour vos retraits.",
+      },
+      { property: "og:title", content: "Compte de retrait — Nike" },
+      {
+        property: "og:description",
+        content: "Enregistrez votre compte Wave, Orange, MTN ou Moov.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -6,15 +6,15 @@ import { Btn, Card, SubHeader } from "@/components/ui-kit";
 export const Route = createFileRoute("/_authenticated/app/download")({
   head: () => ({
     meta: [
-      { title: "Télécharger l’app — NikeStake" },
+      { title: "Télécharger l’app — Nike" },
       {
         name: "description",
-        content: "Installez NikeStake sur votre téléphone pour un accès plus rapide.",
+        content: "Installez Nike sur votre téléphone pour un accès plus rapide.",
       },
-      { property: "og:title", content: "Télécharger l’app — NikeStake" },
+      { property: "og:title", content: "Télécharger l’app — Nike" },
       {
         property: "og:description",
-        content: "Ajoutez NikeStake à l’écran d’accueil de votre téléphone.",
+        content: "Ajoutez Nike à l’écran d’accueil de votre téléphone.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -45,7 +45,7 @@ function DownloadApp() {
         <Card className="space-y-2">
           <p className="text-sm font-bold">Étapes</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Ouvrez NikeStake dans votre navigateur mobile.</li>
+            <li>• Ouvrez Nike dans votre navigateur mobile.</li>
             <li>• Utilisez le menu du navigateur pour ajouter à l’écran d’accueil.</li>
             <li>• Lancez ensuite l’app depuis l’icône créée.</li>
           </ul>

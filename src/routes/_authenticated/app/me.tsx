@@ -29,12 +29,12 @@ import { fcfa } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/me")({
   head: () => ({
     meta: [
-      { title: "Mon compte — NikeStake" },
+      { title: "Mon compte — Nike" },
       {
         name: "description",
         content: "Solde, missions, historiques et paramètres de votre compte.",
       },
-      { property: "og:title", content: "Mon compte — NikeStake" },
+      { property: "og:title", content: "Mon compte — Nike" },
       {
         property: "og:description",
         content: "Gérez votre solde, vos retraits et vos comptes de paiement.",

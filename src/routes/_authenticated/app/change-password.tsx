@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/app/change-password")({
   head: () => ({
     meta: [
-      { title: "Changer mon mot de passe — NikeStake" },
-      { name: "description", content: "Mettez à jour le mot de passe de votre compte NikeStake." },
-      { property: "og:title", content: "Changer mon mot de passe — NikeStake" },
+      { title: "Changer mon mot de passe — Nike" },
+      { name: "description", content: "Mettez à jour le mot de passe de votre compte Nike." },
+      { property: "og:title", content: "Changer mon mot de passe — Nike" },
       { property: "og:description", content: "Protégez votre compte avec un mot de passe fort." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

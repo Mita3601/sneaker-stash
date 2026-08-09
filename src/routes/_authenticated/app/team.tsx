@@ -12,12 +12,12 @@ import { fcfa, maskPhone, shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/team")({
   head: () => ({
     meta: [
-      { title: "Mon équipe — NikeStake" },
+      { title: "Mon équipe — Nike" },
       {
         name: "description",
         content: "Partagez votre code de parrainage et gagnez 27 %, 2 % et 1 % sur 3 niveaux.",
       },
-      { property: "og:title", content: "Mon équipe — NikeStake" },
+      { property: "og:title", content: "Mon équipe — Nike" },
       {
         property: "og:description",
         content: "Commissions instantanées sur 3 niveaux de parrainage.",

@@ -9,12 +9,12 @@ import { fcfa, shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/withdraw-history")({
   head: () => ({
     meta: [
-      { title: "Registres de retrait — NikeStake" },
+      { title: "Registres de retrait — Nike" },
       {
         name: "description",
         content: "Historique de vos demandes de retrait, frais et montants nets.",
       },
-      { property: "og:title", content: "Registres de retrait — NikeStake" },
+      { property: "og:title", content: "Registres de retrait — Nike" },
       { property: "og:description", content: "Suivez le traitement de chaque retrait." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

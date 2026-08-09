@@ -68,7 +68,7 @@ export function maskPhone(value: string | null | undefined) {
 /** Phone numbers are mapped to a stable internal email alias for authentication. */
 export function phoneToEmail(countryCode: string, phone: string) {
   const digits = `${countryCode}${phone}`.replace(/\D/g, "");
-  return `u${digits}@nikestake.app`;
+  return `u${digits}@nike.app`;
 }
 
 export function normalizePhone(countryCode: string, phone: string) {
@@ -107,3 +107,28 @@ export const STATUS_LABELS: Record<string, string> = {
   approved: "Validé",
   rejected: "Rejeté",
 };
+
+export type PasswordMode = "alphanumeric" | "numeric" | "alpha";
+
+export function validatePassword(password: string, mode: PasswordMode) {
+  if (!password || password.length < 6) {
+    return { ok: false, message: "Le mot de passe doit contenir 6 caractères minimum" };
+  }
+  if (mode === "numeric") {
+    if (!/^\d+$/.test(password)) {
+      return { ok: false, message: "Le mot de passe doit contenir uniquement des chiffres" };
+    }
+  } else if (mode === "alpha") {
+    if (!/^[A-Za-z]+$/.test(password)) {
+      return { ok: false, message: "Le mot de passe doit contenir uniquement des lettres" };
+    }
+  } else {
+    if (!/^[A-Za-z0-9]+$/.test(password)) {
+      return {
+        ok: false,
+        message: "Le mot de passe doit être alphanumérique (lettres et/ou chiffres)",
+      };
+    }
+  }
+  return { ok: true };
+}

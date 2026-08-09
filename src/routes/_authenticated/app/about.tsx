@@ -6,9 +6,9 @@ import { Btn, Card, SubHeader } from "@/components/ui-kit";
 export const Route = createFileRoute("/_authenticated/app/about")({
   head: () => ({
     meta: [
-      { title: "À propos — NikeStake" },
-      { name: "description", content: "Présentation rapide de la plateforme NikeStake." },
-      { property: "og:title", content: "À propos — NikeStake" },
+      { title: "À propos — Nike" },
+      { name: "description", content: "Présentation rapide de la plateforme Nike." },
+      { property: "og:title", content: "À propos — Nike" },
       {
         property: "og:description",
         content: "Découvrez le fonctionnement de la plateforme et ses points clés.",

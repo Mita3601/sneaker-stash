@@ -1,22 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import hero from "@/assets/hero-banner.jpg";
-import { Btn, Card, Empty, StatTile } from "@/components/ui-kit";
+import { Card, Empty, StatTile } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { countdown, fcfa, nextClaimAt, SNEAKER_IMAGES, shortDate } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/my-products")({
   head: () => ({
     meta: [
-      { title: "Mes paires — NikeStake" },
+      { title: "Mes paires — Nike" },
       {
         name: "description",
         content: "Suivez vos paires actives et réclamez vos revenus quotidiens.",
       },
-      { property: "og:title", content: "Mes paires — NikeStake" },
+      { property: "og:title", content: "Mes paires — Nike" },
       {
         property: "og:description",
         content: "Revenus quotidiens à réclamer toutes les 24 heures.",
@@ -60,8 +60,42 @@ function MyProducts() {
       qc.invalidateQueries({ queryKey: ["my-products"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (_error: Error) => {
+      // ignore individual auto-claim failures, they may simply be not ready yet
+    },
   });
+
+  const autoClaimedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const readyItems = items.filter(
+      (item) =>
+        item.status === "active" &&
+        nextClaimAt(item.last_claim_date, item.purchase_date) <= now &&
+        !autoClaimedRef.current.has(item.id),
+    );
+
+    if (readyItems.length === 0) return;
+
+    let aborted = false;
+    const process = async () => {
+      for (const item of readyItems) {
+        if (aborted) return;
+        try {
+          await claim.mutateAsync(item.id);
+        } catch {
+          // ignore errors to avoid interrupting auto processing
+        } finally {
+          autoClaimedRef.current.add(item.id);
+        }
+      }
+    };
+
+    process();
+    return () => {
+      aborted = true;
+    };
+  }, [items, now, claim]);
 
   const active = items.filter((i) => i.status === "active");
   const dailyTotal = active.reduce((sum, i) => sum + Number(i.products?.daily_yield ?? 0), 0);
@@ -126,17 +160,9 @@ function MyProducts() {
                       {item.status === "completed"
                         ? "Terminé"
                         : ready
-                          ? `+ ${fcfa(item.products?.daily_yield)}`
+                          ? `Crédit automatique + ${fcfa(item.products?.daily_yield)}`
                           : countdown(nextClaimAt(item.last_claim_date, item.purchase_date) - now)}
                     </span>
-                    <Btn
-                      className="px-3 py-2 text-xs"
-                      variant={ready && item.status === "active" ? "primary" : "ghost"}
-                      disabled={!ready || item.status !== "active" || claim.isPending}
-                      onClick={() => claim.mutate(item.id)}
-                    >
-                      Réclamer
-                    </Btn>
                   </div>
                 </div>
               </Card>

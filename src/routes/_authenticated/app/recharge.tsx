@@ -12,13 +12,13 @@ import { isWave, MIN_DEPOSIT, payCountry, type DepositInit } from "@/lib/payment
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
     meta: [
-      { title: "Recharge — NikeStake" },
+      { title: "Recharge — Nike" },
       {
         name: "description",
         content:
           "Rechargez votre compte en mobile money : Orange, MTN, Moov, Wave. Validation instantanée.",
       },
-      { property: "og:title", content: "Recharge — NikeStake" },
+      { property: "og:title", content: "Recharge — Nike" },
       {
         property: "og:description",
         content: "Dépôt mobile money instantané, sans quitter l'application.",
