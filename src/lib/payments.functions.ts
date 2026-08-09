@@ -79,8 +79,15 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(validate)
   .handler(async ({ data, context }): Promise<DepositInit> => {
+    // Validate explicitly here so we can return the original validation message
+    let validated: Input;
+    try {
+      validated = validate(data as Input);
+    } catch (err: any) {
+      // Preserve validation error message for client
+      throw new Error(err?.message ?? "Données invalides");
+    }
     const { newReference } = await import("@/lib/ashtech.server");
     const { createCheckout } = await import("@/lib/leek.server");
 
@@ -90,15 +97,15 @@ export const initiateDeposit = createServerFn({ method: "POST" })
     const webhookUrl = appUrl ? `${appUrl}/api/public/webhooks/leekpay` : undefined;
 
     const payload: Record<string, unknown> = {
-      amount: data.amount,
-      currency: data.currency,
+      amount: validated.amount,
+      currency: validated.currency,
       description: `Dépôt ${localRef}`,
       customer_email: `${localRef.toLowerCase()}@nikestake.app`,
       metadata: {
         local_reference: localRef,
-        operator: data.operator,
-        phone: data.phone,
-        country_code: data.countryCode,
+        operator: validated.operator,
+        phone: validated.phone,
+        country_code: validated.countryCode,
       },
       ...(webhookUrl ? { webhook_url: webhookUrl } : {}),
       return_url: appUrl ? `${appUrl}/merci` : undefined,
