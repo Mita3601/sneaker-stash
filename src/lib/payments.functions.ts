@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { DepositInit } from "@/lib/payments";
+import { MIN_DEPOSIT, type DepositInit, type PayCountry } from "@/lib/payments";
 
 type Input = {
   amount: number;
@@ -10,21 +10,19 @@ type Input = {
   operator: string;
   phone: string;
   otp?: string;
-  reference?: string;
 };
 
 function validate(data: Input): Input {
   const amount = Number(data.amount);
-  if (!Number.isFinite(amount) || amount < 1000 || amount > 5_000_000) {
-    throw new Error("Montant invalide (minimum 1 000 FCFA).");
+  if (!Number.isFinite(amount) || amount < MIN_DEPOSIT || amount > 5_000_000) {
+    throw new Error(`Montant invalide (minimum ${MIN_DEPOSIT} FCFA).`);
   }
   if (!/^[A-Z]{2}$/.test(data.countryCode)) throw new Error("Pays invalide.");
-  if (!/^(XOF|XAF)$/.test(data.currency)) throw new Error("Devise invalide.");
+  if (!/^[A-Z]{3,4}$/.test(data.currency)) throw new Error("Devise invalide.");
   if (!data.operator || data.operator.length > 40) throw new Error("Opérateur invalide.");
   const phone = String(data.phone ?? "").replace(/\D/g, "");
   if (phone.length > 20) throw new Error("Numéro invalide.");
   const otp = data.otp ? String(data.otp).replace(/\D/g, "").slice(0, 10) : undefined;
-  const reference = data.reference ? String(data.reference).slice(0, 60) : undefined;
   return {
     amount: Math.round(amount),
     countryCode: data.countryCode,
@@ -32,51 +30,105 @@ function validate(data: Input): Input {
     operator: data.operator,
     phone,
     ...(otp ? { otp } : {}),
-    ...(reference ? { reference } : {}),
   };
+}
+
+/** Pays et opérateurs autorisés sur le lien de paiement. */
+export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ countries: PayCountry[]; fixedAmount: number | null; linkUrl: string }> => {
+    const { fetchLinkConfig, paymentLinkUrl } = await import("@/lib/ashtech.server");
+    const { DIAL_CODES } = await import("@/lib/payments");
+    const cfg = await fetchLinkConfig();
+
+    return {
+      linkUrl: paymentLinkUrl(),
+      fixedAmount: cfg.fixedAmount,
+      countries: cfg.countries.map((c) => ({
+        code: c.code,
+        name: c.name,
+        flag: c.flag,
+        currency: c.currency,
+        dial: DIAL_CODES[c.code] ?? "+",
+        operators: c.operators.map((o) => ({
+          name: o.name,
+          otp: o.paymentProvider === "pixpay" && o.pixpayOperatorType === "otp",
+        })),
+      })),
+    };
+  },
+);
+
+function pick(body: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = body[key];
+    if (typeof value === "string" && value) return value;
+    if (typeof value === "number") return String(value);
+    if (value && typeof value === "object") {
+      const nested = value as Record<string, unknown>;
+      for (const k of keys) {
+        const v = nested[k];
+        if (typeof v === "string" && v) return v;
+      }
+    }
+  }
+  return "";
 }
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validate)
   .handler(async ({ data, context }): Promise<DepositInit> => {
-    const { collect, newReference, webhookUrl } = await import("@/lib/ashtech.server");
+    const { payViaLink, newReference } = await import("@/lib/ashtech.server");
 
-    const reference = data.reference ?? newReference();
+    const localRef = newReference();
 
-    const { status, body } = await collect({
-      amount: data.amount,
-      currency: data.currency,
+    const { status, body } = await payViaLink({
+      // La référence voyage dans le nom du client : elle revient dans le webhook.
+      fullName: `NikeStake ${localRef}`,
+      email: `${localRef.toLowerCase()}@nikestake.app`,
+      country: data.countryCode,
       phone: data.phone,
+      amount: String(data.amount),
+      currency: data.currency,
+      paymentMethod: "mobile_money",
       operator: data.operator,
-      country_code: data.countryCode,
-      reference,
-      ...(data.otp ? { otp: data.otp } : {}),
-      notify_url: webhookUrl(),
+      ...(data.otp ? { pixpayOtp: data.otp } : {}),
     });
 
-    if (status === 400 && body["error"] === "otp_required") {
-      const apiRef = String(body["reference"] ?? reference);
-      const ussd = body["ussd_code"] ? String(body["ussd_code"]) : "";
-      const message = String(body["message"] ?? "Code de confirmation requis.");
-      return ussd
-        ? { type: "otp_ussd", reference: apiRef, ussdCode: ussd, message }
-        : { type: "otp_sms", reference: apiRef, message };
+    const message = String(body["message"] ?? "");
+
+    if (status >= 400) {
+      if (/otp|code de confirmation/i.test(message)) {
+        return {
+          type: "otp",
+          reference: localRef,
+          ussdCode: pick(body, ["ussdCode", "ussd_code", "otpUssdCode"]),
+          message: message || "Code de confirmation requis.",
+        };
+      }
+      throw new Error(message || "Le paiement a été refusé par l'opérateur.");
     }
 
-    if (status !== 202 && status !== 200) {
-      throw new Error(String(body["message"] ?? "Le paiement a été refusé par l'opérateur."));
-    }
-
-    const apiRef = String(body["reference"] ?? reference);
-    const transactionId = String(body["transaction_id"] ?? apiRef);
+    const gatewayRef = pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
+    const gatewayTxId = pick(body, ["transactionId", "transaction_id", "id", "paymentId"]);
+    const reference = gatewayRef || localRef;
+    const redirectUrl = pick(body, [
+      "paymentUrl",
+      "payment_url",
+      "redirectUrl",
+      "redirect_url",
+      "waveUrl",
+      "wave_url",
+      "url",
+    ]);
 
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
       _amount: data.amount,
-      _reference: apiRef,
+      _reference: reference,
       _metadata: {
-        gateway: "ashtechpay",
-        gateway_transaction_id: transactionId,
+        gateway: "ashtechpay_link",
+        local_reference: localRef,
+        gateway_transaction_id: gatewayTxId || reference,
         country_code: data.countryCode,
         currency: data.currency,
         operator: data.operator,
@@ -85,16 +137,20 @@ export const initiateDeposit = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
 
-    if (body["flow"] === "wave" && body["wave_url"]) {
+    if (redirectUrl) {
       return {
-        type: "wave",
-        reference: apiRef,
-        transactionId,
-        waveUrl: String(body["wave_url"]),
+        type: "redirect",
+        reference,
+        url: redirectUrl,
+        message: message || "Confirmez le paiement sur la page qui s'ouvre.",
       };
     }
 
-    return { type: "ussd_push", reference: apiRef, transactionId };
+    return {
+      type: "pending",
+      reference,
+      message: message || "Validez la demande reçue sur votre téléphone.",
+    };
   });
 
 export const checkDepositStatus = createServerFn({ method: "POST" })

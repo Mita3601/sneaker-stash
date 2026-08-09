@@ -1,59 +1,47 @@
-/** Pays et opérateurs mobile money supportés pour les recharges (Ashtech Pay). */
+/** Pays et opérateurs mobile money disponibles via le lien de paiement Ashtech Pay. */
+export const MIN_DEPOSIT = 200;
+
+export type PayOperator = {
+  name: string;
+  otp: boolean;
+};
+
 export type PayCountry = {
   code: string;
   name: string;
-  currency: "XOF" | "XAF";
+  currency: string;
   dial: string;
   flag: string;
-  operators: string[];
+  operators: PayOperator[];
 };
 
-export const PAY_COUNTRIES: PayCountry[] = [
-  {
-    code: "CI",
-    name: "Côte d'Ivoire",
-    currency: "XOF",
-    dial: "+225",
-    flag: "🇨🇮",
-    operators: ["Orange Money", "MTN Money", "Moov Money", "Wave Money"],
-  },
-  {
-    code: "BF",
-    name: "Burkina Faso",
-    currency: "XOF",
-    dial: "+226",
-    flag: "🇧🇫",
-    operators: ["Orange Money", "Moov Money", "Wallet LigdiCash"],
-  },
-  {
-    code: "BJ",
-    name: "Bénin",
-    currency: "XOF",
-    dial: "+229",
-    flag: "🇧🇯",
-    operators: ["MTN Money", "Moov Money", "Celtiis Money", "Coris Money"],
-  },
-  {
-    code: "CM",
-    name: "Cameroun",
-    currency: "XAF",
-    dial: "+237",
-    flag: "🇨🇲",
-    operators: ["MTN Money", "Orange Money"],
-  },
-];
+export const DIAL_CODES: Record<string, string> = {
+  BJ: "+229",
+  BF: "+226",
+  CI: "+225",
+  CM: "+237",
+  SN: "+221",
+  TG: "+228",
+  ML: "+223",
+  NE: "+227",
+  GA: "+241",
+  CG: "+242",
+  CD: "+243",
+  TD: "+235",
+  CF: "+236",
+  GW: "+245",
+};
 
-export function payCountry(code: string) {
-  return PAY_COUNTRIES.find((c) => c.code === code) ?? PAY_COUNTRIES[0]!;
+export function payCountry(countries: PayCountry[], code: string) {
+  return countries.find((c) => c.code === code) ?? countries[0];
 }
 
-/** Wave n'exige pas de numéro de téléphone : le client confirme via le lien de paiement. */
+/** Wave n'exige pas de numéro de téléphone : le client confirme via le lien Wave. */
 export function isWave(operator: string) {
   return operator.toLowerCase().startsWith("wave");
 }
 
 export type DepositInit =
-  | { type: "ussd_push"; reference: string; transactionId: string }
-  | { type: "wave"; reference: string; transactionId: string; waveUrl: string }
-  | { type: "otp_ussd"; reference: string; ussdCode: string; message: string }
-  | { type: "otp_sms"; reference: string; message: string };
+  | { type: "pending"; reference: string; message: string }
+  | { type: "redirect"; reference: string; url: string; message: string }
+  | { type: "otp"; reference: string; ussdCode: string; message: string };

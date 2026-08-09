@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -6,8 +6,8 @@ import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
 import { fcfa } from "@/lib/app";
-import { checkDepositStatus, initiateDeposit } from "@/lib/payments.functions";
-import { isWave, PAY_COUNTRIES, payCountry, type DepositInit } from "@/lib/payments";
+import { checkDepositStatus, getPaymentOptions, initiateDeposit } from "@/lib/payments.functions";
+import { isWave, MIN_DEPOSIT, payCountry, type DepositInit } from "@/lib/payments";
 
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
@@ -15,10 +15,14 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
       { title: "Recharge — NikeStake" },
       {
         name: "description",
-        content: "Rechargez votre compte en mobile money : Orange, MTN, Moov, Wave. Validation instantanée.",
+        content:
+          "Rechargez votre compte en mobile money : Orange, MTN, Moov, Wave. Validation instantanée.",
       },
       { property: "og:title", content: "Recharge — NikeStake" },
-      { property: "og:description", content: "Dépôt mobile money instantané, sans quitter l'application." },
+      {
+        property: "og:description",
+        content: "Dépôt mobile money instantané, sans quitter l'application.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -26,58 +30,67 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [3000, 5000, 10000, 20000, 50000, 100000];
+const PRESETS = [200, 1000, 3000, 5000, 10000, 20000];
 
 function Recharge() {
   const qc = useQueryClient();
+  const loadOptions = useServerFn(getPaymentOptions);
   const initiate = useServerFn(initiateDeposit);
   const checkStatus = useServerFn(checkDepositStatus);
 
+  const options = useQuery({
+    queryKey: ["payment-options"],
+    queryFn: () => loadOptions(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const countries = options.data?.countries ?? [];
+  const [countryCode, setCountryCode] = useState("");
+  const [operator, setOperator] = useState("");
   const [amount, setAmount] = useState("");
-  const [countryCode, setCountryCode] = useState(PAY_COUNTRIES[0]!.code);
-  const [operator, setOperator] = useState(PAY_COUNTRIES[0]!.operators[0]!);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<DepositInit | null>(null);
 
-  const country = payCountry(countryCode);
-  const wave = isWave(operator);
+  const country = payCountry(countries, countryCode || countries[0]?.code || "");
+  const operators = country?.operators ?? [];
+  const activeOperator = operator || operators[0]?.name || "";
+  const wave = isWave(activeOperator);
+  const dial = country?.dial.replace("+", "") ?? "";
 
   function onCountryChange(code: string) {
     setCountryCode(code);
-    setOperator(payCountry(code).operators[0]!);
+    setOperator("");
     setStep(null);
   }
 
   const pay = useMutation({
     mutationFn: async (withOtp: boolean) => {
       const digits = phone.replace(/\D/g, "");
-      const fullPhone = digits.startsWith(country.dial.replace("+", ""))
-        ? digits
-        : `${country.dial.replace("+", "")}${digits}`;
+      const fullPhone = digits.startsWith(dial) ? digits : `${dial}${digits}`;
 
       return initiate({
         data: {
           amount: Number(amount),
-          countryCode: country.code,
-          currency: country.currency,
-          operator,
+          countryCode: country!.code,
+          currency: country!.currency,
+          operator: activeOperator,
           phone: fullPhone,
-          ...(withOtp && step ? { otp, reference: step.reference } : {}),
+          ...(withOtp ? { otp } : {}),
         },
       });
     },
     onSuccess: (result) => {
       setStep(result);
       setOtp("");
-      if (result.type === "otp_ussd" || result.type === "otp_sms") {
-        toast.info("Confirmation requise");
+      if (result.type === "otp") {
+        toast.info(result.message);
         return;
       }
       qc.invalidateQueries({ queryKey: ["transactions"] });
-      if (result.type === "wave") {
-        toast.success("Ouvrez Wave pour confirmer le paiement");
-        window.open(result.waveUrl, "_blank", "noopener,noreferrer");
+      if (result.type === "redirect") {
+        toast.success("Confirmez le paiement sur la page qui s'ouvre");
+        window.open(result.url, "_blank", "noopener,noreferrer");
       } else {
         toast.success("Demande envoyée — validez sur votre téléphone");
       }
@@ -110,8 +123,12 @@ function Recharge() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (Number(amount) < 1000) {
-      toast.error("Montant minimum : 1 000 FCFA");
+    if (!country) {
+      toast.error("Paiement momentanément indisponible");
+      return;
+    }
+    if (Number(amount) < MIN_DEPOSIT) {
+      toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
     if (!wave && phone.replace(/\D/g, "").length < 8) {
@@ -130,9 +147,6 @@ function Recharge() {
     pay.mutate(true);
   }
 
-  const awaitingOtp = step?.type === "otp_ussd" || step?.type === "otp_sms";
-  const pendingPayment = step?.type === "ussd_push" || step?.type === "wave";
-
   return (
     <>
       <SubHeader title="Recharger" />
@@ -140,104 +154,112 @@ function Recharge() {
         <Card>
           <p className="text-sm font-bold">Paiement mobile money instantané</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Choisissez votre pays et votre opérateur, entrez le montant puis validez la demande
-            reçue sur votre téléphone. Votre solde est crédité automatiquement dès la confirmation
-            de l&apos;opérateur.
+            Choisissez votre pays et votre opérateur, entrez le montant (minimum{" "}
+            {fcfa(MIN_DEPOSIT)}) puis validez la demande reçue sur votre téléphone. Votre solde est
+            crédité automatiquement dès la confirmation du paiement.
           </p>
         </Card>
 
-        <Card>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <Field label="Montant">
-              <input
-                inputMode="numeric"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                placeholder="5000"
-                className={inputClass}
-              />
-            </Field>
+        {options.isLoading ? (
+          <Card>
+            <p className="text-xs text-muted-foreground">Chargement des moyens de paiement…</p>
+          </Card>
+        ) : null}
 
-            <div className="grid grid-cols-3 gap-2">
-              {PRESETS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setAmount(String(p))}
-                  className="rounded-xl bg-secondary py-2 text-xs font-bold text-primary"
+        {options.isError ? (
+          <Card>
+            <p className="text-xs text-destructive">
+              Impossible de charger les moyens de paiement. Réessayez dans un instant.
+            </p>
+          </Card>
+        ) : null}
+
+        {country ? (
+          <Card>
+            <form onSubmit={onSubmit} className="space-y-4">
+              <Field label="Montant">
+                <input
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+                  placeholder="200"
+                  className={inputClass}
+                />
+              </Field>
+
+              <div className="grid grid-cols-3 gap-2">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setAmount(String(p))}
+                    className="rounded-xl bg-secondary py-2 text-xs font-bold text-primary"
+                  >
+                    {fcfa(p)}
+                  </button>
+                ))}
+              </div>
+
+              <Field label="Pays">
+                <select
+                  value={country.code}
+                  onChange={(e) => onCountryChange(e.target.value)}
+                  className={inputClass}
                 >
-                  {fcfa(p)}
-                </button>
-              ))}
-            </div>
+                  {countries.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <Field label="Pays">
-              <select
-                value={countryCode}
-                onChange={(e) => onCountryChange(e.target.value)}
-                className={inputClass}
-              >
-                {PAY_COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.flag} {c.name} ({c.currency})
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label="Opérateur">
+                <select
+                  value={activeOperator}
+                  onChange={(e) => {
+                    setOperator(e.target.value);
+                    setStep(null);
+                  }}
+                  className={inputClass}
+                >
+                  {operators.map((o) => (
+                    <option key={o.name} value={o.name}>
+                      {o.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <Field label="Opérateur">
-              <select
-                value={operator}
-                onChange={(e) => {
-                  setOperator(e.target.value);
-                  setStep(null);
-                }}
-                className={inputClass}
-              >
-                {country.operators.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              {wave ? (
+                <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
+                  Avec Wave, un lien de paiement s&apos;ouvre pour confirmer le montant.
+                </p>
+              ) : null}
 
-            {wave ? (
-              <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-                Avec Wave, un lien de paiement s&apos;ouvre pour confirmer le montant. Le numéro de
-                téléphone est facultatif.
-              </p>
-            ) : null}
+              <Field label="Numéro mobile money" hint={`Indicatif ${country.dial}`}>
+                <input
+                  inputMode="numeric"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
+                  placeholder="07 00 00 00 00"
+                  className={inputClass}
+                />
+              </Field>
 
-            <Field
-              label={wave ? "Numéro (facultatif)" : "Numéro mobile money"}
-              hint={`Indicatif ${country.dial}`}
-            >
-              <input
-                inputMode="numeric"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
-                placeholder="07 00 00 00 00"
-                className={inputClass}
-              />
-            </Field>
+              <Btn full disabled={pay.isPending}>
+                {pay.isPending ? "Traitement..." : `Payer ${amount ? fcfa(Number(amount)) : ""}`}
+              </Btn>
+            </form>
+          </Card>
+        ) : null}
 
-            <Btn full disabled={pay.isPending}>
-              {pay.isPending ? "Traitement..." : `Payer ${amount ? fcfa(Number(amount)) : ""}`}
-            </Btn>
-          </form>
-        </Card>
-
-        {awaitingOtp && step ? (
+        {step?.type === "otp" ? (
           <Card className="space-y-4">
             <div>
               <p className="text-sm font-bold">Confirmation requise</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {step.type === "otp_ussd"
-                  ? `Composez ${step.ussdCode} sur votre téléphone, le code de confirmation s'affiche dans le menu.`
-                  : "Un code de confirmation vous a été envoyé par SMS."}
-              </p>
-              {step.type === "otp_ussd" ? (
+              <p className="mt-1 text-xs text-muted-foreground">{step.message}</p>
+              {step.ussdCode ? (
                 <p className="mt-2 rounded-xl bg-secondary p-3 text-center text-lg font-black text-primary">
                   {step.ussdCode}
                 </p>
@@ -260,29 +282,44 @@ function Recharge() {
           </Card>
         ) : null}
 
-        {pendingPayment && step ? (
+        {step && (step.type === "pending" || step.type === "redirect") ? (
           <Card className="space-y-3">
             <p className="text-sm font-bold">Paiement en attente</p>
             <p className="text-xs text-muted-foreground">
               Référence : {step.reference}
               <br />
-              {step.type === "wave"
-                ? "Confirmez le paiement dans l'application Wave."
-                : "Validez la demande reçue sur votre téléphone avec votre code secret."}
+              {step.message}
             </p>
-            {step.type === "wave" ? (
+            {step.type === "redirect" ? (
               <a
-                href={step.waveUrl}
+                href={step.url}
                 target="_blank"
-                rel="noreferrer"
-                className="block rounded-xl bg-primary py-3 text-center text-sm font-bold text-primary-foreground"
+                rel="noopener noreferrer"
+                className="block rounded-xl bg-secondary p-3 text-center text-xs font-bold text-primary"
               >
-                Payer avec Wave
+                Ouvrir la page de paiement
               </a>
             ) : null}
-            <Btn variant="outline" full disabled={refresh.isPending} onClick={() => refresh.mutate()}>
-              {refresh.isPending ? "Vérification..." : "J'ai payé — vérifier le statut"}
+            <Btn full variant="ghost" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
+              {refresh.isPending ? "Vérification..." : "J'ai payé — vérifier"}
             </Btn>
+          </Card>
+        ) : null}
+
+        {options.data?.linkUrl ? (
+          <Card>
+            <p className="text-xs text-muted-foreground">
+              Vous pouvez aussi payer directement via notre page sécurisée :{" "}
+              <a
+                href={options.data.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-primary underline"
+              >
+                page de paiement
+              </a>
+              . Utilisez de préférence le formulaire ci-dessus pour un crédit automatique.
+            </p>
           </Card>
         ) : null}
       </div>
