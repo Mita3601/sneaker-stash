@@ -101,8 +101,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const DEFAULT_LANG = (process.env["APP_LANG"] ?? "fr").toString();
+
   return (
-    <html lang="en">
+    <html lang={DEFAULT_LANG}>
       <head>
         <HeadContent />
       </head>
@@ -125,4 +127,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
