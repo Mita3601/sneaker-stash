@@ -65,8 +65,8 @@ export const Route = createFileRoute("/api/public/webhooks/ashtechpay")({
           gateway_event: event || status,
           gateway_status: status || null,
           gateway_transaction_id: txId || reference || null,
-          gateway_amount: body["amount"] ?? null,
-          gateway_total_amount: body["total_amount"] ?? null,
+          gateway_amount: str(body["amount"]) || null,
+          gateway_total_amount: str(body["total_amount"]) || null,
         };
 
         const candidates = [reference, txId, ...localRefs(raw)].filter(Boolean);
