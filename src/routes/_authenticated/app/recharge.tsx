@@ -340,7 +340,7 @@ function Recharge() {
           </Card>
         ) : null}
 
-        {options.data?.linkUrl ? (
+        {!options.data?.leekConfigured && options.data?.linkUrl ? (
           <Card>
             <p className="text-xs text-muted-foreground">
               Vous pouvez aussi payer directement via notre page sécurisée :{" "}

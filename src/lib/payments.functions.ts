@@ -38,13 +38,19 @@ function validate(data: Input): Input {
 
 /** Pays et opérateurs autorisés sur le lien de paiement. */
 export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ countries: PayCountry[]; fixedAmount: number | null; linkUrl: string }> => {
+  async (): Promise<{
+    countries: PayCountry[];
+    fixedAmount: number | null;
+    linkUrl: string;
+    leekConfigured: boolean;
+  }> => {
     const { fetchLinkConfig, paymentLinkUrl } = await import("@/lib/ashtech.server");
     const { DIAL_CODES } = await import("@/lib/payments");
     const cfg = await fetchLinkConfig();
 
     return {
       linkUrl: paymentLinkUrl(),
+      leekConfigured: Boolean(process.env["LEEKPAY_SECRET_KEY"]),
       fixedAmount: cfg.fixedAmount,
       countries: cfg.countries.map((c) => ({
         code: c.code,
