@@ -34,7 +34,9 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           return new Response("Invalid payload", { status: 400 });
         }
 
-        const event = str(body["event"]).toLowerCase();
+        const eventHeader =
+          request.headers.get("x-leekpay-event") || request.headers.get("X-LeekPay-Event");
+        const event = str(body["event"] || eventHeader).toLowerCase();
         const data = (body["data"] as Record<string, unknown>) ?? {};
         const checkoutId = str(
           data["checkout_id"] || data["transaction_id"] || data["checkoutId"] || "",
@@ -43,7 +45,9 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
         const success =
           event === "payment.completed" || ["paid", "completed", "successful"].includes(status);
         const failed =
-          event === "payment.failed" || ["failed", "cancelled", "expired"].includes(status);
+          event === "payment.failed" ||
+          event === "payment.cancelled" ||
+          ["failed", "cancelled", "expired"].includes(status);
 
         const signature =
           request.headers.get("x-leekpay-signature") || request.headers.get("X-LeekPay-Signature");
@@ -56,6 +60,13 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           } catch {
             verified = false;
           }
+        }
+
+        if (signature && publicKey && !verified) {
+          return new Response(JSON.stringify({ received: false, reason: "invalid_signature" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
