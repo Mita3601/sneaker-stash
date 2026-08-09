@@ -41,7 +41,6 @@ import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 import { Route as ApiInternalJobsLeekExpireRouteImport } from './routes/api/internal/jobs/leek-expire'
-import { Route as ApiPublicWebhooksAshtechpayRouteImport } from './routes/api/public/webhooks/ashtechpay'
 import { Route as ApiPublicWebhooksLeekpayRouteImport } from './routes/api/public/webhooks/leekpay'
 
 const IndexRoute = IndexRouteImport.update({
@@ -220,12 +219,6 @@ const ApiInternalJobsLeekExpireRoute =
     path: '/api/internal/jobs/leek-expire',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicWebhooksAshtechpayRoute =
-  ApiPublicWebhooksAshtechpayRouteImport.update({
-    id: '/api/public/webhooks/ashtechpay',
-    path: '/api/public/webhooks/ashtechpay',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicWebhooksLeekpayRoute =
   ApiPublicWebhooksLeekpayRouteImport.update({
     id: '/api/public/webhooks/leekpay',
@@ -265,7 +258,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
 export interface FileRoutesByTo {
@@ -298,7 +290,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
 export interface FileRoutesById {
@@ -335,7 +326,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
 export interface FileRouteTypes {
@@ -372,7 +362,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/webhooks/ashtechpay'
     | '/api/public/webhooks/leekpay'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -405,7 +394,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/webhooks/ashtechpay'
     | '/api/public/webhooks/leekpay'
   id:
     | '__root__'
@@ -441,7 +429,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/webhooks/ashtechpay'
     | '/api/public/webhooks/leekpay'
   fileRoutesById: FileRoutesById
 }
@@ -451,7 +438,6 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiInternalJobsLeekExpireRoute: typeof ApiInternalJobsLeekExpireRoute
-  ApiPublicWebhooksAshtechpayRoute: typeof ApiPublicWebhooksAshtechpayRoute
   ApiPublicWebhooksLeekpayRoute: typeof ApiPublicWebhooksLeekpayRoute
 }
 
@@ -681,13 +667,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalJobsLeekExpireRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/webhooks/ashtechpay': {
-      id: '/api/public/webhooks/ashtechpay'
-      path: '/api/public/webhooks/ashtechpay'
-      fullPath: '/api/public/webhooks/ashtechpay'
-      preLoaderRoute: typeof ApiPublicWebhooksAshtechpayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/webhooks/leekpay': {
       id: '/api/public/webhooks/leekpay'
       path: '/api/public/webhooks/leekpay'
@@ -785,7 +764,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   ApiInternalJobsLeekExpireRoute: ApiInternalJobsLeekExpireRoute,
-  ApiPublicWebhooksAshtechpayRoute: ApiPublicWebhooksAshtechpayRoute,
   ApiPublicWebhooksLeekpayRoute: ApiPublicWebhooksLeekpayRoute,
 }
 export const routeTree = rootRouteImport

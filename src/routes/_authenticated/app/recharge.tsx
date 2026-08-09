@@ -67,7 +67,7 @@ function Recharge() {
   }
 
   function openPaymentPopup(url?: string) {
-    const targetUrl = url ?? options.data?.linkUrl ?? "about:blank";
+    const targetUrl = url ?? "about:blank";
 
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.location.href = targetUrl;
@@ -173,7 +173,7 @@ function Recharge() {
     }
 
     if (!popupRef.current || popupRef.current.closed) {
-      const popup = openPaymentPopup(); // open a blank popup to avoid loading Ashtech link
+      const popup = openPaymentPopup(); // open a blank popup before redirecting to the payment page
       if (!popup) return;
     }
     pay.mutate(false);
@@ -355,23 +355,6 @@ function Recharge() {
             <Btn full variant="ghost" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
               {refresh.isPending ? "Vérification..." : "J'ai payé — vérifier"}
             </Btn>
-          </Card>
-        ) : null}
-
-        {!options.data?.leekConfigured && options.data?.linkUrl ? (
-          <Card>
-            <p className="text-xs text-muted-foreground">
-              Vous pouvez aussi payer directement via notre page sécurisée :{" "}
-              <a
-                href={options.data.linkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold text-primary underline"
-              >
-                page de paiement
-              </a>
-              . Utilisez de préférence le formulaire ci-dessus pour un crédit automatique.
-            </p>
           </Card>
         ) : null}
       </div>

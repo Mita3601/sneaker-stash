@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { MIN_DEPOSIT, type DepositInit, type PayCountry } from "@/lib/payments";
+import { COUNTRIES, PROVIDERS } from "@/lib/app";
+import { MIN_DEPOSIT, type DepositInit, type PayCountry, DIAL_CODES } from "@/lib/payments";
 
 type Input = {
   amount: number;
@@ -20,7 +21,9 @@ function validate(data: Input): Input {
   const countryCode = String(data.countryCode ?? "").toUpperCase();
   const currency = String(data.currency ?? "").toUpperCase();
   const operator = String(data.operator ?? "").trim();
-  if (!/^[A-Z]{2}$/.test(countryCode)) throw new Error("Pays invalide.");
+  if (!/^\+?\d{2,4}$/.test(countryCode) && !/^[A-Z]{2}$/.test(countryCode)) {
+    throw new Error("Pays invalide.");
+  }
   if (!/^[A-Z]{3,4}$/.test(currency)) throw new Error("Devise invalide.");
   if (!operator || operator.length > 40) throw new Error("Opérateur invalide.");
   const phone = String(data.phone ?? "").replace(/\D/g, "");
@@ -36,31 +39,29 @@ function validate(data: Input): Input {
   };
 }
 
-/** Pays et opérateurs autorisés sur le lien de paiement. */
+function newReference() {
+  return `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}${Date.now().toString(36).toUpperCase()}`;
+}
+
+/** Pays et opérateurs autorisés sur le formulaire de recharge. */
 export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   async (): Promise<{
     countries: PayCountry[];
     fixedAmount: number | null;
-    linkUrl: string;
     leekConfigured: boolean;
   }> => {
-    const { fetchLinkConfig, paymentLinkUrl } = await import("@/lib/ashtech.server");
-    const { DIAL_CODES } = await import("@/lib/payments");
-    const cfg = await fetchLinkConfig();
-
     return {
-      linkUrl: paymentLinkUrl(),
       leekConfigured: Boolean(process.env["LEEKPAY_SECRET_KEY"]),
-      fixedAmount: cfg.fixedAmount,
-      countries: cfg.countries.map((c) => ({
+      fixedAmount: null,
+      countries: COUNTRIES.map((c) => ({
         code: c.code,
-        name: c.name,
+        name: c.label,
         flag: c.flag,
-        currency: c.currency,
+        currency: "XOF",
         dial: DIAL_CODES[c.code] ?? "+",
-        operators: c.operators.map((o) => ({
-          name: o.name,
-          otp: o.paymentProvider === "pixpay" && o.pixpayOperatorType === "otp",
+        operators: PROVIDERS.map((name) => ({
+          name,
+          otp: name.toLowerCase().startsWith("wave"),
         })),
       })),
     };
@@ -86,15 +87,24 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<DepositInit> => {
+    const requestData = data as Input | undefined;
+    if (!requestData) throw new Error("Données invalides");
+
     // Validate explicitly here so we can return the original validation message
     let validated: Input;
     try {
-      validated = validate(data as Input);
-    } catch (err: any) {
-      // Preserve validation error message for client
-      throw new Error(err?.message ?? "Données invalides");
+      validated = validate(requestData);
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "message" in err &&
+        typeof (err as { message: unknown }).message === "string"
+      ) {
+        throw new Error((err as { message: string }).message);
+      }
+      throw new Error("Données invalides");
     }
-    const { newReference } = await import("@/lib/ashtech.server");
     const { createCheckout } = await import("@/lib/leek.server");
 
     const localRef = newReference();
@@ -151,16 +161,16 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       ) || "";
 
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
-      _amount: data.amount,
+      _amount: validated.amount,
       _reference: reference,
       _metadata: {
         gateway: "leekpay",
         local_reference: localRef,
         gateway_transaction_id: gatewayTxId || reference,
-        country_code: data.countryCode,
-        currency: data.currency,
-        operator: data.operator,
-        phone: data.phone,
+        country_code: validated.countryCode,
+        currency: validated.currency,
+        operator: validated.operator,
+        phone: validated.phone,
       },
     });
     if (error) throw new Error(error.message);
