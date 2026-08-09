@@ -52,6 +52,7 @@ function Recharge() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<DepositInit | null>(null);
+  const [leekError, setLeekError] = useState<string | null>(null);
 
   const country = payCountry(countries, countryCode || countries[0]?.code || "");
   const operators = country?.operators ?? [];
@@ -102,6 +103,7 @@ function Recharge() {
     onSuccess: (result) => {
       setStep(result);
       setOtp("");
+      setLeekError(null);
       if (result.type === "otp") {
         toast.info(result.message);
         if (popupRef.current && !popupRef.current.closed) {
@@ -119,7 +121,12 @@ function Recharge() {
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      // If LeekPay secret key missing, surface explicit UI message
+      if (error.message && /leekpay secret key not configured/i.test(error.message)) {
+        setLeekError("LeekPay non configuré sur le serveur. Définissez LEEKPAY_SECRET_KEY.");
+      } else {
+        toast.error(error.message);
+      }
       if (popupRef.current && !popupRef.current.closed) {
         popupRef.current.close();
         popupRef.current = null;
@@ -197,6 +204,17 @@ function Recharge() {
         {options.isLoading ? (
           <Card>
             <p className="text-xs text-muted-foreground">Chargement des moyens de paiement…</p>
+          </Card>
+        ) : null}
+
+        {leekError ? (
+          <Card>
+            <p className="text-sm font-bold">LeekPay non configuré</p>
+            <p className="mt-1 text-xs text-muted-foreground">{leekError}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Contactez l'administrateur ou définissez la variable d'environnement{" "}
+              <strong>LEEKPAY_SECRET_KEY</strong>.
+            </p>
           </Card>
         ) : null}
 
