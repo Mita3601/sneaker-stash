@@ -78,22 +78,30 @@ export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validate)
   .handler(async ({ data, context }): Promise<DepositInit> => {
-    const { payViaLink, newReference } = await import("@/lib/ashtech.server");
+    const { newReference } = await import("@/lib/ashtech.server");
+    const { createCheckout } = await import("@/lib/leek.server");
 
     const localRef = newReference();
 
-    const { status, body } = await payViaLink({
-      // La référence voyage dans le nom du client : elle revient dans le webhook.
-      fullName: `NikeStake ${localRef}`,
-      email: `${localRef.toLowerCase()}@nikestake.app`,
-      country: data.countryCode,
-      phone: data.phone,
-      amount: String(data.amount),
+    const appUrl = (process.env["APP_PUBLIC_URL"] ?? "").replace(/\/$/, "") || undefined;
+    const webhookUrl = appUrl ? `${appUrl}/api/public/webhooks/leekpay` : undefined;
+
+    const payload: Record<string, unknown> = {
+      amount: data.amount,
       currency: data.currency,
-      paymentMethod: "mobile_money",
-      operator: data.operator,
-      ...(data.otp ? { pixpayOtp: data.otp } : {}),
-    });
+      description: `Dépôt ${localRef}`,
+      customer_email: `${localRef.toLowerCase()}@nikestake.app`,
+      metadata: {
+        local_reference: localRef,
+        operator: data.operator,
+        phone: data.phone,
+        country_code: data.countryCode,
+      },
+      ...(webhookUrl ? { webhook_url: webhookUrl } : {}),
+      return_url: appUrl ? `${appUrl}/merci` : undefined,
+    };
+
+    const { status, body } = await createCheckout(payload);
 
     const message = String(body["message"] ?? "");
 
@@ -109,24 +117,28 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       throw new Error(message || "Le paiement a été refusé par l'opérateur.");
     }
 
-    const gatewayRef = pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
-    const gatewayTxId = pick(body, ["transactionId", "transaction_id", "id", "paymentId"]);
+    const gatewayRef =
+      String(body?.data?.id ?? "") ||
+      pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
+    const gatewayTxId =
+      String(
+        body?.data?.transaction_id ??
+          body?.data?.transactionId ??
+          pick(body, ["transactionId", "transaction_id", "id", "paymentId"]),
+      ) || gatewayRef;
     const reference = gatewayRef || localRef;
-    const redirectUrl = pick(body, [
-      "paymentUrl",
-      "payment_url",
-      "redirectUrl",
-      "redirect_url",
-      "waveUrl",
-      "wave_url",
-      "url",
-    ]);
+    const redirectUrl =
+      String(
+        body?.data?.payment_url ??
+          body?.data?.paymentUrl ??
+          pick(body, ["paymentUrl", "payment_url", "redirectUrl", "redirect_url", "url"]),
+      ) || "";
 
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
       _amount: data.amount,
       _reference: reference,
       _metadata: {
-        gateway: "ashtechpay_link",
+        gateway: "leekpay",
         local_reference: localRef,
         gateway_transaction_id: gatewayTxId || reference,
         country_code: data.countryCode,

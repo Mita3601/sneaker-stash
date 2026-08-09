@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
@@ -45,6 +45,7 @@ function Recharge() {
   });
 
   const countries = options.data?.countries ?? [];
+  const popupRef = useRef<Window | null>(null);
   const [countryCode, setCountryCode] = useState("");
   const [operator, setOperator] = useState("");
   const [amount, setAmount] = useState("");
@@ -62,6 +63,24 @@ function Recharge() {
     setCountryCode(code);
     setOperator("");
     setStep(null);
+  }
+
+  function openPaymentPopup(url?: string) {
+    const targetUrl = url ?? options.data?.linkUrl ?? "about:blank";
+
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.location.href = targetUrl;
+      return popupRef.current;
+    }
+
+    const popup = window.open(targetUrl, "_blank");
+    if (!popup) {
+      toast.error("Pop-up bloqué. Autorisez les pop-ups puis réessayez.");
+      return null;
+    }
+
+    popupRef.current = popup;
+    return popup;
   }
 
   const pay = useMutation({
@@ -85,17 +104,31 @@ function Recharge() {
       setOtp("");
       if (result.type === "otp") {
         toast.info(result.message);
+        if (popupRef.current && !popupRef.current.closed) {
+          popupRef.current.close();
+          popupRef.current = null;
+        }
         return;
       }
       qc.invalidateQueries({ queryKey: ["transactions"] });
+      const fallbackUrl = options.data?.linkUrl;
       if (result.type === "redirect") {
-        toast.success("Confirmez le paiement sur la page qui s'ouvre");
-        window.open(result.url, "_blank", "noopener,noreferrer");
+        toast.success("La page de paiement s'ouvre maintenant.");
+        openPaymentPopup(result.url);
+      } else if (fallbackUrl) {
+        toast.success("La page de paiement s'ouvre maintenant.");
+        openPaymentPopup(fallbackUrl);
       } else {
         toast.success("Demande envoyée — validez sur votre téléphone");
       }
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      toast.error(error.message);
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close();
+        popupRef.current = null;
+      }
+    },
   });
 
   const refresh = useMutation({
@@ -135,6 +168,11 @@ function Recharge() {
       toast.error("Numéro mobile money invalide");
       return;
     }
+
+    if (!popupRef.current || popupRef.current.closed) {
+      const popup = openPaymentPopup(options.data?.linkUrl);
+      if (!popup) return;
+    }
     pay.mutate(false);
   }
 
@@ -154,9 +192,9 @@ function Recharge() {
         <Card>
           <p className="text-sm font-bold">Paiement mobile money instantané</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Choisissez votre pays et votre opérateur, entrez le montant (minimum{" "}
-            {fcfa(MIN_DEPOSIT)}) puis validez la demande reçue sur votre téléphone. Votre solde est
-            crédité automatiquement dès la confirmation du paiement.
+            Choisissez votre pays et votre opérateur, entrez le montant (minimum {fcfa(MIN_DEPOSIT)}
+            ) puis validez la demande reçue sur votre téléphone. Votre solde est crédité
+            automatiquement dès la confirmation du paiement.
           </p>
         </Card>
 
