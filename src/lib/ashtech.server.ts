@@ -20,8 +20,13 @@ export type CollectResult = {
 };
 
 function apiKey() {
-  const key = process.env["ASHTECHPAY_API_KEY"];
+  const key = process.env["ASHTECHPAY_API_KEY"]?.trim();
   if (!key) throw new Error("Paiement indisponible : clé API manquante.");
+  if (/^https?:\/\//i.test(key)) {
+    throw new Error(
+      "Paiement mal configuré : la valeur enregistrée est une URL et non la clé API Ashtech Pay.",
+    );
+  }
   return key;
 }
 
