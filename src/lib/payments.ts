@@ -1,4 +1,4 @@
-/** Pays et opérateurs mobile money disponibles via le lien de paiement Ashtech Pay. */
+/** Pays et opérateurs mobile money disponibles pour le formulaire de recharge. */
 export const MIN_DEPOSIT = 200;
 
 export type PayOperator = {
