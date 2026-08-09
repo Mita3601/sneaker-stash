@@ -110,6 +110,11 @@ export const initiateDeposit = createServerFn({ method: "POST" })
     const localRef = newReference();
 
     const appUrl = (process.env["APP_PUBLIC_URL"] ?? "").replace(/\/$/, "") || undefined;
+    if (!appUrl && process.env["NODE_ENV"] === "production") {
+      throw new Error(
+        "APP_PUBLIC_URL est requis en production pour que LeekPay puisse confirmer le dépôt via webhook.",
+      );
+    }
     const webhookUrl = appUrl ? `${appUrl}/api/public/webhooks/leekpay` : undefined;
 
     const payload: Record<string, unknown> = {
@@ -193,7 +198,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
 
 export const checkDepositStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { reference: string }) => ({
+  .validator((data: { reference: string }) => ({
     reference: String(data.reference ?? "").slice(0, 60),
   }))
   .handler(async ({ data, context }) => {

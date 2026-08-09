@@ -9,6 +9,19 @@ function localRefs(raw: string) {
   return [...new Set(matches)];
 }
 
+function mergeCandidates(raw: string, body: Record<string, unknown>, checkoutId: string) {
+  const metadata = (body["metadata"] as Record<string, unknown>) ?? {};
+  const candidates = [
+    checkoutId,
+    str(body["reference"]),
+    str((body["data"] as Record<string, unknown>)?.["reference"]),
+    str(metadata["local_reference"]),
+    ...localRefs(raw),
+  ].filter(Boolean);
+
+  return [...new Set(candidates)];
+}
+
 export const Route = createFileRoute("/api/public/webhooks/leekpay")({
   server: {
     handlers: {
@@ -27,13 +40,11 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           data["checkout_id"] || data["transaction_id"] || data["checkoutId"] || "",
         );
         const status = str(data["status"] || "").toLowerCase();
-
         const success =
           event === "payment.completed" || ["paid", "completed", "successful"].includes(status);
         const failed =
           event === "payment.failed" || ["failed", "cancelled", "expired"].includes(status);
 
-        // Best-effort verification: if a public key is configured, try verify signature.
         const signature =
           request.headers.get("x-leekpay-signature") || request.headers.get("X-LeekPay-Signature");
         const publicKey = process.env["LEEKPAY_PUBLIC_KEY"];
@@ -48,28 +59,40 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const metadata = {
+          gateway: "leekpay",
+          gateway_event: event || status,
+          gateway_status: status || null,
+          gateway_transaction_id: checkoutId || null,
+          gateway_amount: data["amount"] ?? null,
+        };
 
-        // If signature not verified, fall back to confirming with LeekPay API using secret key.
+        const confirmDeposit = async (reference: string, isSuccess: boolean) => {
+          const { data: rpc } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
+            _reference: reference,
+            _success: isSuccess,
+            _metadata: {
+              ...metadata,
+              gateway_event: event || status || metadata.gateway_event,
+              gateway_status: status || metadata.gateway_status,
+            },
+          });
+          const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
+          return result;
+        };
+
         if (!verified && checkoutId) {
           try {
             const { getCheckout } = await import("@/lib/leek.server");
             const res = await getCheckout(checkoutId);
             const remoteStatus = String(res.body?.data?.status ?? "").toLowerCase();
-            if (remoteStatus === "paid") {
-              // treat as success
-              for (const candidate of [checkoutId, ...localRefs(raw)]) {
-                const { data: rpc } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
-                  _reference: candidate,
-                  _success: true,
-                  _metadata: {
-                    gateway: "leekpay",
-                    gateway_event: event || status,
-                    gateway_status: remoteStatus,
-                    gateway_transaction_id: checkoutId,
-                    gateway_amount: data["amount"] ?? null,
-                  },
-                });
-                const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
+            const remoteSuccess = ["paid", "completed", "successful"].includes(remoteStatus);
+            const remoteFailed = ["failed", "cancelled", "expired"].includes(remoteStatus);
+
+            if (remoteSuccess || remoteFailed) {
+              const candidates = mergeCandidates(raw, body, checkoutId);
+              for (const candidate of candidates) {
+                const result = await confirmDeposit(candidate, remoteSuccess);
                 if (result.ok && result.reason !== "not_found") break;
               }
               return new Response(JSON.stringify({ received: true }), {
@@ -77,8 +100,8 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
                 headers: { "Content-Type": "application/json" },
               });
             }
-          } catch (err) {
-            // ignore and continue to try handling incoming event
+          } catch {
+            // fallback to incoming event processing below
           }
         }
 
@@ -89,23 +112,9 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           });
         }
 
-        const metadata = {
-          gateway: "leekpay",
-          gateway_event: event || status,
-          gateway_status: status || null,
-          gateway_transaction_id: checkoutId || null,
-          gateway_amount: data["amount"] ?? null,
-        };
-
-        const candidates = [checkoutId, ...localRefs(raw)].filter(Boolean);
-
+        const candidates = mergeCandidates(raw, body, checkoutId);
         for (const candidate of candidates) {
-          const { data: rpc } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
-            _reference: candidate,
-            _success: success,
-            _metadata: metadata,
-          });
-          const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
+          const result = await confirmDeposit(candidate, success);
           if (result.ok && result.reason !== "not_found") break;
         }
 
