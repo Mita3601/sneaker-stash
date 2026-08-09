@@ -111,15 +111,11 @@ function Recharge() {
         return;
       }
       qc.invalidateQueries({ queryKey: ["transactions"] });
-      const fallbackUrl = options.data?.linkUrl;
       if (result.type === "redirect") {
         toast.success("La page de paiement s'ouvre maintenant.");
         openPaymentPopup(result.url);
-      } else if (fallbackUrl) {
-        toast.success("La page de paiement s'ouvre maintenant.");
-        openPaymentPopup(fallbackUrl);
       } else {
-        toast.success("Demande envoyée — validez sur votre téléphone");
+        toast.success("Demande envoyée — validez la demande reçue sur votre téléphone");
       }
     },
     onError: (error: Error) => {
@@ -170,7 +166,7 @@ function Recharge() {
     }
 
     if (!popupRef.current || popupRef.current.closed) {
-      const popup = openPaymentPopup(options.data?.linkUrl);
+      const popup = openPaymentPopup(); // open a blank popup to avoid loading Ashtech link
       if (!popup) return;
     }
     pay.mutate(false);
