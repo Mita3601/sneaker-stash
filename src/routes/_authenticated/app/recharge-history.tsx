@@ -3,13 +3,17 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Card, Empty, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/useSession";
 import { fcfa, shortDate } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/recharge-history")({
   head: () => ({
     meta: [
       { title: "Enregistrements de recharge — NikeStake" },
-      { name: "description", content: "Historique complet de vos dépôts et de leur statut de validation." },
+      {
+        name: "description",
+        content: "Historique complet de vos dépôts et de leur statut de validation.",
+      },
       { property: "og:title", content: "Enregistrements de recharge — NikeStake" },
       { property: "og:description", content: "Suivez la validation de chaque dépôt." },
       { property: "og:type", content: "website" },
@@ -20,13 +24,20 @@ export const Route = createFileRoute("/_authenticated/app/recharge-history")({
 });
 
 function RechargeHistory() {
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
+
   const { data: rows = [] } = useQuery({
-    queryKey: ["transactions", "deposit"],
+    queryKey: ["transactions", "deposit", userId],
+    enabled: Boolean(userId),
     queryFn: async () => {
+      if (!userId) return [];
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
         .eq("type", "deposit")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;

@@ -3,13 +3,17 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Card, Empty, StatTile, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/useSession";
 import { CREDIT_TYPES, fcfa, shortDate, TX_LABELS } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/account-details")({
   head: () => ({
     meta: [
       { title: "Détails du compte — NikeStake" },
-      { name: "description", content: "Consultez vos revenus du jour, sur 7 jours et sur 30 jours." },
+      {
+        name: "description",
+        content: "Consultez vos revenus du jour, sur 7 jours et sur 30 jours.",
+      },
       { property: "og:title", content: "Détails du compte — NikeStake" },
       { property: "og:description", content: "Tous vos mouvements de compte au même endroit." },
       { property: "og:type", content: "website" },
@@ -20,12 +24,19 @@ export const Route = createFileRoute("/_authenticated/app/account-details")({
 });
 
 function AccountDetails() {
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
+
   const { data: txs = [] } = useQuery({
-    queryKey: ["transactions"],
+    queryKey: ["transactions", userId],
+    enabled: Boolean(userId),
     queryFn: async () => {
+      if (!userId) return [];
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;

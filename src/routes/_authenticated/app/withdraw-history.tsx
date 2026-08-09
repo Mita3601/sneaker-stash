@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Card, Empty, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/useSession";
 import { fcfa, shortDate } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/withdraw-history")({
@@ -23,13 +24,20 @@ export const Route = createFileRoute("/_authenticated/app/withdraw-history")({
 });
 
 function WithdrawHistory() {
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
+
   const { data: rows = [] } = useQuery({
-    queryKey: ["transactions", "withdrawal"],
+    queryKey: ["transactions", "withdrawal", userId],
+    enabled: Boolean(userId),
     queryFn: async () => {
+      if (!userId) return [];
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
         .eq("type", "withdraw")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
