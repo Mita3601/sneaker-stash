@@ -73,12 +73,8 @@ export function useIsAdmin() {
     enabled: Boolean(userId),
     queryFn: async () => {
       if (!userId) return false;
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("is_admin");
+      if (error) throw error;
       return Boolean(data);
     },
   });

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import hero from "@/assets/hero-banner.jpg";
 import { Card, Empty, StatTile } from "@/components/ui-kit";
+import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { countdown, fcfa, nextClaimAt, SNEAKER_IMAGES, shortDate } from "@/lib/app";
 
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/my-products")({
 
 function MyProducts() {
   const qc = useQueryClient();
+  const { data: profile } = useProfile();
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -38,11 +40,16 @@ function MyProducts() {
   }, []);
 
   const { data: items = [] } = useQuery({
-    queryKey: ["my-products"],
+    queryKey: ["my-products", profile?.id],
+    enabled: Boolean(profile?.id),
     queryFn: async () => {
+      const userId = profile?.id;
+      if (!userId) return [];
+
       const { data, error } = await supabase
         .from("user_products")
         .select("*, products(*)")
+        .eq("user_id", userId)
         .order("purchase_date", { ascending: false });
       if (error) throw error;
       return data;

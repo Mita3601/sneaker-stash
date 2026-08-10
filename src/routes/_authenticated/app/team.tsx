@@ -95,13 +95,18 @@ function Team() {
   });
 
   const { data: commissions = 0 } = useQuery({
-    queryKey: ["commissions-total"],
+    queryKey: ["commissions-total", profile?.id],
+    enabled: Boolean(profile?.id),
     queryFn: async () => {
+      const userId = profile?.id;
+      if (!userId) return 0;
+
       const { data, error } = await supabase
         .from("transactions")
         .select("amount")
         .eq("type", "commission")
-        .eq("status", "approved");
+        .eq("status", "approved")
+        .eq("user_id", userId);
       if (error) throw error;
       return (data ?? []).reduce((sum, t) => sum + Number(t.amount), 0);
     },

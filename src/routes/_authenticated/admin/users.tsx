@@ -200,14 +200,6 @@ function AdminUsers() {
                 >
                   {profile.is_frozen ? "Dégeler le compte" : "Geler le compte"}
                 </Btn>
-                <Btn
-                  variant={profileRoles[profile.id] === "admin" ? "success" : "outline"}
-                  className="w-full"
-                  disabled={grantAdmin.isPending || profileRoles[profile.id] === "admin"}
-                  onClick={() => grantAdmin.mutate(profile.id)}
-                >
-                  {profileRoles[profile.id] === "admin" ? "Compte admin" : "Nommer admin"}
-                </Btn>
               </div>
             </Card>
           ))}
