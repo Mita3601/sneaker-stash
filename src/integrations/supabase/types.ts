@@ -238,6 +238,7 @@ export type Database = {
       profiles: {
         Row: {
           balance: number
+          checkin_count: number
           country_code: string
           created_at: string
           id: string
@@ -252,6 +253,7 @@ export type Database = {
         }
         Insert: {
           balance?: number
+          checkin_count?: number
           country_code?: string
           created_at?: string
           id: string
@@ -266,6 +268,7 @@ export type Database = {
         }
         Update: {
           balance?: number
+          checkin_count?: number
           country_code?: string
           created_at?: string
           id?: string

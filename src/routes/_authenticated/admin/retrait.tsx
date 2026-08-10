@@ -41,9 +41,9 @@ function AdminRetrait() {
     const value = [
       tx.profiles?.phone,
       tx.profiles?.country_code,
-      metadata.provider,
-      metadata.account_number,
-      metadata.account_name,
+      metadata['provider'],
+      metadata['account_number'],
+      metadata['account_name'],
       tx.id,
       tx.reference,
     ]
@@ -146,11 +146,11 @@ function AdminRetrait() {
           <div className="space-y-3">
             {sortedWithdrawals.map((tx) => {
               const metadata = (tx.metadata ?? {}) as Record<string, unknown>;
-              const provider = typeof metadata.provider === "string" ? metadata.provider : "-";
+              const provider = typeof metadata['provider'] === "string" ? metadata['provider'] : "-";
               const accountNumber =
-                typeof metadata.account_number === "string" ? metadata.account_number : "-";
+                typeof metadata['account_number'] === "string" ? metadata['account_number'] : "-";
               const accountName =
-                typeof metadata.account_name === "string" ? metadata.account_name : "-";
+                typeof metadata['account_name'] === "string" ? metadata['account_name'] : "-";
               const countryCode =
                 typeof tx.profiles?.country_code === "string" ? tx.profiles.country_code : "-";
 
