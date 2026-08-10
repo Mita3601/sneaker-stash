@@ -43,7 +43,6 @@ import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 import { Route as ApiInternalJobsLeekExpireRouteImport } from './routes/api/internal/jobs/leek-expire'
-import { Route as ApiPublicJobsLeekSelftestRouteImport } from './routes/api/public/jobs/leek-selftest'
 import { Route as ApiPublicJobsLeekpaySyncRouteImport } from './routes/api/public/jobs/leekpay-sync'
 import { Route as ApiPublicWebhooksLeekpayRouteImport } from './routes/api/public/webhooks/leekpay'
 
@@ -234,12 +233,6 @@ const ApiInternalJobsLeekExpireRoute =
     path: '/api/internal/jobs/leek-expire',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicJobsLeekSelftestRoute =
-  ApiPublicJobsLeekSelftestRouteImport.update({
-    id: '/api/public/jobs/leek-selftest',
-    path: '/api/public/jobs/leek-selftest',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicJobsLeekpaySyncRoute =
   ApiPublicJobsLeekpaySyncRouteImport.update({
     id: '/api/public/jobs/leekpay-sync',
@@ -287,7 +280,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/jobs/leek-selftest': typeof ApiPublicJobsLeekSelftestRoute
   '/api/public/jobs/leekpay-sync': typeof ApiPublicJobsLeekpaySyncRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
@@ -323,7 +315,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/jobs/leek-selftest': typeof ApiPublicJobsLeekSelftestRoute
   '/api/public/jobs/leekpay-sync': typeof ApiPublicJobsLeekpaySyncRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
@@ -363,7 +354,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/internal/jobs/leek-expire': typeof ApiInternalJobsLeekExpireRoute
-  '/api/public/jobs/leek-selftest': typeof ApiPublicJobsLeekSelftestRoute
   '/api/public/jobs/leekpay-sync': typeof ApiPublicJobsLeekpaySyncRoute
   '/api/public/webhooks/leekpay': typeof ApiPublicWebhooksLeekpayRoute
 }
@@ -403,7 +393,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/jobs/leek-selftest'
     | '/api/public/jobs/leekpay-sync'
     | '/api/public/webhooks/leekpay'
   fileRoutesByTo: FileRoutesByTo
@@ -439,7 +428,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/jobs/leek-selftest'
     | '/api/public/jobs/leekpay-sync'
     | '/api/public/webhooks/leekpay'
   id:
@@ -478,7 +466,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
     | '/api/internal/jobs/leek-expire'
-    | '/api/public/jobs/leek-selftest'
     | '/api/public/jobs/leekpay-sync'
     | '/api/public/webhooks/leekpay'
   fileRoutesById: FileRoutesById
@@ -490,7 +477,6 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiInternalJobsLeekExpireRoute: typeof ApiInternalJobsLeekExpireRoute
-  ApiPublicJobsLeekSelftestRoute: typeof ApiPublicJobsLeekSelftestRoute
   ApiPublicJobsLeekpaySyncRoute: typeof ApiPublicJobsLeekpaySyncRoute
   ApiPublicWebhooksLeekpayRoute: typeof ApiPublicWebhooksLeekpayRoute
 }
@@ -735,13 +721,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalJobsLeekExpireRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/jobs/leek-selftest': {
-      id: '/api/public/jobs/leek-selftest'
-      path: '/api/public/jobs/leek-selftest'
-      fullPath: '/api/public/jobs/leek-selftest'
-      preLoaderRoute: typeof ApiPublicJobsLeekSelftestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/jobs/leekpay-sync': {
       id: '/api/public/jobs/leekpay-sync'
       path: '/api/public/jobs/leekpay-sync'
@@ -849,7 +828,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   ApiInternalJobsLeekExpireRoute: ApiInternalJobsLeekExpireRoute,
-  ApiPublicJobsLeekSelftestRoute: ApiPublicJobsLeekSelftestRoute,
   ApiPublicJobsLeekpaySyncRoute: ApiPublicJobsLeekpaySyncRoute,
   ApiPublicWebhooksLeekpayRoute: ApiPublicWebhooksLeekpayRoute,
 }
