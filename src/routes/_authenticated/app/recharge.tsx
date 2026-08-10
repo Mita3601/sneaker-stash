@@ -157,6 +157,43 @@ function Recharge() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  // Vérification automatique du paiement toutes les 6 s tant qu'un dépôt est en attente.
+  const pendingReference =
+    step && (step.type === "pending" || step.type === "redirect") ? step.reference : null;
+
+  useEffect(() => {
+    if (!pendingReference) return;
+    let cancelled = false;
+
+    const tick = async () => {
+      try {
+        const result = await checkStatus({ data: { reference: pendingReference } });
+        if (cancelled) return;
+        if (result.status === "approved") {
+          qc.invalidateQueries({ queryKey: ["profile"] });
+          qc.invalidateQueries({ queryKey: ["transactions"] });
+          toast.success(`Recharge validée : ${fcfa(result.amount)}`);
+          setStep(null);
+          setAmount("");
+          setPhone("");
+        } else if (result.status === "rejected") {
+          toast.error("Paiement refusé par l'opérateur");
+          setStep(null);
+        }
+      } catch {
+        // silencieux : nouvelle tentative au prochain tick
+      }
+    };
+
+    const id = window.setInterval(tick, 6000);
+    void tick();
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [pendingReference, checkStatus, qc]);
+
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!country) {
