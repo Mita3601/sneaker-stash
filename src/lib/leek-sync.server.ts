@@ -32,6 +32,7 @@ export async function syncLeekDeposits(opts: {
     .eq("type", "deposit")
     .eq("status", "pending")
     .gte("created_at", new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString())
+    .eq("metadata->>gateway", "leekpay")
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 30);
 
@@ -42,6 +43,8 @@ export async function syncLeekDeposits(opts: {
       `reference.eq.${ref},metadata->>local_reference.eq.${ref},metadata->>gateway_transaction_id.eq.${ref}`,
     );
   }
+
+
 
 
   const { data: rows, error } = await query;
