@@ -22,6 +22,9 @@ function AdminDepots() {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<"date" | "amount" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "approved" | "pending" | "rejected">(
+    "all",
+  );
 
   const { data: deposits = [] } = useQuery({
     queryKey: ["admin-depots"],
@@ -36,8 +39,21 @@ function AdminDepots() {
     },
   });
 
+  const { data: withdrawals = [] } = useQuery({
+    queryKey: ["admin-depots-withdrawals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("type", "withdraw")
+        .eq("status", "approved");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const filteredDeposits = deposits.filter((tx) => {
-    const value = [
+    const matchesQuery = [
       tx.profiles?.phone,
       tx.reference,
       (tx.metadata as Record<string, unknown> | null)?.gateway_transaction_id,
@@ -46,8 +62,11 @@ function AdminDepots() {
     ]
       .filter(Boolean)
       .join(" ")
-      .toLowerCase();
-    return value.includes(query.trim().toLowerCase());
+      .toLowerCase()
+      .includes(query.trim().toLowerCase());
+
+    const matchesStatus = selectedStatus === "all" || tx.status === selectedStatus;
+    return matchesQuery && matchesStatus;
   });
 
   const sortedDeposits = useMemo(() => {
@@ -64,11 +83,18 @@ function AdminDepots() {
   }, [filteredDeposits, sortKey, sortOrder]);
 
   const counts = {
-    total: filteredDeposits.length,
-    pending: filteredDeposits.filter((tx) => tx.status === "pending").length,
-    approved: filteredDeposits.filter((tx) => tx.status === "approved").length,
-    rejected: filteredDeposits.filter((tx) => tx.status === "rejected").length,
+    total: deposits.filter((tx) => tx.status !== "rejected").length,
+    approved: deposits.filter((tx) => tx.status === "approved").length,
+    pending: deposits.filter((tx) => tx.status === "pending").length,
+    rejected: deposits.filter((tx) => tx.status === "rejected").length,
   };
+
+  const totalDepositsApproved = deposits
+    .filter((tx) => tx.status === "approved")
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+  const totalWithdrawalsApproved = withdrawals.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const remaining = totalDepositsApproved - totalWithdrawalsApproved;
 
   const review = useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
@@ -89,6 +115,45 @@ function AdminDepots() {
     <div>
       <SubHeader title="Dépôts" to="/admin" />
       <div className="space-y-4 p-4">
+        <div className="grid grid-cols-3 gap-2">
+          <Card className="text-center p-4">
+            <p className="text-xs opacity-90">Dépôts validés</p>
+            <p className="text-2xl font-black">{fcfa(totalDepositsApproved)}</p>
+            <p className="text-xs text-muted-foreground">Montant total</p>
+          </Card>
+          <Card className="text-center p-4">
+            <p className="text-xs opacity-90">Retraits validés</p>
+            <p className="text-2xl font-black">{fcfa(totalWithdrawalsApproved)}</p>
+            <p className="text-xs text-muted-foreground">Déboursé</p>
+          </Card>
+          <Card className="text-center p-4">
+            <p className="text-xs opacity-90">Reste</p>
+            <p className="text-2xl font-black">{fcfa(remaining)}</p>
+            <p className="text-xs text-muted-foreground">En réserve</p>
+          </Card>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "all", label: `Tous (${counts.total})` },
+            { value: "approved", label: `Réussis (${counts.approved})` },
+            { value: "pending", label: `En cours (${counts.pending})` },
+            { value: "rejected", label: `Échoués (${counts.rejected})` },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setSelectedStatus(tab.value as typeof selectedStatus)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+                selectedStatus === tab.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
           <Card className="p-3">
             <input
@@ -116,24 +181,6 @@ function AdminDepots() {
               <option value="desc">Décroissant</option>
               <option value="asc">Croissant</option>
             </select>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">Total</p>
-            <p className="text-2xl font-black">{counts.total}</p>
-            <p className="text-xs text-muted-foreground">Tous</p>
-          </Card>
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">Validés</p>
-            <p className="text-2xl font-black">{counts.approved}</p>
-            <p className="text-xs text-muted-foreground">Réussis</p>
-          </Card>
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">En attente</p>
-            <p className="text-2xl font-black">{counts.pending}</p>
-            <p className="text-xs text-muted-foreground">En cours</p>
           </Card>
         </div>
 

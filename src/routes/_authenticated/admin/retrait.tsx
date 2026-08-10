@@ -22,6 +22,9 @@ function AdminRetrait() {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<"date" | "amount" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "approved" | "pending" | "rejected">(
+    "all",
+  );
 
   const { data: withdrawals = [] } = useQuery({
     queryKey: ["admin-retrait"],
@@ -38,7 +41,7 @@ function AdminRetrait() {
 
   const filteredWithdrawals = withdrawals.filter((tx) => {
     const metadata = (tx.metadata as Record<string, unknown> | null) ?? {};
-    const value = [
+    const matchesQuery = [
       tx.profiles?.phone,
       tx.profiles?.country_code,
       metadata.provider,
@@ -49,8 +52,11 @@ function AdminRetrait() {
     ]
       .filter(Boolean)
       .join(" ")
-      .toLowerCase();
-    return value.includes(query.trim().toLowerCase());
+      .toLowerCase()
+      .includes(query.trim().toLowerCase());
+
+    const matchesStatus = selectedStatus === "all" || tx.status === selectedStatus;
+    return matchesQuery && matchesStatus;
   });
 
   const sortedWithdrawals = useMemo(() => {
@@ -138,6 +144,27 @@ function AdminRetrait() {
             <p className="text-2xl font-black">{counts.pending}</p>
             <p className="text-xs text-muted-foreground">En cours</p>
           </Card>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "all", label: `Tous (${counts.total})` },
+            { value: "approved", label: `Réussis (${counts.approved})` },
+            { value: "pending", label: `En cours (${counts.pending})` },
+            { value: "rejected", label: `Échoués (${counts.rejected})` },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setSelectedStatus(tab.value as typeof selectedStatus)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+                selectedStatus === tab.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {sortedWithdrawals.length === 0 ? (
