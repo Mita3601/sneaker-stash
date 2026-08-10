@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [200, 1000, 3000, 5000, 10000, 20000];
+const PRESETS = [4000, 8000, 12000, 15000, 20000, 50000];
 
 function Recharge() {
   const qc = useQueryClient();

@@ -27,8 +27,8 @@ export const Route = createFileRoute("/_authenticated/app/withdraw")({
 
 function Withdraw() {
   const qc = useQueryClient();
-  const { data: user } = useCurrentUser();
   const { data: profile } = useProfile();
+  const { data: user } = useCurrentUser();
   const [amount, setAmount] = useState("");
   const [accountId, setAccountId] = useState("");
 
@@ -63,6 +63,7 @@ function Withdraw() {
       setAmount("");
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["transactions"] });
+      qc.invalidateQueries({ queryKey: ["bank-accounts", user?.id] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
