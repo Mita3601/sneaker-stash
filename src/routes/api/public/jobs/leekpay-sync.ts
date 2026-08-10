@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
  */
 async function run() {
   const { syncLeekDeposits } = await import("@/lib/leek-sync.server");
-  const result = await syncLeekDeposits({ limit: 100, debug: true });
+  const result = await syncLeekDeposits({ limit: 100 });
   return new Response(JSON.stringify(result), {
     status: 200,
     headers: { "Content-Type": "application/json" },

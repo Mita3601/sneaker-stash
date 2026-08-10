@@ -23,7 +23,6 @@ export async function syncLeekDeposits(opts: {
   userId?: string;
   reference?: string;
   limit?: number;
-  debug?: boolean;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -51,7 +50,6 @@ export async function syncLeekDeposits(opts: {
   let approved = 0;
   let rejected = 0;
   let stillPending = 0;
-  const debug: unknown[] = [];
 
   for (const row of (rows ?? []) as PendingRow[]) {
     const metadata = (row.metadata ?? {}) as Record<string, unknown>;
@@ -62,11 +60,9 @@ export async function syncLeekDeposits(opts: {
     let status = "";
     try {
       const res = await getCheckout(checkoutId);
-      if (opts.debug) debug.push({ checkoutId, http: res.status, body: res.body });
       if (res.status >= 400) continue;
       status = readStatus(res.body);
-    } catch (err) {
-      if (opts.debug) debug.push({ checkoutId, error: String(err) });
+    } catch {
       continue;
     }
 
@@ -92,5 +88,5 @@ export async function syncLeekDeposits(opts: {
     else rejected += 1;
   }
 
-  return { checked: rows?.length ?? 0, approved, rejected, pending: stillPending, debug };
+  return { checked: rows?.length ?? 0, approved, rejected, pending: stillPending };
 }
