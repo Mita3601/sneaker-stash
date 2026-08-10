@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, TrendingUp, Users } from "lucide-react";
 
 import hero from "@/assets/hero-banner.jpg";
+import nikeLogo from "@/assets/nike_logo_design.png";
 import { Btn, Card } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -47,6 +48,9 @@ function Landing() {
       </section>
 
       <div className="space-y-5 p-5">
+        <div className="flex items-center justify-center rounded-2xl bg-white/80 p-3 shadow-sm">
+          <img src={nikeLogo} alt="Nike logo" className="h-16 w-auto object-contain" />
+        </div>
         <h1 className="text-3xl font-extrabold leading-tight">
           Faites travailler vos <span className="text-gradient-primary">sneakers</span>
         </h1>
