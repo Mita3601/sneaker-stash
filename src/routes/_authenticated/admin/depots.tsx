@@ -40,8 +40,8 @@ function AdminDepots() {
     const value = [
       tx.profiles?.phone,
       tx.reference,
-      (tx.metadata as Record<string, unknown> | null)?.gateway_transaction_id,
-      (tx.metadata as Record<string, unknown> | null)?.local_reference,
+      (tx.metadata as Record<string, unknown> | null)?.['gateway_transaction_id'],
+      (tx.metadata as Record<string, unknown> | null)?.['local_reference'],
       tx.id,
     ]
       .filter(Boolean)
@@ -160,16 +160,16 @@ function AdminDepots() {
                       {(() => {
                         const metadata = tx.metadata as Record<string, unknown>;
                         const gatewayTxId =
-                          typeof metadata.gateway_transaction_id === "string"
-                            ? metadata.gateway_transaction_id
+                          typeof metadata['gateway_transaction_id'] === "string"
+                            ? metadata['gateway_transaction_id']
                             : undefined;
                         const localRef =
-                          typeof metadata.local_reference === "string"
-                            ? metadata.local_reference
+                          typeof metadata['local_reference'] === "string"
+                            ? metadata['local_reference']
                             : undefined;
                         const paymentUrl =
-                          typeof metadata.payment_url === "string"
-                            ? metadata.payment_url
+                          typeof metadata['payment_url'] === "string"
+                            ? metadata['payment_url']
                             : undefined;
 
                         return (
