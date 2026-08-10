@@ -37,9 +37,14 @@ function AddBank() {
   const [number, setNumber] = useState("");
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ["bank-accounts"],
+    queryKey: ["bank-accounts", user?.id],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
-      const { data, error } = await supabase.from("bank_accounts").select("*").order("created_at");
+      const { data, error } = await supabase
+        .from("bank_accounts")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at");
       if (error) throw error;
       return data;
     },
@@ -67,12 +72,16 @@ function AddBank() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("bank_accounts").delete().eq("id", id);
+      const { error } = await supabase
+        .from("bank_accounts")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user!.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Compte supprimé");
-      qc.invalidateQueries({ queryKey: ["bank-accounts"] });
+      qc.invalidateQueries({ queryKey: ["bank-accounts", user?.id] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
