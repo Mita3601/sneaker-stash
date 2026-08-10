@@ -50,6 +50,19 @@ function Withdraw() {
   const value = Number(amount || 0);
   const fee = Math.round(value * WITHDRAW_FEE_RATE);
 
+  const { data: hasPurchased = false } = useQuery({
+    queryKey: ["has-purchased-product", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_products")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return (data?.length ?? 0) > 0;
+    },
+  });
+
   const submit = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc("request_withdrawal", {
@@ -64,6 +77,7 @@ function Withdraw() {
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["transactions"] });
       qc.invalidateQueries({ queryKey: ["bank-accounts", user?.id] });
+      qc.invalidateQueries({ queryKey: ["has-purchased-product", user?.id] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -80,6 +94,10 @@ function Withdraw() {
     }
     if (value > Number(profile?.balance ?? 0)) {
       toast.error("Solde insuffisant");
+      return;
+    }
+    if (!hasPurchased) {
+      toast.error("Vous devez acheter au moins une paire avant de demander un retrait");
       return;
     }
     submit.mutate();
@@ -144,8 +162,8 @@ function Withdraw() {
             <li>Montant minimum de retrait : 1 000 FCFA.</li>
             <li>Frais de retrait : 15 % du montant retiré.</li>
             <li>
-              Vous pouvez effectuer des retraits à tout moment. Les retraits sont disponibles sous
-              10 min à 1 heure.
+              Vous pouvez effectuer des retraits à tout moment, après avoir acheté au moins une
+              paire.
             </li>
             <li>
               Afin de protéger les intérêts de la plateforme et de ses membres, vous devez disposer

@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Empty, Field, inputClass, SubHeader } from "@/components/ui-kit";
-import { useCurrentUser } from "@/hooks/useSession";
+import { useCurrentUser, useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { PROVIDERS } from "@/lib/app";
 
@@ -32,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/app/add-bank")({
 function AddBank() {
   const qc = useQueryClient();
   const { data: user } = useCurrentUser();
+  const { data: profile } = useProfile();
   const [provider, setProvider] = useState(PROVIDERS[0]!);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
@@ -69,6 +70,29 @@ function AddBank() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
+  const getProvidersForCountry = (countryCode: string | null | undefined) => {
+    switch (countryCode) {
+      case "+226":
+        return ["Wave", "Orange", "Moov"];
+      case "+237":
+        return ["Moov", "Orange"];
+      case "+225":
+        return ["Moov", "Orange", "MTN", "Wave"];
+      case "+229":
+        return ["Moov", "Orange"];
+      default:
+        return PROVIDERS;
+    }
+  };
+
+  const availableProviders = getProvidersForCountry(profile?.country_code);
+
+  useEffect(() => {
+    if (!availableProviders.includes(provider)) {
+      setProvider(availableProviders[0] ?? "");
+    }
+  }, [availableProviders, provider]);
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -111,7 +135,7 @@ function AddBank() {
                 onChange={(e) => setProvider(e.target.value)}
                 className={inputClass}
               >
-                {PROVIDERS.map((p) => (
+                {availableProviders.map((p) => (
                   <option key={p} value={p}>
                     {p}
                   </option>

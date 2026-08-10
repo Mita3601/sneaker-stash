@@ -291,6 +291,9 @@ begin
   if me.is_frozen then raise exception 'Compte gelé'; end if;
   if _amount < 1000 then raise exception 'Montant minimum de retrait : 1 000 FCFA'; end if;
   if me.balance < _amount then raise exception 'Solde insuffisant'; end if;
+  if not exists (select 1 from public.user_products where user_id = auth.uid()) then
+    raise exception 'Vous devez acheter au moins une paire pour effectuer un retrait';
+  end if;
   select * into ba from public.bank_accounts where id = _bank_account_id and user_id = auth.uid();
   if ba is null then raise exception 'Compte de retrait introuvable'; end if;
   fee := round(_amount * 0.15, 2);
