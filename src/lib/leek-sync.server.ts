@@ -36,7 +36,13 @@ export async function syncLeekDeposits(opts: {
     .limit(opts.limit ?? 30);
 
   if (opts.userId) query = query.eq("user_id", opts.userId);
-  if (opts.reference) query = query.eq("reference", opts.reference);
+  if (opts.reference) {
+    const ref = opts.reference;
+    query = query.or(
+      `reference.eq.${ref},metadata->>local_reference.eq.${ref},metadata->>gateway_transaction_id.eq.${ref}`,
+    );
+  }
+
 
   const { data: rows, error } = await query;
   if (error) throw new Error(error.message);
