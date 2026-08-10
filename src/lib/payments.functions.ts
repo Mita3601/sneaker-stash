@@ -68,6 +68,10 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   },
 );
 
+function dataOf(body: Record<string, unknown>) {
+  return (body["data"] as Record<string, unknown> | undefined) ?? {};
+}
+
 function pick(body: Record<string, unknown>, keys: string[]) {
   for (const key of keys) {
     const value = body[key];
@@ -86,6 +90,7 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((data: Input) => data)
   .handler(async ({ data, context }): Promise<DepositInit> => {
     const requestData = data as Input | undefined;
     if (!requestData) throw new Error("Données invalides");
@@ -152,19 +157,19 @@ export const initiateDeposit = createServerFn({ method: "POST" })
     }
 
     const gatewayRef =
-      String(body?.data?.id ?? "") ||
+      String(dataOf(body)["id"] ?? "") ||
       pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
     const gatewayTxId =
       String(
-        body?.data?.transaction_id ??
-          body?.data?.transactionId ??
+        dataOf(body)["transaction_id"] ??
+          dataOf(body)["transactionId"] ??
           pick(body, ["transactionId", "transaction_id", "id", "paymentId"]),
       ) || gatewayRef;
     const reference = gatewayRef || localRef;
     const redirectUrl =
       String(
-        body?.data?.payment_url ??
-          body?.data?.paymentUrl ??
+        dataOf(body)["payment_url"] ??
+          dataOf(body)["paymentUrl"] ??
           pick(body, ["paymentUrl", "payment_url", "redirectUrl", "redirect_url", "url"]),
       ) || "";
 

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import type { Json } from "@/integrations/supabase/types";
+
 function str(v: unknown) {
   return typeof v === "string" ? v : typeof v === "number" ? String(v) : "";
 }
@@ -86,7 +88,7 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
               ...metadata,
               gateway_event: event || status || metadata.gateway_event,
               gateway_status: status || metadata.gateway_status,
-            },
+            } as Json,
           });
           const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
           return result;
