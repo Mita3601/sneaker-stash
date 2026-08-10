@@ -79,13 +79,12 @@ function Products() {
     },
   });
 
-  const createdAtMs = profile?.created_at ? new Date(profile.created_at).getTime() : 0;
   const lastCheckinMs = profile?.last_checkin_at ? new Date(profile.last_checkin_at).getTime() : 0;
-  const nextFromCreation = createdAtMs ? createdAtMs + 24 * 60 * 60 * 1000 : 0;
   const nextFromLastCheckin = lastCheckinMs ? lastCheckinMs + 24 * 60 * 60 * 1000 : 0;
-  const nextCheckinAt = Math.max(nextFromCreation, nextFromLastCheckin);
+  const nextCheckinAt = Math.max(0, nextFromLastCheckin);
   const remaining = Math.max(0, nextCheckinAt - now);
-  const canCheckIn = Boolean(profile?.id) && remaining === 0;
+  const canCheckIn = Boolean(profile?.id) && (profile?.last_checkin_at ? remaining === 0 : true);
+  const checkinDays = profile?.checkin_count ?? 0;
 
   return (
     <>
@@ -134,24 +133,33 @@ function Products() {
         </div>
 
         <Card className="mt-4 border border-primary/15 bg-gradient-to-r from-primary/10 via-cyan-400/10 to-background">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-extrabold text-foreground">Pointage quotidien</p>
-              <p className="text-xs text-muted-foreground">
-                Tous les 24h, appuyez pour recevoir 100 FCFA.
-              </p>
-              <p className="mt-1 text-xs font-semibold text-primary">
+          <div className="grid gap-5 sm:grid-cols-[1.6fr_auto] sm:items-center">
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-extrabold text-foreground">Pointage quotidien</p>
+                <p className="text-xs text-muted-foreground">
+                  Tous les 24h, appuyez pour recevoir 100 FCFA.
+                </p>
+              </div>
+              <div className="flex items-end gap-3">
+                <p className="text-5xl font-black text-primary">{checkinDays}</p>
+                <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  jour{checkinDays > 1 ? "s" : ""} de pointage
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-primary">
                 {canCheckIn
-                  ? "Disponible maintenant"
+                  ? "Pointage disponible maintenant"
                   : `Prochain pointage dans ${new Date(remaining).toISOString().slice(11, 19)}`}
               </p>
             </div>
+
             <Btn
-              className="shrink-0 px-3 py-2 text-xs"
+              className="shrink-0 rounded-full px-5 py-4 text-sm font-semibold"
               disabled={!canCheckIn || claimCheckin.isPending}
               onClick={() => claimCheckin.mutate()}
             >
-              <CalendarCheck className="size-4" />
+              <CalendarCheck className="mr-2 inline-block size-4" />
               {claimCheckin.isPending ? "Validation..." : "Pointer"}
             </Btn>
           </div>

@@ -97,6 +97,7 @@ function Register() {
         total_deposits: 0,
         total_withdrawals: 0,
         total_bonus: 0,
+        checkin_count: 0,
         ...(sponsorId ? { referred_by: sponsorId } : {}),
       });
       if (profileError) throw profileError;
@@ -152,23 +153,27 @@ function Register() {
 
               <div className="px-8 pb-10 pt-8 sm:px-10">
                 <form onSubmit={onSubmit} className="space-y-5">
+                  <Field label="Pays" className="text-slate-900">
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className={`${inputClass} w-full rounded-[28px] border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-slate-900`}
+                    >
+                      {COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {`${c.flag} ${c.label} (${c.code})`}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
                   <Field label="Numéro de téléphone" className="text-slate-900">
                     <div className="flex gap-3">
-                      <select
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className={`${inputClass} min-w-[72px] rounded-[28px] border-slate-200 bg-slate-100 px-3 py-3 text-slate-500 shadow-sm transition focus:border-slate-500`}
-                        aria-label="Code pays"
-                      >
-                        {COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {`${c.flag} ${c.label} (${c.code})`}
-                          </option>
-                        ))}
-                      </select>
+                      <span className="inline-flex min-w-[72px] items-center justify-center rounded-[28px] border border-slate-200 bg-slate-100 px-3 py-3 text-slate-900">
+                        {selectedCountry.flag} {selectedCountry.code}
+                      </span>
                       <input
-                        type="tel"
-                        inputMode="tel"
+                        inputMode="numeric"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="07 00 00 00 00"
