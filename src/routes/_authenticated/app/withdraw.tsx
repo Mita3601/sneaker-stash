@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
-import { useProfile } from "@/hooks/useSession";
+import { useCurrentUser, useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { fcfa, WITHDRAW_FEE_RATE, WITHDRAW_MIN } from "@/lib/app";
 
@@ -27,14 +27,20 @@ export const Route = createFileRoute("/_authenticated/app/withdraw")({
 
 function Withdraw() {
   const qc = useQueryClient();
+  const { data: user } = useCurrentUser();
   const { data: profile } = useProfile();
   const [amount, setAmount] = useState("");
   const [accountId, setAccountId] = useState("");
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ["bank-accounts"],
+    queryKey: ["bank-accounts", user?.id],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
-      const { data, error } = await supabase.from("bank_accounts").select("*").order("created_at");
+      const { data, error } = await supabase
+        .from("bank_accounts")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at");
       if (error) throw error;
       return data;
     },
