@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 import { Card, Empty, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,12 +48,6 @@ function WithdrawHistory() {
     return COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
   };
 
-  const getStatusIcon = (status: string) => {
-    if (status === "approved") return <CheckCircle2 className="size-5 text-green-500" />;
-    if (status === "rejected") return <XCircle className="size-5 text-red-500" />;
-    return <Clock className="size-5 text-yellow-500" />;
-  };
-
   return (
     <>
       <SubHeader title="Registres de retrait" />
@@ -77,80 +70,68 @@ function WithdrawHistory() {
               const net = Number(r.net_amount ?? Math.max(0, Number(r.amount ?? 0) - fee));
 
               return (
-                <Card key={r.id} className="space-y-4 p-5 border-l-4 border-l-primary">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="text-2xl font-black text-foreground">{fcfa(r.amount)}</p>
-                        <div>{getStatusIcon(r.status)}</div>
-                      </div>
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {shortDate(r.created_at)}
-                      </p>
+                <Card key={r.id} className="space-y-3 p-4 border-l-4 border-l-primary">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xl font-black text-foreground">{fcfa(r.amount)}</p>
+                      <p className="text-xs text-muted-foreground">{shortDate(r.created_at)}</p>
                     </div>
                     <StatusPill status={r.status} />
                   </div>
 
-                  <div className="grid gap-3 text-sm">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  <div className="grid gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">
                           ID du retrait
                         </p>
-                        <p className="font-mono text-xs text-foreground">{r.id.slice(0, 12)}...</p>
+                        <p className="font-mono text-foreground break-all">{r.id}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                          Pays
-                        </p>
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">Pays</p>
                         <p className="font-medium text-foreground">
                           {getCountryFlag(countryCode)} {countryCode}
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                          Mobile du client
-                        </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">Mobile</p>
                         <p className="font-medium text-foreground">{phone}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                          Opérateur
-                        </p>
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">Opérateur</p>
                         <p className="font-medium text-foreground">{provider}</p>
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                        Compte destinataire
-                      </p>
-                      <p className="font-mono font-medium text-foreground">{accountNumber}</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                        Bénéficiaire
-                      </p>
-                      <p className="font-medium text-foreground">{accountName}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">Compte</p>
+                        <p className="font-mono text-foreground">{accountNumber}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold uppercase text-muted-foreground">
+                          Bénéficiaire
+                        </p>
+                        <p className="font-medium text-foreground">{accountName}</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-border pt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
+                  <div className="border-t border-border pt-2 space-y-1 text-xs">
+                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Montant demandé</span>
                       <span className="font-semibold">{fcfa(r.amount)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Frais de transfert (15%)</span>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Frais (15%)</span>
                       <span className="font-semibold text-red-600">-{fcfa(fee)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-base border-t border-border pt-2">
-                      <span className="font-semibold">Montant transféré</span>
-                      <span className="font-black text-lg text-primary">{fcfa(net)}</span>
+                    <div className="flex justify-between border-t border-border pt-1">
+                      <span className="font-semibold">Transféré</span>
+                      <span className="font-bold text-primary">{fcfa(net)}</span>
                     </div>
                   </div>
                 </Card>
