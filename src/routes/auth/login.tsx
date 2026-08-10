@@ -7,7 +7,6 @@ import { Btn, Field, inputClass } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { COUNTRIES, phoneToEmail } from "@/lib/app";
 import copyImage from "@/assets/image copy.png";
-import nikeLogo from "@/assets/nike_logo_design.png";
 
 export const Route = createFileRoute("/auth/login")({
   ssr: false,
@@ -77,9 +76,6 @@ function Login() {
         <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 sm:py-14 lg:px-12 lg:py-18">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr] lg:items-end">
             <div className="max-w-2xl text-white">
-              <div className="mb-6 inline-flex rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
-                <img src={nikeLogo} alt="Nike logo" className="h-12 w-auto object-contain" />
-              </div>
               <p className="text-sm uppercase tracking-[0.45em] text-slate-300">Nike Invest</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Just invest it

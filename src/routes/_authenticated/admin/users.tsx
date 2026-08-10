@@ -76,6 +76,21 @@ function AdminUsers() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const grantAdmin = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc("admin_set_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Compte promu administrateur");
+      qc.invalidateQueries({ queryKey: ["admin-user-roles"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const profileRoles = roles.reduce<Record<string, string>>((acc, item) => {
     if (item.user_id) acc[item.user_id] = item.role;
     return acc;
@@ -174,16 +189,26 @@ function AdminUsers() {
                   </p>
                 </div>
               </div>
-              <Btn
-                variant={profile.is_frozen ? "success" : "danger"}
-                className="w-full"
-                disabled={toggleFreeze.isPending}
-                onClick={() =>
-                  toggleFreeze.mutate({ userId: profile.id, freeze: !profile.is_frozen })
-                }
-              >
-                {profile.is_frozen ? "Dégeler le compte" : "Geler le compte"}
-              </Btn>
+              <div className="grid gap-2">
+                <Btn
+                  variant={profile.is_frozen ? "success" : "danger"}
+                  className="w-full"
+                  disabled={toggleFreeze.isPending}
+                  onClick={() =>
+                    toggleFreeze.mutate({ userId: profile.id, freeze: !profile.is_frozen })
+                  }
+                >
+                  {profile.is_frozen ? "Dégeler le compte" : "Geler le compte"}
+                </Btn>
+                <Btn
+                  variant={profileRoles[profile.id] === "admin" ? "success" : "outline"}
+                  className="w-full"
+                  disabled={grantAdmin.isPending || profileRoles[profile.id] === "admin"}
+                  onClick={() => grantAdmin.mutate(profile.id)}
+                >
+                  {profileRoles[profile.id] === "admin" ? "Compte admin" : "Nommer admin"}
+                </Btn>
+              </div>
             </Card>
           ))}
         </div>

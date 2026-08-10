@@ -33,7 +33,7 @@ export const WITHDRAW_MIN = 1000;
 export const WITHDRAW_FEE_RATE = 0.15;
 
 export const TELEGRAM = {
-  group: "https://t.me/",
+  group: "https://t.me/+pBYJdnffFM0xZjI0",
   channel: "https://t.me/",
   support: "https://t.me/",
 };
