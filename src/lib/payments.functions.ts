@@ -86,9 +86,8 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: Input) => data)
+  .inputValidator((raw: unknown) => raw as Input)
   .handler(async ({ data, context }): Promise<DepositInit> => {
-
     const requestData = data as Input | undefined;
     if (!requestData) throw new Error("Données invalides");
 
@@ -153,21 +152,19 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       throw new Error(message || "Le paiement a été refusé par l'opérateur.");
     }
 
-    const bodyData = (body["data"] as Record<string, unknown> | undefined) ?? {};
+    const dataObj = (body["data"] as Record<string, unknown> | undefined) ?? {};
     const gatewayRef =
-      String(bodyData["id"] ?? "") ||
+      String(dataObj["id"] ?? "") ||
       pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
     const gatewayTxId =
       String(
-        bodyData["transaction_id"] ??
-          bodyData["transactionId"] ??
+        dataObj["transaction_id"] ?? dataObj["transactionId"] ??
           pick(body, ["transactionId", "transaction_id", "id", "paymentId"]),
       ) || gatewayRef;
     const reference = gatewayRef || localRef;
     const redirectUrl =
       String(
-        bodyData["payment_url"] ??
-          bodyData["paymentUrl"] ??
+        dataObj["payment_url"] ?? dataObj["paymentUrl"] ??
           pick(body, ["paymentUrl", "payment_url", "redirectUrl", "redirect_url", "url"]),
       ) || "";
 
@@ -204,18 +201,10 @@ export const initiateDeposit = createServerFn({ method: "POST" })
 
 export const checkDepositStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { reference: string }) => ({
+  .validator((data: { reference: string }) => ({
     reference: String(data.reference ?? "").slice(0, 60),
   }))
   .handler(async ({ data, context }) => {
-    // Source de vérité : on interroge LeekPay avant de lire le statut local.
-    try {
-      const { syncLeekDeposits } = await import("@/lib/leek-sync.server");
-      await syncLeekDeposits({ userId: context.userId });
-    } catch {
-      // on renvoie au moins le statut local
-    }
-
     const { data: rows, error } = await context.supabase
       .from("transactions")
       .select("status, amount")
@@ -228,12 +217,8 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     return { status: row?.status ?? "unknown", amount: Number(row?.amount ?? 0) };
   });
 
-/**
- * Appelée au retour de la page de paiement. Ne crédite jamais sur la seule
- * base du navigateur : le statut est vérifié auprès de LeekPay.
- */
 export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
-  .inputValidator((data: { reference?: string }) => ({
+  .validator((data: { reference?: string }) => ({
     reference: String(data.reference ?? "")
       .trim()
       .slice(0, 60),
@@ -241,16 +226,27 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const reference = data.reference;
     if (!reference) {
-      return { ok: false, status: "unknown" as const };
+      return { ok: false, reason: "missing_reference" };
     }
 
-    const { syncLeekDeposits } = await import("@/lib/leek-sync.server");
-    const result = await syncLeekDeposits({ reference });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rpc, error } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
+      _reference: reference,
+      _success: true,
+      _metadata: {
+        gateway: "return_redirect",
+        gateway_event: "payment_success_redirect",
+        source: "success_page",
+      },
+    });
 
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const rpcResult = (rpc ?? {}) as Record<string, unknown>;
     return {
-      ok: result.approved > 0,
-      status:
-        result.approved > 0 ? "approved" : result.rejected > 0 ? "rejected" : ("pending" as const),
+      ok: Boolean((rpcResult as { ok?: boolean }).ok),
+      ...rpcResult,
     };
   });
-

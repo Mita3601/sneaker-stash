@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import type { Json } from "@/integrations/supabase/types";
-
 function str(v: unknown) {
   return typeof v === "string" ? v : typeof v === "number" ? String(v) : "";
 }
@@ -77,7 +75,7 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           gateway_event: event || status,
           gateway_status: status || null,
           gateway_transaction_id: checkoutId || null,
-          gateway_amount: data["amount"] ?? null,
+          gateway_amount: data["amount"] != null ? String(data["amount"]) : null,
         };
 
         const confirmDeposit = async (reference: string, isSuccess: boolean) => {
@@ -88,7 +86,7 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
               ...metadata,
               gateway_event: event || status || metadata.gateway_event,
               gateway_status: status || metadata.gateway_status,
-            } as unknown as Json,
+            },
           });
           const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
           return result;

@@ -58,7 +58,6 @@ function AdminDepots() {
       tx.reference,
       (tx.metadata as Record<string, unknown> | null)?.["gateway_transaction_id"],
       (tx.metadata as Record<string, unknown> | null)?.["local_reference"],
-
       tx.id,
     ]
       .filter(Boolean)
