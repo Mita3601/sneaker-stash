@@ -202,10 +202,18 @@ export const initiateDeposit = createServerFn({ method: "POST" })
 
 export const checkDepositStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((data: { reference: string }) => ({
+  .inputValidator((data: { reference: string }) => ({
     reference: String(data.reference ?? "").slice(0, 60),
   }))
   .handler(async ({ data, context }) => {
+    // Source de vérité : on interroge LeekPay avant de lire le statut local.
+    try {
+      const { syncLeekDeposits } = await import("@/lib/leek-sync.server");
+      await syncLeekDeposits({ userId: context.userId });
+    } catch {
+      // on renvoie au moins le statut local
+    }
+
     const { data: rows, error } = await context.supabase
       .from("transactions")
       .select("status, amount")
@@ -218,8 +226,12 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     return { status: row?.status ?? "unknown", amount: Number(row?.amount ?? 0) };
   });
 
+/**
+ * Appelée au retour de la page de paiement. Ne crédite jamais sur la seule
+ * base du navigateur : le statut est vérifié auprès de LeekPay.
+ */
 export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
-  .validator((data: { reference?: string }) => ({
+  .inputValidator((data: { reference?: string }) => ({
     reference: String(data.reference ?? "")
       .trim()
       .slice(0, 60),
@@ -227,26 +239,16 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const reference = data.reference;
     if (!reference) {
-      return { ok: false, reason: "missing_reference" };
+      return { ok: false, status: "unknown" as const };
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rpc, error } = await supabaseAdmin.rpc("gateway_confirm_deposit", {
-      _reference: reference,
-      _success: true,
-      _metadata: {
-        gateway: "return_redirect",
-        gateway_event: "payment_success_redirect",
-        source: "success_page",
-      },
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    const { syncLeekDeposits } = await import("@/lib/leek-sync.server");
+    const result = await syncLeekDeposits({ reference });
 
     return {
-      ok: Boolean((rpc as { ok?: boolean } | null)?.ok),
-      ...(rpc ?? {}),
+      ok: result.approved > 0,
+      status:
+        result.approved > 0 ? "approved" : result.rejected > 0 ? "rejected" : ("pending" as const),
     };
   });
+
