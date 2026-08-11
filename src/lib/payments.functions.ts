@@ -86,7 +86,9 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((data: Input) => data)
   .handler(async ({ data, context }): Promise<DepositInit> => {
+
     const requestData = data as Input | undefined;
     if (!requestData) throw new Error("Données invalides");
 
