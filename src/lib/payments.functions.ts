@@ -151,20 +151,21 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       throw new Error(message || "Le paiement a été refusé par l'opérateur.");
     }
 
+    const bodyData = (body["data"] as Record<string, unknown> | undefined) ?? {};
     const gatewayRef =
-      String(body?.data?.id ?? "") ||
+      String(bodyData["id"] ?? "") ||
       pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
     const gatewayTxId =
       String(
-        body?.data?.transaction_id ??
-          body?.data?.transactionId ??
+        bodyData["transaction_id"] ??
+          bodyData["transactionId"] ??
           pick(body, ["transactionId", "transaction_id", "id", "paymentId"]),
       ) || gatewayRef;
     const reference = gatewayRef || localRef;
     const redirectUrl =
       String(
-        body?.data?.payment_url ??
-          body?.data?.paymentUrl ??
+        bodyData["payment_url"] ??
+          bodyData["paymentUrl"] ??
           pick(body, ["paymentUrl", "payment_url", "redirectUrl", "redirect_url", "url"]),
       ) || "";
 

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import type { Json } from "@/integrations/supabase/types";
+
 function str(v: unknown) {
   return typeof v === "string" ? v : typeof v === "number" ? String(v) : "";
 }
@@ -86,7 +88,7 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
               ...metadata,
               gateway_event: event || status || metadata.gateway_event,
               gateway_status: status || metadata.gateway_status,
-            },
+            } as unknown as Json,
           });
           const result = (rpc ?? {}) as { ok?: boolean; reason?: string };
           return result;
@@ -96,7 +98,8 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           try {
             const { getCheckout } = await import("@/lib/leek.server");
             const res = await getCheckout(checkoutId);
-            const remoteStatus = String(res.body?.data?.status ?? "").toLowerCase();
+            const remoteData = (res.body["data"] as Record<string, unknown> | undefined) ?? {};
+            const remoteStatus = String(remoteData["status"] ?? "").toLowerCase();
             const remoteSuccess = ["paid", "completed", "successful"].includes(remoteStatus);
             const remoteFailed = ["failed", "cancelled", "expired"].includes(remoteStatus);
 
