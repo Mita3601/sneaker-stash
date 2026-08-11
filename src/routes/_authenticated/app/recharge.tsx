@@ -157,6 +157,42 @@ function Recharge() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  // Vérification automatique toutes les 6 s tant qu'un dépôt est en attente :
+  // le solde est crédité sans action de l'utilisateur dès que LeekPay confirme.
+  useEffect(() => {
+    if (!step) return;
+    const reference = step.reference;
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const result = await checkStatus({ data: { reference } });
+        if (cancelled) return;
+        if (result.status === "approved") {
+          qc.invalidateQueries({ queryKey: ["profile"] });
+          qc.invalidateQueries({ queryKey: ["transactions"] });
+          toast.success(`Recharge validée : ${fcfa(result.amount)}`);
+          setStep(null);
+          setAmount("");
+          setPhone("");
+        } else if (result.status === "rejected") {
+          toast.error("Paiement refusé par l'opérateur");
+          setStep(null);
+        }
+      } catch {
+        // on réessaie au prochain cycle
+      }
+    };
+
+    const id = window.setInterval(poll, 6000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [step, checkStatus, qc]);
+
+
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!country) {
