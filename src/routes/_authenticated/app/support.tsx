@@ -3,13 +3,13 @@ import { CheckCircle, Headphones, MessageCircle, Send, Users } from "lucide-reac
 
 import { Btn, SubHeader } from "@/components/ui-kit";
 import copyImage from "@/assets/image copy.png";
-import { TELEGRAM, WHATSAPP } from "@/lib/app";
+import { TELEGRAM } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/support")({
   head: () => ({
     meta: [
       { title: "Service client — Nike" },
-      { name: "description", content: "Contactez le support Nike par Telegram ou WhatsApp." },
+      { name: "description", content: "Contactez le support Nike par Telegram." },
       { property: "og:title", content: "Service client — Nike" },
       { property: "og:description", content: "Assistance rapide pour vos dépôts et retraits." },
       { property: "og:type", content: "website" },
@@ -29,7 +29,6 @@ const steps = [
 const contacts = [
   { icon: Users, label: "Groupe Telegram", href: TELEGRAM.group },
   { icon: Send, label: "Canal Telegram", href: TELEGRAM.channel },
-  { icon: MessageCircle, label: "Groupe WhatsApp", href: WHATSAPP.group },
   { icon: Headphones, label: "Support direct", href: TELEGRAM.support },
 ];
 
