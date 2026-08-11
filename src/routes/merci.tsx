@@ -18,24 +18,45 @@ function MerciPage() {
     const reference = new URLSearchParams(window.location.search).get("reference");
     if (!reference) return;
 
-    void confirmDeposit({ data: { reference } })
-      .then((result) => {
+    let cancelled = false;
+    let attempts = 0;
+    let id = 0;
+
+    const tick = async () => {
+      attempts += 1;
+      try {
+        const result = await confirmDeposit({ data: { reference } });
+        if (cancelled) return;
         if (result?.ok) {
           setStatusMessage(
             "Votre dépôt a bien été confirmé et votre solde a été crédité automatiquement.",
           );
+          window.clearInterval(id);
           return;
         }
-        setStatusMessage(
-          "Votre paiement a été reçu. La confirmation est en cours et votre solde sera crédité automatiquement.",
-        );
-      })
-      .catch(() => {
-        setStatusMessage(
-          "Votre paiement a été reçu. La confirmation est en cours et votre solde sera crédité automatiquement.",
-        );
-      });
+        if (result?.status === "rejected") {
+          setStatusMessage("Le paiement n'a pas abouti. Aucun montant n'a été débité.");
+          window.clearInterval(id);
+          return;
+        }
+      } catch {
+        // on réessaie au prochain cycle
+      }
+      if (cancelled) return;
+      if (attempts >= 20) window.clearInterval(id);
+      setStatusMessage(
+        "Votre paiement est en cours de confirmation, votre solde sera crédité automatiquement.",
+      );
+    };
+
+    id = window.setInterval(tick, 5000);
+    void tick();
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, [confirmDeposit]);
+
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md items-center justify-center bg-background px-4">
