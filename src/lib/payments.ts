@@ -1,5 +1,5 @@
 /** Pays et opérateurs mobile money disponibles pour le formulaire de recharge. */
-export const MIN_DEPOSIT = 4000;
+export const MIN_DEPOSIT = 200;
 
 export type PayOperator = {
   name: string;

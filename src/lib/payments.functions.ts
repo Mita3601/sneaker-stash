@@ -86,6 +86,7 @@ function pick(body: Record<string, unknown>, keys: string[]) {
 
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => raw as Input)
   .handler(async ({ data, context }): Promise<DepositInit> => {
     const requestData = data as Input | undefined;
     if (!requestData) throw new Error("Données invalides");
@@ -151,20 +152,19 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       throw new Error(message || "Le paiement a été refusé par l'opérateur.");
     }
 
+    const dataObj = (body["data"] as Record<string, unknown> | undefined) ?? {};
     const gatewayRef =
-      String(body?.data?.id ?? "") ||
+      String(dataObj["id"] ?? "") ||
       pick(body, ["reference", "transactionReference", "orderId", "order_id"]);
     const gatewayTxId =
       String(
-        body?.data?.transaction_id ??
-          body?.data?.transactionId ??
+        dataObj["transaction_id"] ?? dataObj["transactionId"] ??
           pick(body, ["transactionId", "transaction_id", "id", "paymentId"]),
       ) || gatewayRef;
     const reference = gatewayRef || localRef;
     const redirectUrl =
       String(
-        body?.data?.payment_url ??
-          body?.data?.paymentUrl ??
+        dataObj["payment_url"] ?? dataObj["paymentUrl"] ??
           pick(body, ["paymentUrl", "payment_url", "redirectUrl", "redirect_url", "url"]),
       ) || "";
 
@@ -244,8 +244,9 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
 
+    const rpcResult = (rpc ?? {}) as Record<string, unknown>;
     return {
-      ok: Boolean((rpc as { ok?: boolean } | null)?.ok),
-      ...(rpc ?? {}),
+      ok: Boolean((rpcResult as { ok?: boolean }).ok),
+      ...rpcResult,
     };
   });

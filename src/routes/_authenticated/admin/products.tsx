@@ -62,7 +62,7 @@ function AdminProducts() {
                     {p.is_active ? "Actif" : "Gelé"}
                   </span>
                   <Btn
-                    variant={p.is_active ? "destructive" : "primary"}
+                    variant={p.is_active ? "danger" : "primary"}
                     disabled={toggleActive.isPending}
                     onClick={() => toggleActive.mutate({ id: p.id, active: !p.is_active })}
                   >

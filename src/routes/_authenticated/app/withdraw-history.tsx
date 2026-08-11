@@ -58,11 +58,13 @@ function WithdrawHistory() {
           <div className="space-y-4">
             {rows.map((r) => {
               const metadata = (r.metadata as Record<string, unknown> | null) ?? {};
-              const provider = typeof metadata.provider === "string" ? metadata.provider : "-";
+              const provider = typeof metadata["provider"] === "string" ? metadata["provider"] : "-";
               const accountNumber =
-                typeof metadata.account_number === "string" ? metadata.account_number : "-";
+                typeof metadata["account_number"] === "string"
+                  ? metadata["account_number"]
+                  : "-";
               const accountName =
-                typeof metadata.account_name === "string" ? metadata.account_name : "-";
+                typeof metadata["account_name"] === "string" ? metadata["account_name"] : "-";
               const countryCode =
                 typeof r.profiles?.country_code === "string" ? r.profiles.country_code : "-";
               const phone = typeof r.profiles?.phone === "string" ? r.profiles.phone : "-";

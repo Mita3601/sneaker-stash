@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           gateway_event: event || status,
           gateway_status: status || null,
           gateway_transaction_id: checkoutId || null,
-          gateway_amount: data["amount"] ?? null,
+          gateway_amount: data["amount"] != null ? String(data["amount"]) : null,
         };
 
         const confirmDeposit = async (reference: string, isSuccess: boolean) => {
@@ -96,7 +96,8 @@ export const Route = createFileRoute("/api/public/webhooks/leekpay")({
           try {
             const { getCheckout } = await import("@/lib/leek.server");
             const res = await getCheckout(checkoutId);
-            const remoteStatus = String(res.body?.data?.status ?? "").toLowerCase();
+            const remoteData = (res.body["data"] as Record<string, unknown> | undefined) ?? {};
+            const remoteStatus = String(remoteData["status"] ?? "").toLowerCase();
             const remoteSuccess = ["paid", "completed", "successful"].includes(remoteStatus);
             const remoteFailed = ["failed", "cancelled", "expired"].includes(remoteStatus);
 
