@@ -23,6 +23,7 @@ import { Route as AuthenticatedAdminInvestissementRouteImport } from './routes/_
 import { Route as AuthenticatedAdminParrainagesRouteImport } from './routes/_authenticated/admin/parrainages'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminPromoteurRouteImport } from './routes/_authenticated/admin/promoteur'
+import { Route as AuthenticatedAdminRepriseParrainageRouteImport } from './routes/_authenticated/admin/reprise-parrainage'
 import { Route as AuthenticatedAdminRetraitRouteImport } from './routes/_authenticated/admin/retrait'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
@@ -118,6 +119,12 @@ const AuthenticatedAdminPromoteurRoute =
   AuthenticatedAdminPromoteurRouteImport.update({
     id: '/promoteur',
     path: '/promoteur',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRepriseParrainageRoute =
+  AuthenticatedAdminRepriseParrainageRouteImport.update({
+    id: '/reprise-parrainage',
+    path: '/reprise-parrainage',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRetraitRoute =
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/admin/reprise-parrainage': typeof AuthenticatedAdminRepriseParrainageRoute
   '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/app/about': typeof AuthenticatedAppAboutRoute
@@ -286,6 +294,7 @@ export interface FileRoutesByTo {
   '/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/admin/reprise-parrainage': typeof AuthenticatedAdminRepriseParrainageRoute
   '/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/app/about': typeof AuthenticatedAppAboutRoute
@@ -324,6 +333,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/parrainages': typeof AuthenticatedAdminParrainagesRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/promoteur': typeof AuthenticatedAdminPromoteurRoute
+  '/_authenticated/admin/reprise-parrainage': typeof AuthenticatedAdminRepriseParrainageRoute
   '/_authenticated/admin/retrait': typeof AuthenticatedAdminRetraitRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/app/about': typeof AuthenticatedAppAboutRoute
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/admin/parrainages'
     | '/admin/products'
     | '/admin/promoteur'
+    | '/admin/reprise-parrainage'
     | '/admin/retrait'
     | '/admin/users'
     | '/app/about'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/parrainages'
     | '/admin/products'
     | '/admin/promoteur'
+    | '/admin/reprise-parrainage'
     | '/admin/retrait'
     | '/admin/users'
     | '/app/about'
@@ -433,6 +445,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/parrainages'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/promoteur'
+    | '/_authenticated/admin/reprise-parrainage'
     | '/_authenticated/admin/retrait'
     | '/_authenticated/admin/users'
     | '/_authenticated/app/about'
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/promoteur'
       fullPath: '/admin/promoteur'
       preLoaderRoute: typeof AuthenticatedAdminPromoteurRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/reprise-parrainage': {
+      id: '/_authenticated/admin/reprise-parrainage'
+      path: '/reprise-parrainage'
+      fullPath: '/admin/reprise-parrainage'
+      preLoaderRoute: typeof AuthenticatedAdminRepriseParrainageRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/retrait': {
@@ -724,6 +744,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminParrainagesRoute: typeof AuthenticatedAdminParrainagesRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminPromoteurRoute: typeof AuthenticatedAdminPromoteurRoute
+  AuthenticatedAdminRepriseParrainageRoute: typeof AuthenticatedAdminRepriseParrainageRoute
   AuthenticatedAdminRetraitRoute: typeof AuthenticatedAdminRetraitRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -736,6 +757,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminParrainagesRoute: AuthenticatedAdminParrainagesRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminPromoteurRoute: AuthenticatedAdminPromoteurRoute,
+  AuthenticatedAdminRepriseParrainageRoute:
+    AuthenticatedAdminRepriseParrainageRoute,
   AuthenticatedAdminRetraitRoute: AuthenticatedAdminRetraitRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -812,3 +835,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

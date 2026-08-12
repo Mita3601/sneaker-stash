@@ -80,6 +80,12 @@ function AdminDashboard() {
               Parrainages
             </Link>
             <Link
+              to="/admin/reprise-parrainage"
+              className="block rounded-2xl border border-border px-4 py-4 text-sm font-semibold transition hover:bg-secondary/50"
+            >
+              Reprise parrainage
+            </Link>
+            <Link
               to="/admin/investissement"
               className="block rounded-2xl border border-border px-4 py-4 text-sm font-semibold transition hover:bg-secondary/50"
             >
