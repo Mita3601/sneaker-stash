@@ -116,7 +116,7 @@ function AdminProducts() {
                   ) : (
                     <div className="flex items-center gap-2">
                       <Btn
-                        variant="secondary"
+                        variant="outline"
                         onClick={() => {
                           setEditingId(p.id);
                           setEditingPrice(String(p.price ?? ""));
