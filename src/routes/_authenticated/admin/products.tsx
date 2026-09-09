@@ -94,7 +94,10 @@ function AdminProducts() {
                         disabled={updatePrice.isPending}
                         onClick={() => {
                           const val = Number(editingPrice.replace(/[^0-9.-]+/g, ""));
-                          if (isNaN(val)) return toast.error("Prix invalide");
+                          if (isNaN(val)) {
+                            toast.error("Prix invalide");
+                            return;
+                          }
                           updatePrice.mutate({ id: p.id, price: Math.round(val) });
                         }}
                       >
@@ -113,7 +116,7 @@ function AdminProducts() {
                   ) : (
                     <div className="flex items-center gap-2">
                       <Btn
-                        variant="secondary"
+                        variant="outline"
                         onClick={() => {
                           setEditingId(p.id);
                           setEditingPrice(String(p.price ?? ""));
