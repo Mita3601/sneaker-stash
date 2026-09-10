@@ -1,17 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Info } from "lucide-react";
+import { Gem, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Btn, Card, SubHeader } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/app/about")({
   head: () => ({
     meta: [
-      { title: "À propos — Nike" },
-      { name: "description", content: "Présentation rapide de la plateforme Nike." },
-      { property: "og:title", content: "À propos — Nike" },
+      { title: "À propos — Dior Parfums" },
+      { name: "description", content: "Découvrez l’univers de la plateforme Dior Parfums." },
+      { property: "og:title", content: "À propos — Dior Parfums" },
       {
         property: "og:description",
-        content: "Découvrez le fonctionnement de la plateforme et ses points clés.",
+        content: "Une collection de parfums d’exception associée à des revenus quotidiens.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -20,78 +20,53 @@ export const Route = createFileRoute("/_authenticated/app/about")({
   component: About,
 });
 
+const pillars = [
+  {
+    icon: Gem,
+    title: "Une collection d’exception",
+    text: "Chaque fragrance représente un niveau de collection avec une durée et un rendement clairement définis.",
+  },
+  {
+    icon: Sparkles,
+    title: "Le parfum comme inspiration",
+    text: "Notre univers s’inspire du savoir-faire de la haute parfumerie : sélection, rareté et exigence dans chaque détail.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Clarté et confiance",
+    text: "Suivez votre portefeuille, vos revenus et vos opérations depuis un espace conçu pour rester simple et lisible.",
+  },
+];
+
 function About() {
   return (
     <>
       <SubHeader title="À propos" />
-      <div className="space-y-3 p-4">
-        <Card className="bg-gradient-primary text-primary-foreground">
-          <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-xl bg-white/15">
-              <Info className="size-5" />
-            </span>
-            <div>
-              <p className="font-bold">Nike</p>
-              <p className="text-xs opacity-90">
-                Investissement en paires de sneakers, revenus quotidiens et bonus de bienvenue.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="space-y-3">
-          <p className="text-sm font-bold">Investir dans les sneakers : une stratégie d'avenir</p>
-          <p className="text-sm text-muted-foreground">
-            Nike offre une nouvelle façon de générer des rendements stables grâce à des
-            investissements en paires de sneakers premium. Que vous soyez collectionneur passionné,
-            investisseur avisé ou simplement intéressé par les actifs alternatifs, notre plateforme
-            vous permet de capitaliser sur la croissance du marché des baskets rares et exclusives.
+      <section className="bg-primary px-6 py-12 text-primary-foreground">
+        <p className="text-[9px] uppercase tracking-[0.3em] text-accent">La maison</p>
+        <h1 className="mt-3 text-5xl font-medium italic">Dior Parfums</h1>
+        <p className="mt-4 max-w-sm text-sm leading-6 text-primary-foreground/70">
+          Une expérience de collection inspirée de la haute parfumerie et pensée pour vos revenus quotidiens.
+        </p>
+      </section>
+      <div className="space-y-4 p-4">
+        {pillars.map(({ icon: Icon, title, text }, index) => (
+          <Card key={title} className="relative overflow-hidden p-6">
+            <span className="absolute right-4 top-2 font-display text-6xl text-secondary">0{index + 1}</span>
+            <Icon className="size-5 text-accent" strokeWidth={1.5} />
+            <h2 className="relative mt-5 text-2xl font-medium">{title}</h2>
+            <p className="relative mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
+          </Card>
+        ))}
+        <Card className="bg-gradient-primary p-6 text-primary-foreground">
+          <p className="text-[9px] uppercase tracking-[0.25em] text-accent">Votre première essence</p>
+          <h2 className="mt-3 text-3xl font-medium">Commencez votre collection</h2>
+          <p className="mt-3 text-sm leading-6 text-primary-foreground/75">
+            Explorez les fragrances disponibles et composez progressivement votre portefeuille.
           </p>
         </Card>
-
-        <Card className="space-y-3">
-          <p className="text-sm font-bold">Pourquoi les sneakers ?</p>
-          <p className="text-sm text-muted-foreground">
-            Le marché des sneakers a explosé ces dernières années. Les collections limitées, les
-            collaborations prestigieuses et les éditions exclusives Nike ne cessent de prendre de la
-            valeur. Notre expertise réside dans la sélection rigoureuse des modèles les plus
-            prometteurs, offrant à nos utilisateurs des opportunités d'investissement authentiques
-            et lucratives.
-          </p>
-        </Card>
-
-        <Card className="space-y-3">
-          <p className="text-sm font-bold">Une plateforme fiable et innovante</p>
-          <p className="text-sm text-muted-foreground">
-            Sécurité, transparence et facilité d'utilisation sont les piliers de notre écosystème.
-            Chaque transaction est protégée par les normes de sécurité les plus strictes du secteur.
-            Notre infrastructure cloud propriétaire vous permet de suivre vos investissements en
-            temps réel, analyser l'évolution de vos rendements, gérer un portefeuille diversifié de
-            sneakers et accéder à des opportunités exclusives. Nous prenons en charge tous les modes
-            de paiement populaires et garantissons des retraits rapides et sécurisés.
-          </p>
-        </Card>
-
-        <Card className="space-y-3">
-          <p className="text-sm font-bold">Croissance mondiale et innovation</p>
-          <p className="text-sm text-muted-foreground">
-            Face à la demande croissante des investisseurs alternatifs en Europe, Afrique et
-            au-delà, Nike intensifie son expansion internationale. Nous ne cessons d'innover pour
-            vous offrir de nouveaux produits, des rendements améliorés et des services premium.
-          </p>
-        </Card>
-
-        <Card className="space-y-3 bg-gradient-primary text-primary-foreground">
-          <p className="text-sm font-bold">Commencez dès aujourd'hui</p>
-          <p className="text-sm">
-            Rejoignez des milliers d'investisseurs qui font croître leur patrimoine avec Nike.
-            Accédez à des rendements quotidiens, profitez de nos bonus de bienvenue attractifs et
-            construisez progressivement votre portefeuille de sneakers d'exception.
-          </p>
-        </Card>
-
         <Link to="/app" className="block">
-          <Btn full>Retour à l’accueil</Btn>
+          <Btn full>Retour à la collection</Btn>
         </Link>
       </div>
     </>

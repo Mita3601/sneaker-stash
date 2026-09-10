@@ -20,7 +20,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-import hero from "@/assets/hero-banner.jpg";
+import hero from "@/assets/dior-auth.jpg";
 import { Card, Field, inputClass } from "@/components/ui-kit";
 import { useIsAdmin, useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,12 +29,12 @@ import { fcfa } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/me")({
   head: () => ({
     meta: [
-      { title: "Mon compte — Nike" },
+      { title: "Mon compte — Dior Parfums" },
       {
         name: "description",
         content: "Solde, missions, historiques et paramètres de votre compte.",
       },
-      { property: "og:title", content: "Mon compte — Nike" },
+      { property: "og:title", content: "Mon compte — Dior Parfums" },
       {
         property: "og:description",
         content: "Gérez votre solde, vos retraits et vos comptes de paiement.",
@@ -117,22 +117,22 @@ function Me() {
 
   return (
     <>
-      <header className="relative overflow-hidden rounded-b-[2rem]">
+      <header className="relative overflow-hidden">
         <img
           src={hero}
-          alt="Sneakers premium"
-          width={1088}
-          height={608}
+          alt="Collection de parfums premium"
+          width={1536}
+          height={1024}
           className="h-[16rem] w-full object-cover"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.22)_0%,rgba(2,6,23,0.45)_42%,rgba(2,6,23,0.86)_100%)] p-3 text-primary-foreground">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--primary-deep)_30%,transparent)_0%,color-mix(in_oklab,var(--primary-deep)_55%,transparent)_42%,var(--primary-deep)_100%)] p-4 text-primary-foreground">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-primary-foreground/70">
                 Mon compte
               </p>
               <div className="mt-1.5 flex items-center gap-2">
-                <p className="text-base font-semibold tracking-wide">
+                 <p className="text-base font-semibold">
                   {show ? profile?.phone : "•".repeat(10)}
                 </p>
                 <button
@@ -146,16 +146,16 @@ function Me() {
               <p className="text-xs text-primary-foreground/80">Numéro de téléphone</p>
             </div>
 
-            <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur">
+            <div className="rounded-sm border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-semibold backdrop-blur">
               Compte actif
             </div>
           </div>
 
-          <div className="mt-8 rounded-[1.25rem] border border-white/15 bg-white/10 p-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-md">
+          <div className="mt-8 border border-primary-foreground/15 bg-primary-foreground/10 p-3.5 shadow-glow backdrop-blur-md">
             <p className="text-xs uppercase tracking-[0.25em] text-primary-foreground/75">
               Solde du compte
             </p>
-            <p className="mt-1.5 text-[2.6rem] font-black leading-none tracking-tight">
+            <p className="mt-1.5 font-display text-[2.8rem] font-semibold leading-none">
               {fcfa(profile?.balance)}
             </p>
           </div>
@@ -165,8 +165,8 @@ function Me() {
       <div className="grid grid-cols-3 gap-2 px-4 pt-4">
         {quickActions.map(({ to, label, icon: Icon }) => (
           <Link key={to} to={to}>
-            <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-br from-primary via-sky-500 to-cyan-400 px-3 py-4 text-center text-sm font-bold text-primary-foreground shadow-[0_14px_32px_rgba(0,82,255,0.18)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(0,82,255,0.24)]">
-              <span className="grid size-10 place-items-center rounded-2xl bg-white/15 backdrop-blur-sm">
+            <div className="flex h-full flex-col items-center justify-center gap-2 rounded-sm bg-primary px-3 py-4 text-center text-xs font-bold uppercase text-primary-foreground shadow-card transition duration-200 hover:-translate-y-0.5">
+              <span className="grid size-10 place-items-center rounded-sm border border-accent/40 text-accent">
                 <Icon className="size-5" />
               </span>
               {label}
@@ -179,7 +179,7 @@ function Me() {
         {!showGiftForm ? (
           <button
             type="button"
-            className="w-full rounded-3xl bg-gradient-primary px-5 py-4 text-center text-sm font-semibold text-primary-foreground transition hover:brightness-105 active:scale-[0.98]"
+            className="w-full rounded-sm bg-primary px-5 py-4 text-center text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground transition hover:bg-primary/92 active:scale-[0.98]"
             onClick={() => setShowGiftForm(true)}
           >
             Gagner des cadeaux
@@ -204,7 +204,7 @@ function Me() {
               </Field>
               <button
                 type="button"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.98] disabled:opacity-50"
+                 className="inline-flex w-full items-center justify-center rounded-sm bg-primary px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground transition active:scale-[0.98] disabled:opacity-50"
                 disabled={isRedeeming || !giftCode.trim()}
                 onClick={redeemGiftCode}
               >
@@ -220,8 +220,8 @@ function Me() {
           <img
             src={hero}
             alt="Centre des missions"
-            width={1088}
-            height={608}
+             width={1536}
+             height={1024}
             className="h-40 w-full object-cover"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.92)_0%,rgba(15,23,42,0.68)_48%,rgba(15,23,42,0.18)_100%)]" />
@@ -230,13 +230,13 @@ function Me() {
               <p className="text-xs uppercase tracking-[0.32em] text-primary-foreground/70">
                 Bonus et tâches
               </p>
-              <p className="mt-2 text-[1.75rem] font-black leading-[0.95]">Centre des missions</p>
+               <p className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.95]">Centre des missions</p>
               <p className="mt-2 text-sm text-primary-foreground/88">
                 Accomplissez des missions et obtenez des bonus généreux.
               </p>
             </div>
             <Link to="/app/missions" className="shrink-0">
-              <div className="rounded-[1.35rem] border border-white/20 bg-white/92 px-4 py-4 text-center text-sm font-bold text-slate-900 shadow-xl backdrop-blur-sm transition hover:scale-[1.02]">
+               <div className="rounded-sm border border-primary-foreground/20 bg-card/92 px-4 py-4 text-center text-sm font-bold text-foreground shadow-xl backdrop-blur-sm transition hover:scale-[1.02]">
                 <Trophy className="mx-auto size-5 text-primary" />Y aller -&gt;
               </div>
             </Link>
@@ -259,7 +259,7 @@ function Me() {
                   to={to}
                   className="flex items-center gap-3 px-4 py-4 transition hover:bg-secondary/50"
                 >
-                  <span className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-primary/10 to-cyan-400/10 text-primary ring-1 ring-primary/10">
+                   <span className="grid size-10 place-items-center rounded-sm bg-secondary text-primary ring-1 ring-border">
                     <Icon className="size-4" />
                   </span>
                   <span className="flex-1 text-sm font-semibold text-foreground">{label}</span>
@@ -276,7 +276,7 @@ function Me() {
               to="/admin"
               className="flex items-center gap-3 px-4 py-4 transition hover:bg-secondary/50"
             >
-              <span className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-primary/10 to-cyan-400/10 text-primary ring-1 ring-primary/10">
+               <span className="grid size-10 place-items-center rounded-sm bg-secondary text-primary ring-1 ring-border">
                 <ShieldCheck className="size-4" />
               </span>
               <span className="flex-1 text-sm font-semibold">Panneau administrateur</span>
