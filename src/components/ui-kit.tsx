@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60", className)}>
+    <div className={cn("rounded-md bg-card p-4 shadow-card ring-1 ring-border/70", className)}>
       {children}
     </div>
   );
@@ -20,7 +20,7 @@ type BtnProps = {
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const variants: Record<string, string> = {
-  primary: "bg-gradient-primary text-primary-foreground shadow-glow",
+  primary: "bg-primary text-primary-foreground shadow-glow hover:bg-primary/92",
   ghost: "bg-secondary text-secondary-foreground",
   outline: "bg-card text-foreground ring-1 ring-border",
   danger: "bg-destructive text-destructive-foreground",
@@ -32,7 +32,7 @@ export function Btn({ children, variant = "primary", className, full, ...rest }:
     <button
       {...rest}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] transition active:scale-[0.98] disabled:opacity-50",
         variants[variant],
         full && "w-full",
         className,
@@ -64,15 +64,15 @@ export function Field({
 }
 
 export const inputClass =
-  "w-full rounded-xl bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent placeholder:text-muted-foreground focus:ring-ring";
+  "w-full rounded-sm bg-card px-4 py-3 text-sm text-foreground outline-none ring-1 ring-border placeholder:text-muted-foreground focus:ring-ring";
 
 export function SubHeader({ title, to = "/app/me" }: { title: string; to?: string }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center gap-2 bg-gradient-deep px-3 py-4 text-primary-foreground">
-      <Link to={to} className="rounded-full p-1.5 hover:bg-primary-foreground/10">
+    <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-primary-foreground/15 bg-gradient-deep px-3 py-4 text-primary-foreground">
+      <Link to={to} className="rounded-sm p-1.5 hover:bg-primary-foreground/10">
         <ChevronLeft className="size-5" />
       </Link>
-      <h1 className="text-base font-bold">{title}</h1>
+      <h1 className="text-xl font-medium">{title}</h1>
     </header>
   );
 }
@@ -87,7 +87,7 @@ export function StatTile({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-2xl bg-gradient-primary p-4 text-primary-foreground", className)}>
+    <div className={cn("rounded-md bg-gradient-primary p-4 text-primary-foreground", className)}>
       <p className="text-xs opacity-90">{label}</p>
       <p className="mt-1 text-xl font-extrabold">{value}</p>
     </div>

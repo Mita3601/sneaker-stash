@@ -7,12 +7,12 @@ import hero from "@/assets/image.jpg";
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({
     meta: [
-      { title: "Réglementation — Nike" },
+      { title: "Réglementation — Dior Parfums" },
       {
         name: "description",
-        content: "Règles d’utilisation et informations importantes de Nike.",
+        content: "Règles d’utilisation et informations importantes de Dior Parfums.",
       },
-      { property: "og:title", content: "Réglementation — Nike" },
+      { property: "og:title", content: "Réglementation — Dior Parfums" },
       {
         property: "og:description",
         content: "Lisez les règles de fonctionnement de la plateforme.",
@@ -37,11 +37,9 @@ function Regulation() {
         <Card>
           <p className="text-base font-bold">Présentation</p>
           <p className="text-sm text-muted-foreground mb-3">
-            Nike se spécialise dans la fourniture de solutions d'investissement en sneakers premium
-            sur le marché mondial. Investissez dans des collections Nike exclusives pour participer
-            à l'exploitation de la plateforme, générez facilement un revenu quotidien stable,
-            saisissez les opportunités offertes par le développement du marché des sneakers et
-            obtenez des rendements continus.
+            Dior Parfums propose une expérience de collection inspirée de la haute parfumerie.
+            Sélectionnez des fragrances exclusives pour participer au développement de la plateforme,
+            générer un revenu quotidien et construire progressivement votre portefeuille.
           </p>
           <p className="text-sm text-muted-foreground mb-3">
             Lorsqu'un ami que vous invitez s'inscrit et investit, vous recevez immédiatement une

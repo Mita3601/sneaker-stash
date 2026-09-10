@@ -9,12 +9,12 @@ import { fcfa, shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/recharge-history")({
   head: () => ({
     meta: [
-      { title: "Enregistrements de recharge — Nike" },
+      { title: "Enregistrements de recharge — Dior Parfums" },
       {
         name: "description",
         content: "Historique complet de vos dépôts et de leur statut de validation.",
       },
-      { property: "og:title", content: "Enregistrements de recharge — Nike" },
+      { property: "og:title", content: "Enregistrements de recharge — Dior Parfums" },
       { property: "og:description", content: "Suivez la validation de chaque dépôt." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

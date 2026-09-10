@@ -10,7 +10,7 @@ import { fcfa, shortDate, TX_LABELS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/admin/depots")({
   head: () => ({
     meta: [
-      { title: "Admin - Dépôts — Nike" },
+      { title: "Admin - Dépôts — Dior Parfums" },
       { name: "description", content: "Validez et gérez les dépôts." },
     ],
   }),

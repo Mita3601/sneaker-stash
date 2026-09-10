@@ -6,12 +6,12 @@ import { Btn, Card, SubHeader } from "@/components/ui-kit";
 export const Route = createFileRoute("/_authenticated/app/history")({
   head: () => ({
     meta: [
-      { title: "Historique — Nike" },
+      { title: "Historique — Dior Parfums" },
       {
         name: "description",
         content: "Accédez à l’historique de vos recharges et de vos retraits.",
       },
-      { property: "og:title", content: "Historique — Nike" },
+      { property: "og:title", content: "Historique — Dior Parfums" },
       {
         property: "og:description",
         content: "Consultez vos mouvements de compte et vos opérations financières.",

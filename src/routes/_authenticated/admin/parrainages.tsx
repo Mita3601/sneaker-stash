@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/admin/parrainages")({
   head: () => ({
     meta: [
-      { title: "Admin - Parrainages — Nike" },
+      { title: "Admin - Parrainages — Dior Parfums" },
       { name: "description", content: "Voir les filleuls et leurs investissements par niveau." },
     ],
   }),

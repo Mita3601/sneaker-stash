@@ -11,12 +11,12 @@ import { fcfa, WITHDRAW_FEE_RATE, WITHDRAW_MIN } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/withdraw")({
   head: () => ({
     meta: [
-      { title: "Retrait — Nike" },
+      { title: "Retrait — Dior Parfums" },
       {
         name: "description",
         content: "Demandez un retrait dès 1 000 FCFA vers votre compte mobile money.",
       },
-      { property: "og:title", content: "Retrait — Nike" },
+      { property: "og:title", content: "Retrait — Dior Parfums" },
       { property: "og:description", content: "Retraits 24/7, frais de 15 %." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -97,7 +97,7 @@ function Withdraw() {
       return;
     }
     if (!hasPurchased) {
-      toast.error("Vous devez acheter au moins une paire avant de demander un retrait");
+      toast.error("Vous devez sélectionner au moins un parfum avant de demander un retrait");
       return;
     }
     submit.mutate();
@@ -162,12 +162,12 @@ function Withdraw() {
             <li>Montant minimum de retrait : 1 000 FCFA.</li>
             <li>Frais de retrait : 15 % du montant retiré.</li>
             <li>
-              Vous pouvez effectuer des retraits à tout moment, après avoir acheté au moins une
-              paire.
+              Vous pouvez effectuer des retraits à tout moment, après avoir sélectionné au moins un
+              parfum.
             </li>
             <li>
               Afin de protéger les intérêts de la plateforme et de ses membres, vous devez disposer
-              d’au moins un appareil pour activer la fonction de retrait.
+               d’au moins un parfum actif pour activer la fonction de retrait.
             </li>
           </ul>
         </Card>

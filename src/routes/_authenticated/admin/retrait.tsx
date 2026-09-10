@@ -10,7 +10,7 @@ import { fcfa, shortDate, TX_LABELS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/admin/retrait")({
   head: () => ({
     meta: [
-      { title: "Admin - Retraits — Nike" },
+      { title: "Admin - Retraits — Dior Parfums" },
       { name: "description", content: "Validez et gérez les retraits." },
     ],
   }),

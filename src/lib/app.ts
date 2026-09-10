@@ -1,14 +1,14 @@
-import vip1 from "@/assets/sneaker-vip1.jpg";
-import vip2 from "@/assets/sneaker-vip2.jpg";
-import vip3 from "@/assets/sneaker-vip3.jpg";
-import vip4 from "@/assets/sneaker-vip4.jpg";
-import vip5 from "@/assets/sneaker-vip5.jpg";
-import vip6 from "@/assets/sneaker-vip6.jpg";
-import vip7 from "@/assets/sneaker-vip7.jpg";
-import vip8 from "@/assets/sneaker-vip8.jpg";
-import vip9 from "@/assets/sneaker-vip9.jpg";
+import vip1 from "@/assets/perfume-vip1.jpg";
+import vip2 from "@/assets/perfume-vip2.jpg";
+import vip3 from "@/assets/perfume-vip3.jpg";
+import vip4 from "@/assets/perfume-vip4.jpg";
+import vip5 from "@/assets/perfume-vip5.jpg";
+import vip6 from "@/assets/perfume-vip6.jpg";
+import vip7 from "@/assets/perfume-vip7.jpg";
+import vip8 from "@/assets/perfume-vip8.jpg";
+import vip9 from "@/assets/perfume-vip9.jpg";
 
-export const SNEAKER_IMAGES: Record<string, string> = {
+export const PERFUME_IMAGES: Record<string, string> = {
   VIP1: vip1,
   VIP2: vip2,
   VIP3: vip3,
@@ -18,6 +18,18 @@ export const SNEAKER_IMAGES: Record<string, string> = {
   VIP7: vip7,
   VIP8: vip8,
   VIP9: vip9,
+};
+
+export const PERFUME_NAMES: Record<string, string> = {
+  VIP1: "Dior Addict",
+  VIP2: "Eau Sauvage",
+  VIP3: "Sauvage Elixir",
+  VIP4: "Miss Dior",
+  VIP5: "Ambre Nuit",
+  VIP6: "Gris Dior",
+  VIP7: "J'adore L'Or",
+  VIP8: "Oud Ispahan",
+  VIP9: "Bois d'Argent",
 };
 
 export const COUNTRIES = [
