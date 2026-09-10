@@ -10,7 +10,7 @@ import { fcfa } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/admin/products")({
   head: () => ({
     meta: [
-      { title: "Admin - Produits — Nike" },
+      { title: "Admin - Produits — Dior Parfums" },
       { name: "description", content: "Gérez la visibilité des produits disponibles." },
     ],
   }),

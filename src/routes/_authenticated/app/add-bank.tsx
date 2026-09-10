@@ -12,12 +12,12 @@ import { PROVIDERS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/add-bank")({
   head: () => ({
     meta: [
-      { title: "Compte de retrait — Nike" },
+      { title: "Compte de retrait — Dior Parfums" },
       {
         name: "description",
         content: "Ajoutez et gérez les comptes mobile money utilisés pour vos retraits.",
       },
-      { property: "og:title", content: "Compte de retrait — Nike" },
+      { property: "og:title", content: "Compte de retrait — Dior Parfums" },
       {
         property: "og:description",
         content: "Enregistrez votre compte Wave, Orange, MTN ou Moov.",

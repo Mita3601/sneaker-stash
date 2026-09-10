@@ -7,12 +7,12 @@ import hero from "@/assets/image.jpg";
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({
     meta: [
-      { title: "Réglementation — Nike" },
+      { title: "Réglementation — Dior Parfums" },
       {
         name: "description",
-        content: "Règles d’utilisation et informations importantes de Nike.",
+        content: "Règles d’utilisation et informations importantes de Dior Parfums.",
       },
-      { property: "og:title", content: "Réglementation — Nike" },
+      { property: "og:title", content: "Réglementation — Dior Parfums" },
       {
         property: "og:description",
         content: "Lisez les règles de fonctionnement de la plateforme.",

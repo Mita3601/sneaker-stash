@@ -46,7 +46,7 @@ function getReferralLevel(sponsorId: string, profile: Profile, profiles: Profile
 export const Route = createFileRoute("/_authenticated/admin/reprise-parrainage")({
   head: () => ({
     meta: [
-      { title: "Admin - Reprise parrainage — Nike" },
+      { title: "Admin - Reprise parrainage — Dior Parfums" },
       {
         name: "description",
         content: "Reprendre une commission de parrainage accordée lors de l'achat d'un filleul.",

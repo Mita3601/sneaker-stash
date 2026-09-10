@@ -9,12 +9,12 @@ import { CREDIT_TYPES, fcfa, shortDate, TX_LABELS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/account-details")({
   head: () => ({
     meta: [
-      { title: "Détails du compte — Nike" },
+      { title: "Détails du compte — Dior Parfums" },
       {
         name: "description",
         content: "Consultez vos revenus du jour, sur 7 jours et sur 30 jours.",
       },
-      { property: "og:title", content: "Détails du compte — Nike" },
+      { property: "og:title", content: "Détails du compte — Dior Parfums" },
       { property: "og:description", content: "Tous vos mouvements de compte au même endroit." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

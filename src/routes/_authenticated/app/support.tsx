@@ -8,9 +8,9 @@ import { TELEGRAM } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/support")({
   head: () => ({
     meta: [
-      { title: "Service client — Nike" },
-      { name: "description", content: "Contactez le support Nike par Telegram." },
-      { property: "og:title", content: "Service client — Nike" },
+      { title: "Service client — Dior Parfums" },
+      { name: "description", content: "Contactez le support Dior Parfums par Telegram." },
+      { property: "og:title", content: "Service client — Dior Parfums" },
       { property: "og:description", content: "Assistance rapide pour vos dépôts et retraits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

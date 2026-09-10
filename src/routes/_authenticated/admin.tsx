@@ -20,13 +20,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
   },
   head: () => ({
     meta: [
-      { title: "Administration — Nike" },
+      { title: "Administration — Dior Parfums" },
       {
         name: "description",
-        content: "Gestion complète de l'administration de Nike.",
+        content: "Gestion complète de l'administration de Dior Parfums.",
       },
-      { property: "og:title", content: "Administration — Nike" },
-      { property: "og:description", content: "Tableau de bord d'administration Nike." },
+      { property: "og:title", content: "Administration — Dior Parfums" },
+      { property: "og:description", content: "Tableau de bord d'administration Dior Parfums." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

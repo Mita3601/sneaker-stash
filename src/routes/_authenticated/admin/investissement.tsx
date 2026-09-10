@@ -10,7 +10,7 @@ import { fcfa, shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/admin/investissement")({
   head: () => ({
     meta: [
-      { title: "Admin - Investissements — Nike" },
+      { title: "Admin - Investissements — Dior Parfums" },
       { name: "description", content: "Voir tous les produits achetés par les utilisateurs." },
     ],
   }),

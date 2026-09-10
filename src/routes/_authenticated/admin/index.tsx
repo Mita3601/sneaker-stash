@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
-      { title: "Tableau de bord admin — Nike" },
+      { title: "Tableau de bord admin — Dior Parfums" },
       { name: "description", content: "Accueil du tableau de bord administrateur." },
-      { property: "og:title", content: "Tableau de bord admin — Nike" },
+      { property: "og:title", content: "Tableau de bord admin — Dior Parfums" },
       {
         property: "og:description",
         content: "Gestion des utilisateurs, dépôts, retraits et promotions.",

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/admin/users")({
   head: () => ({
     meta: [
-      { title: "Admin - Utilisateurs — Nike" },
+      { title: "Admin - Utilisateurs — Dior Parfums" },
       { name: "description", content: "Gérez les utilisateurs de la plateforme." },
     ],
   }),
