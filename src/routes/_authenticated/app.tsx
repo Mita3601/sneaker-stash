@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
 function AppLayout() {
   return (
-    <div className="mx-auto min-h-screen max-w-[430px] bg-background pb-20">
+    <div className="mx-auto min-h-screen max-w-[430px] bg-background pb-20 shadow-[0_0_80px_color-mix(in_oklab,var(--primary)_10%,transparent)]">
       <Outlet />
       <BottomNav />
     </div>
