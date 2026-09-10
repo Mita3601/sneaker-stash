@@ -12,12 +12,12 @@ import { fcfa, maskPhone, shortDate } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/team")({
   head: () => ({
     meta: [
-      { title: "Mon équipe — Nike" },
+      { title: "Mon cercle — Dior" },
       {
         name: "description",
         content: "Partagez votre code de parrainage et gagnez 27 %, 2 % et 1 % sur 3 niveaux.",
       },
-      { property: "og:title", content: "Mon équipe — Nike" },
+      { property: "og:title", content: "Mon cercle — Dior" },
       {
         property: "og:description",
         content: "Commissions instantanées sur 3 niveaux de parrainage.",
@@ -132,14 +132,14 @@ function Team() {
   return (
     <>
       <header className="flex items-center justify-between px-4 pt-4">
-        <h1 className="text-xl font-extrabold">Mon équipe</h1>
+        <h1 className="text-3xl font-medium">Mon cercle</h1>
         <div>
           <Btn
             variant="ghost"
             className="px-3 py-2 text-xs"
             onClick={() => setShowDetail((s) => !s)}
           >
-            Mon équipe
+            Voir le cercle
           </Btn>
         </div>
       </header>

@@ -11,12 +11,12 @@ import { fcfa } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/missions")({
   head: () => ({
     meta: [
-      { title: "Missions et récompenses — Nike" },
+      { title: "Missions et récompenses — Dior" },
       {
         name: "description",
-        content: "Invitez des investisseurs et achetez des paires VIP pour débloquer des bonus.",
+        content: "Invitez des membres et sélectionnez des parfums VIP pour débloquer des bonus.",
       },
-      { property: "og:title", content: "Missions et récompenses — Nike" },
+      { property: "og:title", content: "Missions et récompenses — Dior" },
       { property: "og:description", content: "Des bonus jusqu'à 10 000 FCFA à débloquer." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

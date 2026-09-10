@@ -3,21 +3,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import hero from "@/assets/hero-banner.jpg";
+import hero from "@/assets/dior-auth.jpg";
 import { Card, Empty, StatTile } from "@/components/ui-kit";
 import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { countdown, fcfa, nextClaimAt, SNEAKER_IMAGES, shortDate } from "@/lib/app";
+import { countdown, fcfa, nextClaimAt, PERFUME_NAMES, SNEAKER_IMAGES, shortDate } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/my-products")({
   head: () => ({
     meta: [
-      { title: "Mes paires — Nike" },
+      { title: "Mes parfums — Dior" },
       {
         name: "description",
-        content: "Suivez vos paires actives et réclamez vos revenus quotidiens.",
+        content: "Suivez vos parfums actifs et vos revenus quotidiens.",
       },
-      { property: "og:title", content: "Mes paires — Nike" },
+      { property: "og:title", content: "Mes parfums — Dior" },
       {
         property: "og:description",
         content: "Revenus quotidiens à réclamer toutes les 24 heures.",
@@ -113,28 +113,28 @@ function MyProducts() {
       <header className="relative overflow-hidden text-primary-foreground">
         <img
           src={hero}
-          alt="Sneakers Nike en fond"
-          width={1088}
-          height={608}
+           alt="Collection de parfums Dior"
+           width={1536}
+           height={1024}
           className="h-44 w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-deep/70" />
         <div className="absolute inset-0 flex flex-col justify-end px-4 py-5">
-          <p className="text-2xl font-extrabold">{fcfa(dailyTotal)}</p>
-          <p className="text-xs opacity-90">Les revenus quotidiens générés par mes paires</p>
+          <p className="font-display text-4xl font-medium">{fcfa(dailyTotal)}</p>
+          <p className="text-xs opacity-90">Les revenus quotidiens générés par mes parfums</p>
         </div>
       </header>
 
       <div className="grid grid-cols-2 gap-3 p-4">
-        <StatTile label="Nombre de paires" value={items.length} />
+        <StatTile label="Nombre de parfums" value={items.length} />
         <StatTile label="Mes revenus" value={fcfa(earned)} />
       </div>
 
       <section className="space-y-3 px-4 pb-6">
         {items.length === 0 ? (
           <Empty
-            title="Aucune paire pour le moment"
-            text="Achetez une paire dans le catalogue pour commencer à générer des revenus."
+            title="Aucun parfum pour le moment"
+            text="Sélectionnez un parfum dans la collection pour commencer à générer des revenus."
           />
         ) : (
           items.map((item) => {
@@ -143,7 +143,7 @@ function MyProducts() {
               <Card key={item.id} className="flex gap-3">
                 <img
                   src={SNEAKER_IMAGES[item.products?.vip_level ?? "VIP1"]}
-                  alt={item.products?.name ?? "Paire"}
+                   alt={PERFUME_NAMES[item.products?.vip_level ?? "VIP1"] ?? "Parfum"}
                   loading="lazy"
                   width={512}
                   height={512}
@@ -151,7 +151,7 @@ function MyProducts() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold">{item.products?.name}</p>
+                     <p className="font-display text-xl font-semibold">{PERFUME_NAMES[item.products?.vip_level ?? "VIP1"] ?? item.products?.name}</p>
                     <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-primary">
                       {item.products?.vip_level}
                     </span>

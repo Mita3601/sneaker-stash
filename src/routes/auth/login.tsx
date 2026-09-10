@@ -6,19 +6,19 @@ import { toast } from "sonner";
 import { Btn, Field, inputClass } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { COUNTRIES, phoneToEmail } from "@/lib/app";
-import copyImage from "@/assets/image copy.png";
+import copyImage from "@/assets/dior-auth.jpg";
 
 export const Route = createFileRoute("/auth/login")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Connexion — Nike" },
+      { title: "Connexion — Dior Parfums" },
       {
         name: "description",
-        content: "Connectez-vous à votre compte Nike avec votre numéro de téléphone.",
+        content: "Connectez-vous à votre espace Dior Parfums avec votre numéro de téléphone.",
       },
-      { property: "og:title", content: "Connexion — Nike" },
-      { property: "og:description", content: "Accédez à vos paires et à vos revenus quotidiens." },
+      { property: "og:title", content: "Connexion — Dior Parfums" },
+      { property: "og:description", content: "Accédez à vos parfums et à vos revenus quotidiens." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -62,37 +62,39 @@ function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <section className="relative overflow-hidden bg-slate-950">
+    <main className="min-h-screen bg-background text-foreground">
+      <section className="relative min-h-screen overflow-hidden bg-primary">
         <div className="absolute inset-0">
           <img
             src={copyImage}
-            alt="Nike invest background"
-            className="h-full w-full object-contain object-center opacity-90"
+            alt="Collection de parfums dans un décor nocturne"
+            width={1536}
+            height={1024}
+            className="h-full w-full object-cover object-center opacity-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/75 to-slate-950/95" />
+          <div className="absolute inset-0 bg-primary/70" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 sm:py-14 lg:px-12 lg:py-18">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr] lg:items-end">
-            <div className="max-w-2xl text-white">
-              <p className="text-sm uppercase tracking-[0.45em] text-slate-300">Nike Invest</p>
-              <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Just invest it
+            <div className="max-w-2xl text-primary-foreground">
+              <p className="text-sm uppercase tracking-[0.32em] text-accent">Dior · Collection privée</p>
+              <h1 className="mt-4 text-5xl font-medium italic sm:text-6xl lg:text-7xl">
+                Retrouvez votre collection
               </h1>
               <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                Accédez à Nike, gérez vos investissements sneakers et suivez vos gains en temps réel
-                avec une interface fluide et confidentielle.
+                Accédez à votre sélection de parfums et suivez vos revenus dans un espace élégant
+                et confidentiel.
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-[40px] border border-white/12 bg-white/95 shadow-[0_40px_120px_rgba(15,23,42,0.18)]">
+            <div className="overflow-hidden rounded-md border border-primary-foreground/15 bg-card/95 shadow-glow backdrop-blur">
               <div className="px-8 pt-10 sm:px-10">
-                <h2 className="text-4xl font-black uppercase tracking-tight text-slate-950">
-                  CONNEXION
+                <h2 className="text-4xl font-medium text-foreground">
+                  Connexion
                 </h2>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">
-                  Connectez-vous simplement pour retrouver votre portefeuille et vos paires.
+                  Connectez-vous pour retrouver votre portefeuille et vos parfums.
                 </p>
               </div>
 
