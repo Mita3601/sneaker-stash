@@ -9,7 +9,7 @@ import { AnnouncementModal } from "@/components/AnnouncementModal";
 import { Btn, Card } from "@/components/ui-kit";
 import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { fcfa, PERFUME_NAMES, SNEAKER_IMAGES } from "@/lib/app";
+import { fcfa, PERFUME_IMAGES, PERFUME_NAMES } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
@@ -156,7 +156,7 @@ function Products() {
                   <article key={p.id} className={index % 2 ? "mt-8" : ""}>
                     <div className="relative overflow-hidden bg-card ring-1 ring-border">
                       <img
-                        src={SNEAKER_IMAGES[level]}
+                        src={PERFUME_IMAGES[level]}
                         alt={`Flacon ${PERFUME_NAMES[level] ?? p.name}`}
                         loading="lazy"
                         width={768}

@@ -8,7 +8,7 @@ import vip7 from "@/assets/perfume-vip7.jpg";
 import vip8 from "@/assets/perfume-vip8.jpg";
 import vip9 from "@/assets/perfume-vip9.jpg";
 
-export const SNEAKER_IMAGES: Record<string, string> = {
+export const PERFUME_IMAGES: Record<string, string> = {
   VIP1: vip1,
   VIP2: vip2,
   VIP3: vip3,

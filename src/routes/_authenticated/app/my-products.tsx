@@ -7,7 +7,7 @@ import hero from "@/assets/dior-auth.jpg";
 import { Card, Empty, StatTile } from "@/components/ui-kit";
 import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { countdown, fcfa, nextClaimAt, PERFUME_NAMES, SNEAKER_IMAGES, shortDate } from "@/lib/app";
+import { countdown, fcfa, nextClaimAt, PERFUME_IMAGES, PERFUME_NAMES, shortDate } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/my-products")({
   head: () => ({
@@ -142,7 +142,7 @@ function MyProducts() {
             return (
               <Card key={item.id} className="flex gap-3">
                 <img
-                  src={SNEAKER_IMAGES[item.products?.vip_level ?? "VIP1"]}
+                  src={PERFUME_IMAGES[item.products?.vip_level ?? "VIP1"]}
                    alt={PERFUME_NAMES[item.products?.vip_level ?? "VIP1"] ?? "Parfum"}
                   loading="lazy"
                   width={512}

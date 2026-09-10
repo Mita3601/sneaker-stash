@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/app/change-password")({
   head: () => ({
     meta: [
       { title: "Changer mon mot de passe — Dior Parfums" },
-      { name: "description", content: "Mettez à jour le mot de passe de votre compte Nike." },
+      { name: "description", content: "Mettez à jour le mot de passe de votre compte Dior Parfums." },
       { property: "og:title", content: "Changer mon mot de passe — Dior Parfums" },
       { property: "og:description", content: "Protégez votre compte avec un mot de passe fort." },
       { property: "og:type", content: "website" },
