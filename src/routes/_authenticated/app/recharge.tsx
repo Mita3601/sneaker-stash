@@ -1,13 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
 import { fcfa } from "@/lib/app";
 import { checkDepositStatus, getPaymentOptions, initiateDeposit } from "@/lib/payments.functions";
-import { isWave, MIN_DEPOSIT, payCountry, type DepositInit } from "@/lib/payments";
+import {
+  CURRENCIES,
+  DEPOSIT_TIMEOUT_MINUTES,
+  MIN_DEPOSIT,
+  type DepositInit,
+} from "@/lib/payments";
 
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
@@ -16,12 +21,12 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
       {
         name: "description",
         content:
-          "Rechargez votre compte en mobile money : Orange, MTN, Moov, Wave. Validation instantanée.",
+          "Rechargez votre solde par mobile money (Orange, MTN, Moov, Wave). Crédit automatique dès confirmation.",
       },
       { property: "og:title", content: "Recharge — Dior Parfums" },
       {
         property: "og:description",
-        content: "Dépôt mobile money instantané, sans quitter l'application.",
+        content: "Dépôt mobile money sécurisé, solde crédité automatiquement.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -30,7 +35,11 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [4000, 8000, 12000, 15000, 20000, 50000];
+const PRESETS = [1000, 4000, 8000, 12000, 20000, 50000];
+const POLL_MS = 5000;
+const TIMEOUT_MS = DEPOSIT_TIMEOUT_MINUTES * 60 * 1000;
+
+type Phase = "idle" | "pending" | "success" | "failed";
 
 function Recharge() {
   const qc = useQueryClient();
@@ -44,148 +53,75 @@ function Recharge() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const countries = options.data?.countries ?? [];
-  const popupRef = useRef<Window | null>(null);
-  const [countryCode, setCountryCode] = useState("");
-  const [operator, setOperator] = useState("");
+  const currencies = options.data?.currencies ?? CURRENCIES;
+  const gatewayReady = options.data ? options.data.gatewayConfigured : true;
+
   const [amount, setAmount] = useState("");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<DepositInit | null>(null);
-  const [leekError, setLeekError] = useState<string | null>(null);
-
-  const country = payCountry(countries, countryCode || countries[0]?.code || "");
-  const operators = country?.operators ?? [];
-  const activeOperator = operator || operators[0]?.name || "";
-  const wave = isWave(activeOperator);
-  const dial = country?.dial.replace("+", "") ?? "";
-
-  function onCountryChange(code: string) {
-    setCountryCode(code);
-    setOperator("");
-    setStep(null);
-  }
-
-  function openPaymentPopup(url?: string) {
-    const targetUrl = url ?? "about:blank";
-
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.location.href = targetUrl;
-      return popupRef.current;
-    }
-
-    const popup = window.open(targetUrl, "_blank");
-    if (!popup) {
-      toast.error("Pop-up bloqué. Autorisez les pop-ups puis réessayez.");
-      return null;
-    }
-
-    popupRef.current = popup;
-    return popup;
-  }
+  const [currency, setCurrency] = useState("XOF");
+  const [deposit, setDeposit] = useState<DepositInit | null>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const startedAt = useRef<number>(0);
 
   const pay = useMutation({
-    mutationFn: async (withOtp: boolean) => {
-      const digits = phone.replace(/\D/g, "");
-      const fullPhone = digits.startsWith(dial) ? digits : `${dial}${digits}`;
-
-      return initiate({
-        data: {
-          amount: Number(amount),
-          countryCode: country!.code,
-          currency: country!.currency,
-          operator: activeOperator,
-          phone: fullPhone,
-          ...(withOtp ? { otp } : {}),
-        },
-      });
-    },
+    mutationFn: () => initiate({ data: { amount: Number(amount), currency } }),
     onSuccess: (result) => {
-      setStep(result);
-      setOtp("");
-      setLeekError(null);
-      if (result.type === "otp") {
-        toast.info(result.message);
-        if (popupRef.current && !popupRef.current.closed) {
-          popupRef.current.close();
-          popupRef.current = null;
-        }
-        return;
-      }
+      setDeposit(result);
+      setPhase("pending");
+      startedAt.current = Date.now();
       qc.invalidateQueries({ queryKey: ["transactions"] });
-      if (result.type === "redirect") {
-        toast.success("La page de paiement s'ouvre maintenant.");
-        openPaymentPopup(result.url);
-      } else {
-        toast.success("Demande envoyée — validez la demande reçue sur votre téléphone");
-      }
-    },
-    onError: (error: Error) => {
-      // If LeekPay secret key missing, surface explicit UI message
-      if (error.message && /leekpay secret key not configured/i.test(error.message)) {
-        setLeekError("LeekPay non configuré sur le serveur. Définissez LEEKPAY_SECRET_KEY.");
-      } else {
-        toast.error(error.message);
-      }
-      if (popupRef.current && !popupRef.current.closed) {
-        popupRef.current.close();
-        popupRef.current = null;
-      }
-    },
-  });
-
-  const refresh = useMutation({
-    mutationFn: async () => {
-      if (!step) return { status: "unknown", amount: 0 };
-      return checkStatus({ data: { reference: step.reference } });
-    },
-    onSuccess: (result) => {
-      qc.invalidateQueries({ queryKey: ["profile"] });
-      qc.invalidateQueries({ queryKey: ["transactions"] });
-      if (result.status === "approved") {
-        toast.success(`Recharge validée : ${fcfa(result.amount)}`);
-        setStep(null);
-        setAmount("");
-        setPhone("");
-      } else if (result.status === "rejected") {
-        toast.error("Paiement refusé par l'opérateur");
-        setStep(null);
-      } else {
-        toast.info("Paiement toujours en attente de confirmation");
-      }
+      window.open(result.paymentLink, "_blank", "noopener,noreferrer");
+      toast.success("La page de paiement s'ouvre dans un nouvel onglet.");
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
+  // Polling du statut interne toutes les 5 s, arrêté au bout de 15 minutes.
+  useEffect(() => {
+    if (phase !== "pending" || !deposit) return;
+
+    let cancelled = false;
+    const timer = setInterval(async () => {
+      if (Date.now() - startedAt.current > TIMEOUT_MS) {
+        clearInterval(timer);
+        setPhase("failed");
+        return;
+      }
+      try {
+        const result = await checkStatus({ data: { reference: deposit.reference } });
+        if (cancelled) return;
+        if (result.status === "approved") {
+          setPhase("success");
+          qc.invalidateQueries({ queryKey: ["profile"] });
+          qc.invalidateQueries({ queryKey: ["transactions"] });
+          toast.success(`Recharge validée : ${fcfa(result.amount)}`);
+        } else if (result.status === "rejected") {
+          setPhase("failed");
+          qc.invalidateQueries({ queryKey: ["transactions"] });
+        }
+      } catch {
+        // on retentera au prochain cycle
+      }
+    }, POLL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [phase, deposit, checkStatus, qc]);
+
+  function reset() {
+    setDeposit(null);
+    setPhase("idle");
+    setAmount("");
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!country) {
-      toast.error("Paiement momentanément indisponible");
-      return;
-    }
     if (Number(amount) < MIN_DEPOSIT) {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
-    if (!wave && phone.replace(/\D/g, "").length < 8) {
-      toast.error("Numéro mobile money invalide");
-      return;
-    }
-
-    if (!popupRef.current || popupRef.current.closed) {
-      const popup = openPaymentPopup(); // open a blank popup before redirecting to the payment page
-      if (!popup) return;
-    }
-    pay.mutate(false);
-  }
-
-  function onConfirmOtp(e: React.FormEvent) {
-    e.preventDefault();
-    if (otp.replace(/\D/g, "").length < 4) {
-      toast.error("Entrez le code de confirmation");
-      return;
-    }
-    pay.mutate(true);
+    pay.mutate();
   }
 
   return (
@@ -193,40 +129,26 @@ function Recharge() {
       <SubHeader title="Recharger" />
       <div className="space-y-3 p-4">
         <Card>
-          <p className="text-sm font-bold">Paiement mobile money instantané</p>
+          <p className="text-sm font-bold">Recharge par lien de paiement sécurisé</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Choisissez votre pays et votre opérateur, entrez le montant (minimum {fcfa(MIN_DEPOSIT)}
-            ) puis validez la demande reçue sur votre téléphone. Votre solde est crédité
-            automatiquement dès la confirmation du paiement.
+            Indiquez un montant (minimum {fcfa(MIN_DEPOSIT)}), puis payez avec Orange Money, MTN,
+            Moov ou Wave sur la page sécurisée. Votre solde est crédité automatiquement dès la
+            confirmation. Sans confirmation sous {DEPOSIT_TIMEOUT_MINUTES} minutes, la demande est
+            annulée.
           </p>
         </Card>
 
-        {options.isLoading ? (
+        {!gatewayReady ? (
           <Card>
-            <p className="text-xs text-muted-foreground">Chargement des moyens de paiement…</p>
-          </Card>
-        ) : null}
-
-        {leekError ? (
-          <Card>
-            <p className="text-sm font-bold">LeekPay non configuré</p>
-            <p className="mt-1 text-xs text-muted-foreground">{leekError}</p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Contactez l'administrateur ou définissez la variable d'environnement{" "}
-              <strong>LEEKPAY_SECRET_KEY</strong>.
+            <p className="text-sm font-bold">Paiement momentanément indisponible</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              La passerelle de paiement n&apos;est pas encore activée. Réessayez plus tard ou
+              contactez le service client.
             </p>
           </Card>
         ) : null}
 
-        {options.isError ? (
-          <Card>
-            <p className="text-xs text-destructive">
-              Impossible de charger les moyens de paiement. Réessayez dans un instant.
-            </p>
-          </Card>
-        ) : null}
-
-        {country ? (
+        {phase === "idle" ? (
           <Card>
             <form onSubmit={onSubmit} className="space-y-4">
               <Field label="Montant">
@@ -234,7 +156,7 @@ function Recharge() {
                   inputMode="numeric"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                  placeholder="200"
+                  placeholder={String(MIN_DEPOSIT)}
                   className={inputClass}
                 />
               </Field>
@@ -252,108 +174,74 @@ function Recharge() {
                 ))}
               </div>
 
-              <Field label="Pays">
+              <Field label="Devise">
                 <select
-                  value={country.code}
-                  onChange={(e) => onCountryChange(e.target.value)}
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
                   className={inputClass}
                 >
-                  {countries.map((c) => (
+                  {currencies.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.flag} {c.name}
+                      {c.label}
                     </option>
                   ))}
                 </select>
               </Field>
 
-              <Field label="Opérateur">
-                <select
-                  value={activeOperator}
-                  onChange={(e) => {
-                    setOperator(e.target.value);
-                    setStep(null);
-                  }}
-                  className={inputClass}
-                >
-                  {operators.map((o) => (
-                    <option key={o.name} value={o.name}>
-                      {o.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              {wave ? (
-                <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-                  Avec Wave, un lien de paiement s&apos;ouvre pour confirmer le montant.
-                </p>
-              ) : null}
-
-              <Field label="Numéro mobile money" hint={`Indicatif ${country.dial}`}>
-                <input
-                  inputMode="numeric"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
-                  placeholder="07 00 00 00 00"
-                  className={inputClass}
-                />
-              </Field>
-
-              <Btn full disabled={pay.isPending}>
-                {pay.isPending ? "Traitement..." : `Payer ${amount ? fcfa(Number(amount)) : ""}`}
+              <Btn full disabled={pay.isPending || !gatewayReady}>
+                {pay.isPending
+                  ? "Création du paiement..."
+                  : `Recharger ${amount ? fcfa(Number(amount)) : ""}`}
               </Btn>
             </form>
           </Card>
         ) : null}
 
-        {step?.type === "otp" ? (
-          <Card className="space-y-4">
-            <div>
-              <p className="text-sm font-bold">Confirmation requise</p>
-              <p className="mt-1 text-xs text-muted-foreground">{step.message}</p>
-              {step.ussdCode ? (
-                <p className="mt-2 rounded-xl bg-secondary p-3 text-center text-lg font-black text-primary">
-                  {step.ussdCode}
-                </p>
-              ) : null}
-            </div>
-            <form onSubmit={onConfirmOtp} className="space-y-3">
-              <Field label="Code de confirmation" hint="Valable 15 minutes">
-                <input
-                  inputMode="numeric"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  placeholder="123456"
-                  className={inputClass}
-                />
-              </Field>
-              <Btn full disabled={pay.isPending}>
-                {pay.isPending ? "Vérification..." : "Confirmer le paiement"}
-              </Btn>
-            </form>
-          </Card>
-        ) : null}
-
-        {step && (step.type === "pending" || step.type === "redirect") ? (
+        {phase === "pending" && deposit ? (
           <Card className="space-y-3">
-            <p className="text-sm font-bold">Paiement en attente</p>
+            <p className="text-sm font-bold">En attente de confirmation…</p>
             <p className="text-xs text-muted-foreground">
-              Référence : {step.reference}
+              Référence : {deposit.reference}
               <br />
-              {step.message}
+              Montant : {fcfa(deposit.amount)} {deposit.currency}
+              <br />
+              Ne fermez pas cette page : votre solde sera crédité automatiquement.
             </p>
-            {step.type === "redirect" ? (
-              <a
-                href={step.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-xl bg-secondary p-3 text-center text-xs font-bold text-primary"
-              >
-                Ouvrir la page de paiement
-              </a>
-            ) : null}
-            <Btn full variant="ghost" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
-              {refresh.isPending ? "Vérification..." : "J'ai payé — vérifier"}
+            <a
+              href={deposit.paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-xl bg-secondary p-3 text-center text-xs font-bold text-primary"
+            >
+              Réouvrir la page de paiement
+            </a>
+            <Btn full variant="ghost" onClick={reset}>
+              Annuler
+            </Btn>
+          </Card>
+        ) : null}
+
+        {phase === "success" ? (
+          <Card className="space-y-3">
+            <p className="text-sm font-bold">Recharge confirmée</p>
+            <p className="text-xs text-muted-foreground">
+              Votre solde a été crédité. Vous pouvez maintenant choisir votre parfum.
+            </p>
+            <Btn full onClick={reset}>
+              Nouvelle recharge
+            </Btn>
+          </Card>
+        ) : null}
+
+        {phase === "failed" ? (
+          <Card className="space-y-3">
+            <p className="text-sm font-bold">Paiement non confirmé</p>
+            <p className="text-xs text-muted-foreground">
+              Aucune confirmation reçue dans le délai de {DEPOSIT_TIMEOUT_MINUTES} minutes. Aucun
+              montant n&apos;a été débité de votre solde.
+            </p>
+            <Btn full onClick={reset}>
+              Réessayer
             </Btn>
           </Card>
         ) : null}
