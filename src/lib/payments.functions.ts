@@ -50,8 +50,8 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
 
 /** Crée un lien de paiement Ashtech Pay et enregistre le dépôt en attente. */
 export const initiateDeposit = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => validate(raw))
   .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => validate(raw))
   .handler(async ({ data, context }): Promise<DepositInit> => {
     const { createHostedPayment, pickField } = await import("@/lib/ashtech.server");
 
@@ -109,12 +109,12 @@ export const initiateDeposit = createServerFn({ method: "POST" })
 
 /** Statut interne du dépôt : vérifie la passerelle et applique la règle des 15 minutes. */
 export const checkDepositStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => ({
     reference: String((raw as { reference?: string })?.reference ?? "")
       .trim()
       .slice(0, 80),
   }))
-  .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<DepositStatusResult> => {
     const { data: rows, error } = await context.supabase
       .from("transactions")
