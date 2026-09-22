@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * Tâche planifiée (toutes les 1-2 min) : vérifie les dépôts encore en attente
- * auprès d'Ashtech Pay, crédite ceux qui sont payés et marque échoués ceux
- * dépassant 15 minutes.
+ * Filet de sécurité (à appeler toutes les 1-2 min) : revérifie les dépôts encore
+ * en attente auprès de MoneyFusion, crédite ceux qui sont payés et marque échoués
+ * ceux dépassant 15 minutes.
  */
 export const Route = createFileRoute("/api/public/jobs/expire-deposits")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = (process.env["ASHTECHPAY_HP_LIVE_KEY"] ?? "").trim();
+        const secret = (
+          process.env["CRON_SECRET"] ??
+          process.env["MONEYFUSION_API_URL"] ??
+          ""
+        ).trim();
         const provided = (
+          request.headers.get("x-cron-secret") ??
           request.headers.get("x-job-key") ??
           request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
           ""
@@ -29,13 +34,13 @@ export const Route = createFileRoute("/api/public/jobs/expire-deposits")({
           .limit(500);
         if (error) return new Response(error.message, { status: 500 });
 
-        const { syncDeposit } = await import("@/lib/ashtech-sync.server");
+        const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
         let credited = 0;
         let expired = 0;
 
         for (const row of rows ?? []) {
           const meta = (row.metadata ?? {}) as Record<string, unknown>;
-          if (meta["gateway"] !== "ashtechpay") continue;
+          if (meta["gateway"] !== "moneyfusion") continue;
           if (!row.reference) continue;
           try {
             const result = await syncDeposit(row.reference);
