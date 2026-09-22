@@ -1,10 +1,10 @@
 import {
   FAILED_STATUSES,
-  getHostedPayment,
-  isAshtechConfigured,
+  getMoneyFusionStatus,
+  isMoneyFusionConfigured,
   readRemoteStatus,
   SUCCESS_STATUSES,
-} from "@/lib/ashtech.server";
+} from "@/lib/moneyfusion.server";
 
 /** Fenêtre métier : au-delà, le dépôt est marqué échoué même si la passerelle reste ouverte. */
 export const DEPOSIT_TIMEOUT_MS = 15 * 60 * 1000;
@@ -36,6 +36,7 @@ function normalize(status: string): DepositStatus["status"] {
   return "unknown";
 }
 
+/** Retrouve un dépôt par sa référence (token MoneyFusion) ou par ses métadonnées. */
 export async function findDeposit(reference: string): Promise<TxRow | null> {
   const db = await admin();
   const ref = reference.trim();
@@ -56,7 +57,7 @@ export async function findDeposit(reference: string): Promise<TxRow | null> {
     .select("id, status, amount, reference, created_at, metadata")
     .eq("type", "deposit")
     .or(
-      `metadata->>payment_id.eq.${ref},metadata->>local_reference.eq.${ref},metadata->>gateway_transaction_id.eq.${ref},metadata->>slug.eq.${ref}`,
+      `metadata->>token.eq.${ref},metadata->>local_reference.eq.${ref},metadata->>gateway_transaction_id.eq.${ref}`,
     )
     .order("created_at", { ascending: false })
     .limit(1);
@@ -64,22 +65,24 @@ export async function findDeposit(reference: string): Promise<TxRow | null> {
   return (byMeta.data?.[0] as unknown as TxRow) ?? null;
 }
 
-async function settle(tx: TxRow, success: boolean, event: string) {
+async function settle(tx: TxRow, success: boolean, event: string, extra?: Record<string, unknown>) {
   const db = await admin();
+  // Idempotent : gateway_confirm_deposit ignore un dépôt déjà traité.
   await db.rpc("gateway_confirm_deposit", {
     _reference: tx.reference ?? "",
     _success: success,
     _metadata: {
-      gateway: "ashtechpay",
+      gateway: "moneyfusion",
       gateway_event: event,
       credited_at: success ? new Date().toISOString() : null,
+      ...(extra ?? {}),
     },
   });
 }
 
 /**
- * Vérifie un dépôt en attente auprès d'Ashtech Pay, crédite le solde si le paiement
- * est confirmé, et force l'échec passé 15 minutes.
+ * Vérifie un dépôt en attente auprès de MoneyFusion, crédite le solde automatiquement
+ * si le paiement est confirmé, et force l'échec passé 15 minutes.
  */
 export async function syncDeposit(reference: string): Promise<DepositStatus> {
   const tx = await findDeposit(reference);
@@ -94,17 +97,23 @@ export async function syncDeposit(reference: string): Promise<DepositStatus> {
   if (tx.status !== "pending") return result(normalize(tx.status));
 
   const meta = tx.metadata ?? {};
-  const paymentId = String(meta["payment_id"] ?? meta["gateway_transaction_id"] ?? "");
+  const token = String(meta["token"] ?? meta["gateway_transaction_id"] ?? tx.reference ?? "");
 
-  if (paymentId && isAshtechConfigured()) {
+  if (token && isMoneyFusionConfigured()) {
     try {
-      const remote = readRemoteStatus((await getHostedPayment(paymentId)).body);
-      if (SUCCESS_STATUSES.includes(remote)) {
-        await settle(tx, true, "verified_success");
+      const remote = await getMoneyFusionStatus(token);
+      const status = readRemoteStatus(remote.body);
+      if (SUCCESS_STATUSES.includes(status)) {
+        await settle(tx, true, "verified_paid", {
+          numero_transaction:
+            ((remote.body["data"] as Record<string, unknown> | undefined) ?? {})[
+              "numeroTransaction"
+            ] ?? null,
+        });
         return result("approved");
       }
-      if (FAILED_STATUSES.includes(remote)) {
-        await settle(tx, false, `verified_${remote}`);
+      if (FAILED_STATUSES.includes(status)) {
+        await settle(tx, false, `verified_${status.replace(/\s+/g, "_")}`);
         return result("rejected");
       }
     } catch {

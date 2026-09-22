@@ -2,16 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
-  CURRENCIES,
   MIN_DEPOSIT,
   type DepositInit,
   type DepositStatusResult,
-  type PayCurrency,
 } from "@/lib/payments";
 
 type Input = {
   amount: number;
-  currency: string;
+  phone: string;
+  name: string;
 };
 
 function validate(raw: unknown): Input {
@@ -20,11 +19,15 @@ function validate(raw: unknown): Input {
   if (!Number.isFinite(amount) || amount < MIN_DEPOSIT || amount > 5_000_000) {
     throw new Error(`Montant invalide (minimum ${MIN_DEPOSIT} FCFA).`);
   }
-  const currency = String(data.currency ?? "XOF").toUpperCase();
-  if (!CURRENCIES.some((c) => c.code === currency)) {
-    throw new Error("Devise invalide.");
+  const phone = String(data.phone ?? "").replace(/[^\d+]/g, "");
+  if (phone.replace(/\D/g, "").length < 8) {
+    throw new Error("Numéro mobile money invalide.");
   }
-  return { amount, currency };
+  const name = String(data.name ?? "").trim().slice(0, 80);
+  if (name.length < 2) {
+    throw new Error("Nom du titulaire requis.");
+  }
+  return { amount, phone, name };
 }
 
 function newReference() {
@@ -33,76 +36,63 @@ function newReference() {
     .toUpperCase()}`;
 }
 
-/** Devises disponibles et disponibilité de la passerelle. */
+/** Disponibilité de la passerelle et montant minimum. */
 export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{
-    currencies: PayCurrency[];
-    minDeposit: number;
-    gatewayConfigured: boolean;
-  }> => {
+  async (): Promise<{ minDeposit: number; gatewayConfigured: boolean }> => {
     return {
-      currencies: CURRENCIES,
       minDeposit: MIN_DEPOSIT,
-      gatewayConfigured: Boolean((process.env["ASHTECHPAY_HP_LIVE_KEY"] ?? "").trim()),
+      gatewayConfigured: Boolean((process.env["MONEYFUSION_API_URL"] ?? "").trim()),
     };
   },
 );
 
-/** Crée un lien de paiement Ashtech Pay et enregistre le dépôt en attente. */
+/** Crée un paiement MoneyFusion et enregistre le dépôt en attente. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => validate(raw))
   .handler(async ({ data, context }): Promise<DepositInit> => {
-    const { createHostedPayment, pickField } = await import("@/lib/ashtech.server");
+    const { createMoneyFusionPayment, pickField } = await import("@/lib/moneyfusion.server");
 
     const localRef = newReference();
-    const { status, body } = await createHostedPayment({
-      currency: data.currency,
+    const { status, body } = await createMoneyFusionPayment({
       amount: data.amount,
-      description: `Rechargement wallet ${localRef} - user ${context.userId}`,
-      is_fixed_amount: true,
       reference: localRef,
-      metadata: { local_reference: localRef, user_id: context.userId },
+      userId: context.userId,
+      phone: data.phone,
+      clientName: data.name,
+      description: `Recharge wallet ${localRef}`,
     });
 
     const message = String(body["message"] ?? "");
-    if (status >= 400) {
-      throw new Error(message || "Impossible de créer le lien de paiement. Réessayez.");
+    if (status >= 400 || body["statut"] === false) {
+      throw new Error(message || "Impossible de créer le paiement. Réessayez.");
     }
 
-    const paymentId = pickField(body, ["payment_id", "paymentId", "id"]);
-    const paymentLink = pickField(body, ["payment_link", "paymentLink", "url", "checkout_url"]);
-    const slug = pickField(body, ["slug"]);
-    const expiresAt = pickField(body, ["expires_at", "expiresAt"]) || null;
-
-    if (!paymentLink) {
+    const token = pickField(body, ["token", "tokenPay"]);
+    const paymentLink = pickField(body, ["url", "payment_url", "paymentUrl"]);
+    if (!token || !paymentLink) {
       throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
     }
 
-    const reference = paymentId || localRef;
-
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
       _amount: data.amount,
-      _reference: reference,
+      _reference: token,
       _metadata: {
-        gateway: "ashtechpay",
+        gateway: "moneyfusion",
         local_reference: localRef,
-        payment_id: paymentId || null,
-        gateway_transaction_id: paymentId || reference,
-        slug: slug || null,
+        token,
+        gateway_transaction_id: token,
         payment_link: paymentLink,
-        currency: data.currency,
-        expires_at: expiresAt,
+        numero_send: data.phone,
+        nom_client: data.name,
       },
     });
     if (error) throw new Error(error.message);
 
     return {
-      reference,
+      reference: token,
       paymentLink,
       amount: data.amount,
-      currency: data.currency,
-      expiresAt,
       message: message || "Finalisez le paiement sur la page qui s'ouvre.",
     };
   });
@@ -113,7 +103,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => ({
     reference: String((raw as { reference?: string })?.reference ?? "")
       .trim()
-      .slice(0, 80),
+      .slice(0, 120),
   }))
   .handler(async ({ data, context }): Promise<DepositStatusResult> => {
     const { data: rows, error } = await context.supabase
@@ -126,7 +116,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!rows?.[0]) return { status: "unknown", amount: 0, reference: data.reference };
 
-    const { syncDeposit } = await import("@/lib/ashtech-sync.server");
+    const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
     return syncDeposit(data.reference);
   });
 
@@ -135,11 +125,11 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => ({
     reference: String((raw as { reference?: string })?.reference ?? "")
       .trim()
-      .slice(0, 80),
+      .slice(0, 120),
   }))
   .handler(async ({ data }) => {
     if (!data.reference) return { ok: false, status: "unknown" as const };
-    const { syncDeposit } = await import("@/lib/ashtech-sync.server");
+    const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
     const result = await syncDeposit(data.reference);
     return { ok: result.status === "approved", ...result };
   });
