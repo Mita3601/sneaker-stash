@@ -5,14 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
+import { useCurrentUser } from "@/hooks/useSession";
+import { supabase } from "@/integrations/supabase/client";
 import { fcfa } from "@/lib/app";
 import { checkDepositStatus, getPaymentOptions, initiateDeposit } from "@/lib/payments.functions";
-import {
-  CURRENCIES,
-  DEPOSIT_TIMEOUT_MINUTES,
-  MIN_DEPOSIT,
-  type DepositInit,
-} from "@/lib/payments";
+import { DEPOSIT_TIMEOUT_MINUTES, MIN_DEPOSIT, type DepositInit } from "@/lib/payments";
 
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
@@ -43,6 +40,8 @@ type Phase = "idle" | "pending" | "success" | "failed";
 
 function Recharge() {
   const qc = useQueryClient();
+  const { data: authUser } = useCurrentUser();
+  const userId = authUser?.id ?? null;
   const loadOptions = useServerFn(getPaymentOptions);
   const initiate = useServerFn(initiateDeposit);
   const checkStatus = useServerFn(checkDepositStatus);
@@ -53,17 +52,35 @@ function Recharge() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const currencies = options.data?.currencies ?? CURRENCIES;
+  const profile = useQuery({
+    queryKey: ["profile", userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("id", userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const gatewayReady = options.data ? options.data.gatewayConfigured : true;
 
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("XOF");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const startedAt = useRef<number>(0);
 
+  useEffect(() => {
+    if (!phone && profile.data?.phone) setPhone(String(profile.data.phone));
+  }, [profile.data, phone]);
+
   const pay = useMutation({
-    mutationFn: () => initiate({ data: { amount: Number(amount), currency } }),
+    mutationFn: () => initiate({ data: { amount: Number(amount), phone, name } }),
     onSuccess: (result) => {
       setDeposit(result);
       setPhase("pending");
@@ -121,6 +138,14 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
+    if (phone.replace(/\D/g, "").length < 8) {
+      toast.error("Indiquez votre numéro mobile money");
+      return;
+    }
+    if (name.trim().length < 2) {
+      toast.error("Indiquez le nom du titulaire");
+      return;
+    }
     pay.mutate();
   }
 
@@ -129,7 +154,7 @@ function Recharge() {
       <SubHeader title="Recharger" />
       <div className="space-y-3 p-4">
         <Card>
-          <p className="text-sm font-bold">Recharge par lien de paiement sécurisé</p>
+          <p className="text-sm font-bold">Recharge mobile money sécurisée</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Indiquez un montant (minimum {fcfa(MIN_DEPOSIT)}), puis payez avec Orange Money, MTN,
             Moov ou Wave sur la page sécurisée. Votre solde est crédité automatiquement dès la
@@ -174,18 +199,23 @@ function Recharge() {
                 ))}
               </div>
 
-              <Field label="Devise">
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
+              <Field label="Numéro mobile money">
+                <input
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ""))}
+                  placeholder="07XXXXXXXX"
                   className={inputClass}
-                >
-                  {currencies.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                />
+              </Field>
+
+              <Field label="Nom du titulaire">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nom et prénoms"
+                  className={inputClass}
+                />
               </Field>
 
               <Btn full disabled={pay.isPending || !gatewayReady}>
@@ -203,7 +233,7 @@ function Recharge() {
             <p className="text-xs text-muted-foreground">
               Référence : {deposit.reference}
               <br />
-              Montant : {fcfa(deposit.amount)} {deposit.currency}
+              Montant : {fcfa(deposit.amount)}
               <br />
               Ne fermez pas cette page : votre solde sera crédité automatiquement.
             </p>

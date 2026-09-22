@@ -45,6 +45,7 @@ import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 import { Route as ApiPublicJobsExpireDepositsRouteImport } from './routes/api/public/jobs/expire-deposits'
 import { Route as ApiPublicWebhooksAshtechpayRouteImport } from './routes/api/public/webhooks/ashtechpay'
+import { Route as ApiPublicWebhooksMoneyfusionRouteImport } from './routes/api/public/webhooks/moneyfusion'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -245,6 +246,12 @@ const ApiPublicWebhooksAshtechpayRoute =
     path: '/api/public/webhooks/ashtechpay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksMoneyfusionRoute =
+  ApiPublicWebhooksMoneyfusionRouteImport.update({
+    id: '/api/public/webhooks/moneyfusion',
+    path: '/api/public/webhooks/moneyfusion',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
+  '/api/public/webhooks/moneyfusion': typeof ApiPublicWebhooksMoneyfusionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
+  '/api/public/webhooks/moneyfusion': typeof ApiPublicWebhooksMoneyfusionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -356,6 +365,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/ashtechpay': typeof ApiPublicWebhooksAshtechpayRoute
+  '/api/public/webhooks/moneyfusion': typeof ApiPublicWebhooksMoneyfusionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/ashtechpay'
+    | '/api/public/webhooks/moneyfusion'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/ashtechpay'
+    | '/api/public/webhooks/moneyfusion'
   id:
     | '__root__'
     | '/'
@@ -468,6 +480,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/ashtechpay'
+    | '/api/public/webhooks/moneyfusion'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -478,6 +491,7 @@ export interface RootRouteChildren {
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiPublicJobsExpireDepositsRoute: typeof ApiPublicJobsExpireDepositsRoute
   ApiPublicWebhooksAshtechpayRoute: typeof ApiPublicWebhooksAshtechpayRoute
+  ApiPublicWebhooksMoneyfusionRoute: typeof ApiPublicWebhooksMoneyfusionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -734,6 +748,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksAshtechpayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/moneyfusion': {
+      id: '/api/public/webhooks/moneyfusion'
+      path: '/api/public/webhooks/moneyfusion'
+      fullPath: '/api/public/webhooks/moneyfusion'
+      preLoaderRoute: typeof ApiPublicWebhooksMoneyfusionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -831,6 +852,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRegisterRoute: AuthRegisterRoute,
   ApiPublicJobsExpireDepositsRoute: ApiPublicJobsExpireDepositsRoute,
   ApiPublicWebhooksAshtechpayRoute: ApiPublicWebhooksAshtechpayRoute,
+  ApiPublicWebhooksMoneyfusionRoute: ApiPublicWebhooksMoneyfusionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
