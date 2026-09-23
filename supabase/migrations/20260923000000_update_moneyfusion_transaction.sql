@@ -40,6 +40,7 @@ as $$
 declare
   _match boolean;
   _new_meta jsonb := '{}';
+  _tx_ref text := null;
 begin
   -- Compute whether a matching row exists and isn't final.
   select exists(
@@ -60,7 +61,7 @@ begin
   end if;
 
   -- Build new metadata by preserving existing fields and setting gateway_transaction_id and raw payload when provided
-  select coalesce(metadata, '{}'::jsonb) into _new_meta
+  select coalesce(metadata, '{}'::jsonb), reference into _new_meta, _tx_ref
   from transactions
   where type = 'deposit'
     and (
@@ -92,6 +93,14 @@ begin
       or (metadata->> 'gateway_transaction_id') = p_token
     )
     and coalesce(status, '') not in ('paid', 'failure');
+  -- If the new status corresponds to a successful payment, call the existing
+  -- gateway_confirm_deposit function (owned by the DB) to run the business
+  -- logic that credits the user's balance. Using SECURITY DEFINER allows
+  -- this function to invoke gateway_confirm_deposit even if that RPC is
+  -- not directly executable by anon.
+  if p_new_status = 'paid' then
+    perform public.gateway_confirm_deposit(_reference := coalesce(_tx_ref, p_token), _success := true, _metadata := _new_meta);
+  end if;
 end;
 $$;
 
