@@ -81,9 +81,11 @@ begin
     _new_meta := jsonb_set(_new_meta, '{moneyfusion_raw_payload}', p_raw_payload, true);
   end if;
 
+  -- Update metadata only; do NOT set status here because
+  -- `gateway_confirm_deposit` expects the transaction to still be 'pending'
+  -- and will perform the status update and crediting atomically.
   update transactions
-  set status = p_new_status,
-      metadata = _new_meta,
+  set metadata = _new_meta,
       updated_at = now()
   where type = 'deposit'
     and (
@@ -93,13 +95,14 @@ begin
       or (metadata->> 'gateway_transaction_id') = p_token
     )
     and coalesce(status, '') not in ('paid', 'failure');
-  -- If the new status corresponds to a successful payment, call the existing
-  -- gateway_confirm_deposit function (owned by the DB) to run the business
-  -- logic that credits the user's balance. Using SECURITY DEFINER allows
-  -- this function to invoke gateway_confirm_deposit even if that RPC is
-  -- not directly executable by anon.
+
+  -- Call gateway_confirm_deposit to run the business logic (crediting, commissions, etc.).
+  -- Pass _success = true when p_new_status signals a successful payment ('paid'),
+  -- otherwise pass false to mark as rejected.
   if p_new_status = 'paid' then
     perform public.gateway_confirm_deposit(_reference := coalesce(_tx_ref, p_token), _success := true, _metadata := _new_meta);
+  else
+    perform public.gateway_confirm_deposit(_reference := coalesce(_tx_ref, p_token), _success := false, _metadata := _new_meta);
   end if;
 end;
 $$;
