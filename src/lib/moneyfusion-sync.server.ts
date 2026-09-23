@@ -25,8 +25,9 @@ type TxRow = {
 };
 
 async function admin() {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin;
+  // Utilise le client public (publishable key) pour appeler les RPCs autorisés à `anon`.
+  const { supabase } = await import("@/integrations/supabase/client");
+  return supabase;
 }
 
 function normalize(status: string): DepositStatus["status"] {
@@ -68,16 +69,37 @@ export async function findDeposit(reference: string): Promise<TxRow | null> {
 async function settle(tx: TxRow, success: boolean, event: string, extra?: Record<string, unknown>) {
   const db = await admin();
   // Idempotent : gateway_confirm_deposit ignore un dépôt déjà traité.
-  await db.rpc("gateway_confirm_deposit", {
-    _reference: tx.reference ?? "",
-    _success: success,
-    _metadata: {
-      gateway: "moneyfusion",
-      gateway_event: event,
-      credited_at: success ? new Date().toISOString() : null,
-      ...(extra ?? {}),
-    },
-  });
+  // On utilise d'abord l'RPC sécurisé pour mettre à jour le statut de la transaction
+  // sans nécessiter de SUPABASE_SERVICE_ROLE_KEY. La fonction SQL gèrera l'idempotence
+  // et sauvegardera le payload brut dans metadata.moneyfusion_raw_payload.
+  const token = (tx.metadata ?? {})["token"] ?? tx.reference ?? null;
+  try {
+    await db.rpc("update_moneyfusion_transaction", {
+      p_token: String(token ?? ""),
+      p_new_status: success ? "paid" : "failure",
+      p_gateway_transaction_id: (extra && (extra["numero_transaction"] as string)) ?? null,
+      p_raw_payload: {
+        gateway: "moneyfusion",
+        gateway_event: event,
+        credited_at: success ? new Date().toISOString() : null,
+        ...(extra ?? {}),
+      },
+    });
+  } catch (err) {
+    // Si l'appel RPC échoue pour une raison quelconque, retomber sur l'ancien RPC métier
+    // qui crédite le solde (si présent). Ne pas faire échouer le processus.
+    console.error("update_moneyfusion_transaction rpc failed:", err);
+    await db.rpc("gateway_confirm_deposit", {
+      _reference: tx.reference ?? "",
+      _success: success,
+      _metadata: {
+        gateway: "moneyfusion",
+        gateway_event: event,
+        credited_at: success ? new Date().toISOString() : null,
+        ...(extra ?? {}),
+      },
+    });
+  }
 }
 
 /**

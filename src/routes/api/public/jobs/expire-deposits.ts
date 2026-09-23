@@ -24,21 +24,20 @@ export const Route = createFileRoute("/api/public/jobs/expire-deposits")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: rows, error } = await supabaseAdmin
-          .from("transactions")
-          .select("reference, metadata, created_at")
-          .eq("type", "deposit")
-          .eq("status", "pending")
-          .order("created_at", { ascending: false })
-          .limit(500);
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: rows, error } = await supabase.rpc("list_pending_moneyfusion_deposits", {
+          p_limit: 500,
+        });
         if (error) return new Response(error.message, { status: 500 });
 
         const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
         let credited = 0;
         let expired = 0;
 
-        for (const row of rows ?? []) {
+        for (const row of (rows ?? []) as {
+          reference: string | null;
+          metadata: Record<string, unknown> | null;
+        }[]) {
           const meta = (row.metadata ?? {}) as Record<string, unknown>;
           if (meta["gateway"] !== "moneyfusion") continue;
           if (!row.reference) continue;
