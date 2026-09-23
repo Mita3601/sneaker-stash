@@ -43,27 +43,31 @@ export async function findDeposit(reference: string): Promise<TxRow | null> {
   const ref = reference.trim();
   if (!ref) return null;
 
-  const direct = await db
-    .from("transactions")
-    .select("id, status, amount, reference, created_at, metadata")
-    .eq("type", "deposit")
-    .eq("reference", ref)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (direct.data?.[0]) return direct.data[0] as unknown as TxRow;
-
-  const byMeta = await db
-    .from("transactions")
-    .select("id, status, amount, reference, created_at, metadata")
-    .eq("type", "deposit")
-    .or(
-      `metadata->>token.eq.${ref},metadata->>local_reference.eq.${ref},metadata->>gateway_transaction_id.eq.${ref}`,
-    )
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  return (byMeta.data?.[0] as unknown as TxRow) ?? null;
+  // Prefer the DB RPC which encapsulates the search (by reference or metadata)
+  // and is exposed to the public client as SECURITY DEFINER.
+  try {
+    const { data, error } = (await db.rpc("find_moneyfusion_transaction", { p_token: ref })) as {
+      data: Array<Record<string, any>> | null;
+      error: any;
+    };
+    if (error) {
+      console.error("find_moneyfusion_transaction rpc error:", error);
+      return null;
+    }
+    const row = data && data[0];
+    if (!row) return null;
+    return {
+      id: String(row.id),
+      status: String(row.status ?? ""),
+      amount: Number(row.amount ?? 0),
+      reference: row.reference ?? null,
+      created_at: String(row.created_at ?? ""),
+      metadata: (row.metadata ?? null) as Record<string, unknown> | null,
+    } as TxRow;
+  } catch (err) {
+    console.error("find_moneyfusion_transaction rpc failed:", err);
+    return null;
+  }
 }
 
 async function settle(tx: TxRow, success: boolean, event: string, extra?: Record<string, unknown>) {
