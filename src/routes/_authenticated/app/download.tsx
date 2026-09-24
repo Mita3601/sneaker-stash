@@ -51,11 +51,11 @@ function DownloadApp() {
           </ul>
         </Card>
 
-        <Link to="/app" className="block">
+        <a href="/app.apk" download="DiorParfumerie.apk" className="block">
           <Btn full>
             <Download className="size-4" /> Retour à la page compte
           </Btn>
-        </Link>
+        </a>
       </div>
     </>
   );
