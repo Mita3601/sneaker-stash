@@ -51,7 +51,7 @@ function DownloadApp() {
           </ul>
         </Card>
 
-        <a href="/app.apk" download="DiorParfumerie.apk" className="block">
+        <a href="/app.apk" target="_blank" rel="noopener noreferrer" className="block">
           <Btn full>
             <Download className="size-4" /> Retour à la page compte
           </Btn>
