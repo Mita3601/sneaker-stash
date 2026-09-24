@@ -33,7 +33,6 @@ export const PERFUME_NAMES: Record<string, string> = {
 };
 
 export const COUNTRIES = [
-  { code: "+225", label: "Côte d'Ivoire", flag: "🇨🇮" },
   { code: "+226", label: "Burkina Faso", flag: "🇧🇫" },
   { code: "+229", label: "Bénin", flag: "🇧🇯" },
   { code: "+237", label: "Cameroun", flag: "🇨🇲" },
