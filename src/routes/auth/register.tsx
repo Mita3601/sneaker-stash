@@ -54,29 +54,28 @@ function Register() {
       return;
     }
     const referralCode = code.trim().toUpperCase();
-    // Le code de parrainage est facultatif. Si fourni, on le valide.
-    if (referralCode && !/^[A-Za-z0-9]{6}$/.test(referralCode)) {
+    if (!referralCode) {
+      toast.error("Le code de parrainage est obligatoire");
+      return;
+    }
+    if (!/^[A-Za-z0-9]{6}$/.test(referralCode)) {
       toast.error("Code de parrainage invalide (6 caractères alphanumériques)");
       return;
     }
 
     setLoading(true);
     try {
-      let sponsorId: string | null = null;
-
-      if (referralCode) {
-        const { data: sponsor, error: sponsorError } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("referral_code", referralCode)
-          .maybeSingle();
-        if (sponsorError) throw sponsorError;
-        if (!sponsor) {
-          toast.error("Ce code de parrainage n'existe pas");
-          return;
-        }
-        sponsorId = sponsor.id;
+      const { data: sponsor, error: sponsorError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("referral_code", referralCode)
+        .maybeSingle();
+      if (sponsorError) throw sponsorError;
+      if (!sponsor) {
+        toast.error("Ce code de parrainage n'existe pas");
+        return;
       }
+      const sponsorId = sponsor.id;
 
       const { data: signUp, error: signUpError } = await supabase.auth.signUp({
         email: phoneToEmail(country, phone),
@@ -232,8 +231,8 @@ function Register() {
                   </Field>
 
                   <Field
-                    label="Code de parrainage (optionnel)"
-                    hint="Facultatif — 6 caractères alphanumériques si fourni"
+                    label="Code de parrainage"
+                    hint="Obligatoire — 6 caractères alphanumériques"
                     className="text-slate-900"
                   >
                     <input
