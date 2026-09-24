@@ -112,9 +112,12 @@ function Team() {
     },
   });
 
+  const referralCode = profile?.referral_code?.trim();
   const link =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/register?ref=${profile?.referral_code ?? ""}`
+      ? referralCode
+        ? `${window.location.origin}/auth/register?ref=${referralCode}`
+        : `${window.location.origin}/auth/register`
       : "";
 
   const counts = [team?.l1.length ?? 0, team?.l2.length ?? 0, team?.l3.length ?? 0];

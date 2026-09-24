@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -28,16 +28,25 @@ export const Route = createFileRoute("/auth/register")({
 
 function Register() {
   const navigate = useNavigate();
-  const search = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const referralParam =
+    typeof window !== "undefined"
+      ? (new URLSearchParams(window.location.search).get("ref") ?? "")
+      : "";
   const [country, setCountry] = useState(COUNTRIES[0]!.code);
   const selectedCountry = COUNTRIES.find((c) => c.code === country) ?? COUNTRIES[0]!;
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [code, setCode] = useState((search?.get("ref") ?? "").toUpperCase());
+  const [code, setCode] = useState(referralParam.toUpperCase());
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (referralParam) {
+      setCode(referralParam.toUpperCase());
+    }
+  }, [referralParam]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
