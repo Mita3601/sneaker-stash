@@ -45,9 +45,9 @@ export const WITHDRAW_MIN = 1000;
 export const WITHDRAW_FEE_RATE = 0.15;
 
 export const TELEGRAM = {
-  group: "https://t.me/+pBYJdnffFM0xZjI0",
+  group: "https://t.me/+xCaHcQVYUhU2ZjJk",
   channel: "https://t.me/",
-  support: "https://t.me/UService_client_Nike",
+  support: "https://t.me/usr_marc",
 };
 
 export const WHATSAPP = {

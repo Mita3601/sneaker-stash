@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle, Headphones, MessageCircle, Send, Users } from "lucide-react";
 
 import { Btn, SubHeader } from "@/components/ui-kit";
-import copyImage from "@/assets/image copy.png";
+import copyImage from "@/assets/dior-auth.jpg";
 import { TELEGRAM } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/support")({
@@ -29,7 +29,7 @@ const steps = [
 const contacts = [
   { icon: Users, label: "Groupe Telegram", href: TELEGRAM.group },
   { icon: Send, label: "Canal Telegram", href: TELEGRAM.channel },
-  { icon: Headphones, label: "Support direct", href: TELEGRAM.support },
+  { icon: Headphones, label: "Support direct (@usr_marc)", href: TELEGRAM.support },
 ];
 
 function Support() {
@@ -37,13 +37,14 @@ function Support() {
     <>
       <SubHeader title="Service client" />
       <div className="space-y-6 p-4">
-        <div className="relative overflow-hidden rounded-[32px] bg-slate-950 shadow-2xl shadow-slate-950/20">
-          <img
-            src={copyImage}
-            alt="Service client background"
-            className="absolute inset-0 h-full w-full object-cover opacity-75"
-          />
-          <div className="absolute inset-0 bg-slate-950/85" />
+        <div
+          className="relative overflow-hidden rounded-[32px] bg-slate-950 shadow-2xl shadow-slate-950/20"
+          style={{
+            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.72)), url(${copyImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
           <div className="relative grid gap-4 px-6 py-8 sm:px-8 sm:py-10">
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-slate-300/90">Service client</p>
@@ -51,7 +52,7 @@ function Support() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h1 className="text-4xl font-black text-white sm:text-2xl">HORAIRES EN LIGNE</h1>
-                <p className="mt-2 text-lg font-medium text-slate-200/95">8 h - 22 h</p>
+                <p className="mt-2 text-lg font-medium text-slate-200/95">08 h - 17 h</p>
               </div>
             </div>
           </div>

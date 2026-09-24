@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
 import { Btn, Card, SubHeader } from "@/components/ui-kit";
-import hero from "@/assets/dior-hero.jpg";
+import hero from "@/assets/image1.jpg";
 
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({

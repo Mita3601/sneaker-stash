@@ -168,7 +168,7 @@ function Recharge() {
             <p className="text-sm font-bold">Paiement momentanément indisponible</p>
             <p className="mt-1 text-xs text-muted-foreground">
               La passerelle de paiement n&apos;est pas encore activée. Réessayez plus tard ou
-              contactez le service client.
+              contactez le service client via notre groupe Telegram ou @{/* placeholder */}usr_marc.
             </p>
           </Card>
         ) : null}

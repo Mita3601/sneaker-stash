@@ -54,11 +54,8 @@ function Register() {
       return;
     }
     const referralCode = code.trim().toUpperCase();
-    if (!referralCode) {
-      toast.error("Le code de parrainage est obligatoire");
-      return;
-    }
-    if (!/^[A-Za-z0-9]{6}$/.test(referralCode)) {
+    // Le code de parrainage est facultatif. Si fourni, on le valide.
+    if (referralCode && !/^[A-Za-z0-9]{6}$/.test(referralCode)) {
       toast.error("Code de parrainage invalide (6 caractères alphanumériques)");
       return;
     }
@@ -133,7 +130,9 @@ function Register() {
         <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 sm:py-14 lg:px-12 lg:py-18">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr] lg:items-end">
             <div className="max-w-2xl text-primary-foreground">
-              <p className="text-sm uppercase tracking-[0.32em] text-accent">Dior · Collection privée</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-accent">
+                Dior · Collection privée
+              </p>
               <h1 className="mt-4 text-5xl font-medium italic sm:text-6xl lg:text-7xl">
                 Composez votre collection
               </h1>
@@ -145,9 +144,7 @@ function Register() {
 
             <div className="overflow-hidden rounded-md border border-primary-foreground/15 bg-card/95 shadow-glow backdrop-blur">
               <div className="px-8 pt-10 sm:px-10">
-                <h2 className="text-4xl font-medium text-foreground">
-                  Inscription
-                </h2>
+                <h2 className="text-4xl font-medium text-foreground">Inscription</h2>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">
                   Créez votre compte Dior Parfums et recevez un bonus de bienvenue de 1 500 FCFA.
                 </p>
@@ -235,8 +232,8 @@ function Register() {
                   </Field>
 
                   <Field
-                    label="Code de parrainage"
-                    hint="Obligatoire — 6 caractères alphanumériques"
+                    label="Code de parrainage (optionnel)"
+                    hint="Facultatif — 6 caractères alphanumériques si fourni"
                     className="text-slate-900"
                   >
                     <input

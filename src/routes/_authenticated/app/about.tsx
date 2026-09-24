@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Gem, ShieldCheck, Sparkles } from "lucide-react";
 
+import hero from "@/assets/dior-auth.jpg";
 import { Btn, Card, SubHeader } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/app/about")({
@@ -42,24 +43,36 @@ function About() {
   return (
     <>
       <SubHeader title="À propos" />
-      <section className="bg-primary px-6 py-12 text-primary-foreground">
-        <p className="text-[9px] uppercase tracking-[0.3em] text-accent">La maison</p>
-        <h1 className="mt-3 text-5xl font-medium italic">Dior Parfums</h1>
-        <p className="mt-4 max-w-sm text-sm leading-6 text-primary-foreground/70">
-          Une expérience de collection inspirée de la haute parfumerie et pensée pour vos revenus quotidiens.
-        </p>
+      <section className="relative overflow-hidden bg-primary px-6 py-12 text-primary-foreground">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-40"
+          style={{ backgroundImage: `url(${hero})` }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,17,29,0.6),rgba(4,17,29,0.85))]" />
+        <div className="relative">
+          <p className="text-[9px] uppercase tracking-[0.3em] text-accent">La maison</p>
+          <h1 className="mt-3 text-5xl font-medium italic">Dior Parfums</h1>
+          <p className="mt-4 max-w-sm text-sm leading-6 text-primary-foreground/70">
+            Une expérience de collection inspirée de la haute parfumerie et pensée pour vos revenus
+            quotidiens.
+          </p>
+        </div>
       </section>
       <div className="space-y-4 p-4">
         {pillars.map(({ icon: Icon, title, text }, index) => (
           <Card key={title} className="relative overflow-hidden p-6">
-            <span className="absolute right-4 top-2 font-display text-6xl text-secondary">0{index + 1}</span>
+            <span className="absolute right-4 top-2 font-display text-6xl text-secondary">
+              0{index + 1}
+            </span>
             <Icon className="size-5 text-accent" strokeWidth={1.5} />
             <h2 className="relative mt-5 text-2xl font-medium">{title}</h2>
             <p className="relative mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
           </Card>
         ))}
         <Card className="bg-gradient-primary p-6 text-primary-foreground">
-          <p className="text-[9px] uppercase tracking-[0.25em] text-accent">Votre première essence</p>
+          <p className="text-[9px] uppercase tracking-[0.25em] text-accent">
+            Votre première essence
+          </p>
           <h2 className="mt-3 text-3xl font-medium">Commencez votre collection</h2>
           <p className="mt-3 text-sm leading-6 text-primary-foreground/75">
             Explorez les fragrances disponibles et composez progressivement votre portefeuille.
