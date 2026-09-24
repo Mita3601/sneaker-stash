@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
 import { Btn, Card, SubHeader } from "@/components/ui-kit";
-import hero from "@/assets/image.jpg";
+import hero from "@/assets/dior-hero.jpg";
 
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({
@@ -38,8 +38,9 @@ function Regulation() {
           <p className="text-base font-bold">Présentation</p>
           <p className="text-sm text-muted-foreground mb-3">
             Dior Parfums propose une expérience de collection inspirée de la haute parfumerie.
-            Sélectionnez des fragrances exclusives pour participer au développement de la plateforme,
-            générer un revenu quotidien et construire progressivement votre portefeuille.
+            Sélectionnez des fragrances exclusives pour participer au développement de la
+            plateforme, générer un revenu quotidien et construire progressivement votre
+            portefeuille.
           </p>
           <p className="text-sm text-muted-foreground mb-3">
             Lorsqu'un ami que vous invitez s'inscrit et investit, vous recevez immédiatement une
