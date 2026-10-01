@@ -54,12 +54,12 @@ function Withdraw() {
     queryKey: ["has-purchased-product", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { count, error } = await supabase
         .from("user_products")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user!.id);
       if (error) throw error;
-      return (data?.length ?? 0) > 0;
+      return (count ?? 0) > 0;
     },
   });
 
@@ -161,14 +161,8 @@ function Withdraw() {
           <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
             <li>Montant minimum de retrait : 1 000 FCFA.</li>
             <li>Frais de retrait : 15 % du montant retiré.</li>
-            <li>
-              Vous pouvez effectuer des retraits à tout moment, après avoir sélectionné au moins un
-              parfum.
-            </li>
-            <li>
-              Afin de protéger les intérêts de la plateforme et de ses membres, vous devez disposer
-               d’au moins un parfum actif pour activer la fonction de retrait.
-            </li>
+            <li>Maximum 2 retraits par jour.</li>
+            <li>La fonction de retrait est activée dès l’achat de votre premier parfum.</li>
           </ul>
         </Card>
       </div>

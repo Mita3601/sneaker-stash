@@ -57,12 +57,12 @@ export async function findDeposit(reference: string): Promise<TxRow | null> {
     const row = data && data[0];
     if (!row) return null;
     return {
-      id: String(row.id),
-      status: String(row.status ?? ""),
-      amount: Number(row.amount ?? 0),
-      reference: row.reference ?? null,
-      created_at: String(row.created_at ?? ""),
-      metadata: (row.metadata ?? null) as Record<string, unknown> | null,
+      id: String(row["id"]),
+      status: String(row["status"] ?? ""),
+      amount: Number(row["amount"] ?? 0),
+      reference: row["reference"] ?? null,
+      created_at: String(row["created_at"] ?? ""),
+      metadata: (row["metadata"] ?? null) as Record<string, unknown> | null,
     } as TxRow;
   } catch (err) {
     console.error("find_moneyfusion_transaction rpc failed:", err);
@@ -81,11 +81,11 @@ async function settle(tx: TxRow, success: boolean, event: string, extra?: Record
     await db.rpc("update_moneyfusion_transaction", {
       p_token: String(token ?? ""),
       p_new_status: success ? "paid" : "failure",
-      p_gateway_transaction_id: (extra && (extra["numero_transaction"] as string)) ?? null,
+      p_gateway_transaction_id: String((extra && extra["numero_transaction"]) ?? ""),
       p_raw_payload: {
         gateway: "moneyfusion",
         gateway_event: event,
-        credited_at: success ? new Date().toISOString() : null,
+      credited_at: success ? new Date().toISOString() : null,
         ...(extra ?? {}),
       },
     });
