@@ -81,11 +81,11 @@ async function settle(tx: TxRow, success: boolean, event: string, extra?: Record
     await db.rpc("update_moneyfusion_transaction", {
       p_token: String(token ?? ""),
       p_new_status: success ? "paid" : "failure",
-      p_gateway_transaction_id: (extra && (extra["numero_transaction"] as string)) ?? null,
+      p_gateway_transaction_id: String((extra && extra["numero_transaction"]) ?? ""),
       p_raw_payload: {
         gateway: "moneyfusion",
         gateway_event: event,
-      credited_at: success ? new Date().toISOString() : "",
+      credited_at: success ? new Date().toISOString() : null,
         ...(extra ?? {}),
       },
     });
