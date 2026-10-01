@@ -237,6 +237,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_credit_balance: number
           balance: number
           checkin_count: number
           country_code: string
@@ -252,6 +253,7 @@ export type Database = {
           total_withdrawals: number
         }
         Insert: {
+          admin_credit_balance?: number
           balance?: number
           checkin_count?: number
           country_code?: string
@@ -267,6 +269,7 @@ export type Database = {
           total_withdrawals?: number
         }
         Update: {
+          admin_credit_balance?: number
           balance?: number
           checkin_count?: number
           country_code?: string
