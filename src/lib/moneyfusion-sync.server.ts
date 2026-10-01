@@ -85,7 +85,7 @@ async function settle(tx: TxRow, success: boolean, event: string, extra?: Record
       p_raw_payload: {
         gateway: "moneyfusion",
         gateway_event: event,
-        credited_at: success ? new Date().toISOString() : null,
+      credited_at: success ? new Date().toISOString() : "",
         ...(extra ?? {}),
       },
     });
