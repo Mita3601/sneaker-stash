@@ -838,6 +838,7 @@ export type Database = {
           reference: string
         }[]
       }
+      process_all_yields: { Args: never; Returns: number }
       purchase_product: { Args: { _product_id: string }; Returns: Json }
       rebuild_profiles_and_user_products: { Args: never; Returns: undefined }
       refresh_missions: { Args: { _user_id: string }; Returns: undefined }
