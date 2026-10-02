@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
@@ -168,7 +169,7 @@ function Register() {
                     >
                       {COUNTRIES.map((c) => (
                         <option key={c.code} value={c.code}>
-                          {`${c.flag} ${c.label} (${c.code})`}
+                          {`${c.label} (${c.code})`}
                         </option>
                       ))}
                     </select>
@@ -176,8 +177,9 @@ function Register() {
 
                   <Field label="Numéro de téléphone" className="text-slate-900">
                     <div className="flex gap-3">
-                      <span className="inline-flex min-w-[72px] items-center justify-center rounded-[28px] border border-slate-200 bg-slate-100 px-3 py-3 text-slate-900">
-                        {selectedCountry.flag} {selectedCountry.code}
+                      <span className="inline-flex min-w-[92px] items-center justify-center gap-1.5 rounded-[28px] border border-slate-200 bg-slate-100 px-3 py-3 text-slate-900">
+                        <User className="size-4 text-slate-500" strokeWidth={1.5} />
+                        {selectedCountry.code}
                       </span>
                       <input
                         inputMode="numeric"
