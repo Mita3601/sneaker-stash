@@ -153,7 +153,7 @@ function Products() {
             : products.map((p, index) => {
                 const level = p.vip_level ?? "VIP1";
                 return (
-                  <article key={p.id} className={index % 2 ? "mt-8" : ""}>
+                  <article key={p.id}>
                     <div className="relative overflow-hidden bg-card ring-1 ring-border">
                       <img
                         src={PERFUME_IMAGES[level]}
