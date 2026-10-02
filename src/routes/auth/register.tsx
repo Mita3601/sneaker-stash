@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+
 
 import { Btn, Field, inputClass } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
