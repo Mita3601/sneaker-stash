@@ -844,6 +844,7 @@ export type Database = {
       prisca_settle_deposit: {
         Args: {
           _collected_amount: number
+          _key: string
           _metadata?: Json
           _ref_id: string
           _success: boolean
