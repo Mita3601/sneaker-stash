@@ -48,7 +48,7 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   },
 );
 
-/** Crée un paiement MoneyFusion et enregistre le dépôt en attente. */
+/** Crée un recouvrement PRISCA et enregistre le dépôt en attente. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => validate(raw))
