@@ -790,8 +790,8 @@ export type Database = {
         Args: { _amount: number; _user_id: string }
         Returns: undefined
       }
-      find_moneyfusion_transaction: {
-        Args: { p_token: string }
+      find_gateway_deposit: {
+        Args: { p_ref: string }
         Returns: {
           amount: number
           created_at: string
@@ -833,13 +833,22 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      list_pending_moneyfusion_deposits: {
-        Args: { p_limit?: number }
+      list_pending_gateway_deposits: {
+        Args: { p_gateway: string; p_limit?: number }
         Returns: {
           created_at: string
           metadata: Json
           reference: string
         }[]
+      }
+      prisca_settle_deposit: {
+        Args: {
+          _collected_amount: number
+          _metadata?: Json
+          _ref_id: string
+          _success: boolean
+        }
+        Returns: Json
       }
       process_all_yields: { Args: never; Returns: number }
       purchase_product: { Args: { _product_id: string }; Returns: Json }
@@ -851,15 +860,6 @@ export type Database = {
         Returns: Json
       }
       revoke_wrong_sponsor_products: { Args: never; Returns: undefined }
-      update_moneyfusion_transaction: {
-        Args: {
-          p_gateway_transaction_id: string
-          p_new_status: string
-          p_raw_payload: Json
-          p_token: string
-        }
-        Returns: undefined
-      }
     }
     Enums: {
       app_role: "user" | "promoter" | "admin"
