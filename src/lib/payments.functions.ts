@@ -41,59 +41,49 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ minDeposit: number; gatewayConfigured: boolean }> => {
     return {
       minDeposit: MIN_DEPOSIT,
-      gatewayConfigured: Boolean((process.env["MONEYFUSION_API_URL"] ?? "").trim()),
+      gatewayConfigured: ["PRISCA_API_HOST", "PRISCA_MERCHANT_CODE", "PRISCA_MERCHANT_SECRET"].every(
+        (k) => Boolean((process.env[k] ?? "").trim()),
+      ),
     };
   },
 );
 
-/** Crée un paiement MoneyFusion et enregistre le dépôt en attente. */
+/** Crée un recouvrement PRISCA et enregistre le dépôt en attente. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => validate(raw))
   .handler(async ({ data, context }): Promise<DepositInit> => {
-    const { createMoneyFusionPayment, pickField } = await import("@/lib/moneyfusion.server");
+    const { createCollection } = await import("@/lib/prisca.server");
+    const refId = newReference();
 
-    const localRef = newReference();
-    const { status, body } = await createMoneyFusionPayment({
-      amount: data.amount,
-      reference: localRef,
-      userId: context.userId,
-      phone: data.phone,
-      clientName: data.name,
-      description: `Recharge wallet ${localRef}`,
-    });
-
-    const message = String(body["message"] ?? "");
-    if (status >= 400 || body["statut"] === false) {
-      throw new Error(message || "Impossible de créer le paiement. Réessayez.");
-    }
-
-    const token = pickField(body, ["token", "tokenPay"]);
-    const paymentLink = pickField(body, ["url", "payment_url", "paymentUrl"]);
-    if (!token || !paymentLink) {
-      throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
-    }
-
+    // Enregistrement immédiat en attente, avant l'appel à PRISCA.
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
       _amount: data.amount,
-      _reference: token,
-      _metadata: {
-        gateway: "moneyfusion",
-        local_reference: localRef,
-        token,
-        gateway_transaction_id: token,
-        payment_link: paymentLink,
-        numero_send: data.phone,
-        nom_client: data.name,
-      },
+      _reference: refId,
+      _metadata: { gateway: "prisca", ref_id: refId, statut: "pending", pay_phone: data.phone, customer_name: data.name },
     });
     if (error) throw new Error(error.message);
 
+    let created;
+    try {
+      created = await createCollection({ refId, amount: data.amount, customerName: data.name, payPhone: data.phone });
+    } catch (e) {
+      const { settle } = await import("@/lib/prisca-sync.server");
+      await settle(refId, false, 0, { gateway_event: "create_failed" }).catch(() => null);
+      throw e;
+    }
+    if (!created.url && !created.account) {
+      throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
+    }
+
     return {
-      reference: token,
-      paymentLink,
+      reference: refId,
+      paymentLink: created.url,
+      account: created.account,
       amount: data.amount,
-      message: message || "Finalisez le paiement sur la page qui s'ouvre.",
+      message: created.url
+        ? "Finalisez le paiement sur la page qui s'ouvre."
+        : `Envoyez ${data.amount} FCFA au numéro ${created.account}.`,
     };
   });
 
@@ -116,7 +106,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!rows?.[0]) return { status: "unknown", amount: 0, reference: data.reference };
 
-    const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
+    const { syncDeposit } = await import("@/lib/prisca-sync.server");
     return syncDeposit(data.reference);
   });
 
@@ -129,7 +119,7 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data }) => {
     if (!data.reference) return { ok: false, status: "unknown" as const };
-    const { syncDeposit } = await import("@/lib/moneyfusion-sync.server");
+    const { syncDeposit } = await import("@/lib/prisca-sync.server");
     const result = await syncDeposit(data.reference);
     return { ok: result.status === "approved", ...result };
   });

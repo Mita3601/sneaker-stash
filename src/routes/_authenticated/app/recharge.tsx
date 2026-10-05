@@ -86,8 +86,12 @@ function Recharge() {
       setPhase("pending");
       startedAt.current = Date.now();
       qc.invalidateQueries({ queryKey: ["transactions"] });
-      window.open(result.paymentLink, "_blank", "noopener,noreferrer");
-      toast.success("La page de paiement s'ouvre dans un nouvel onglet.");
+      if (result.paymentLink) {
+        window.open(result.paymentLink, "_blank", "noopener,noreferrer");
+        toast.success("La page de paiement s'ouvre dans un nouvel onglet.");
+      } else {
+        toast.success(result.message);
+      }
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -237,6 +241,12 @@ function Recharge() {
               <br />
               Ne fermez pas cette page : votre solde sera crédité automatiquement.
             </p>
+            {deposit.account && !deposit.paymentLink ? (
+              <p className="rounded-xl bg-secondary p-3 text-center text-xs font-bold text-primary">
+                Envoyez {fcfa(deposit.amount)} au numéro {deposit.account}
+              </p>
+            ) : null}
+            {deposit.paymentLink ? (
             <a
               href={deposit.paymentLink}
               target="_blank"
@@ -245,6 +255,7 @@ function Recharge() {
             >
               Réouvrir la page de paiement
             </a>
+            ) : null}
             <Btn full variant="ghost" onClick={reset}>
               Annuler
             </Btn>
