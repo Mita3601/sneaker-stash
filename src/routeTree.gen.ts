@@ -44,7 +44,7 @@ import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 import { Route as ApiPublicJobsExpireDepositsRouteImport } from './routes/api/public/jobs/expire-deposits'
-import { Route as ApiPublicWebhooksPriscaRouteImport } from './routes/api/public/webhooks/prisca'
+import { Route as ApiPublicWebhooksGeniuspayRouteImport } from './routes/api/public/webhooks/geniuspay'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -239,11 +239,12 @@ const ApiPublicJobsExpireDepositsRoute =
     path: '/api/public/jobs/expire-deposits',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicWebhooksPriscaRoute = ApiPublicWebhooksPriscaRouteImport.update({
-  id: '/api/public/webhooks/prisca',
-  path: '/api/public/webhooks/prisca',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const ApiPublicWebhooksGeniuspayRoute =
+  ApiPublicWebhooksGeniuspayRouteImport.update({
+    id: '/api/public/webhooks/geniuspay',
+    path: '/api/public/webhooks/geniuspay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -280,7 +281,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
+  '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -315,7 +316,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
+  '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -354,7 +355,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
+  '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -393,7 +394,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/public/jobs/expire-deposits'
-    | '/api/public/webhooks/prisca'
+    | '/api/public/webhooks/geniuspay'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -428,7 +429,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/api/public/jobs/expire-deposits'
-    | '/api/public/webhooks/prisca'
+    | '/api/public/webhooks/geniuspay'
   id:
     | '__root__'
     | '/'
@@ -466,7 +467,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
     | '/api/public/jobs/expire-deposits'
-    | '/api/public/webhooks/prisca'
+    | '/api/public/webhooks/geniuspay'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -476,7 +477,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiPublicJobsExpireDepositsRoute: typeof ApiPublicJobsExpireDepositsRoute
-  ApiPublicWebhooksPriscaRoute: typeof ApiPublicWebhooksPriscaRoute
+  ApiPublicWebhooksGeniuspayRoute: typeof ApiPublicWebhooksGeniuspayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -726,11 +727,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsExpireDepositsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/webhooks/prisca': {
-      id: '/api/public/webhooks/prisca'
-      path: '/api/public/webhooks/prisca'
-      fullPath: '/api/public/webhooks/prisca'
-      preLoaderRoute: typeof ApiPublicWebhooksPriscaRouteImport
+    '/api/public/webhooks/geniuspay': {
+      id: '/api/public/webhooks/geniuspay'
+      path: '/api/public/webhooks/geniuspay'
+      fullPath: '/api/public/webhooks/geniuspay'
+      preLoaderRoute: typeof ApiPublicWebhooksGeniuspayRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -829,7 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   ApiPublicJobsExpireDepositsRoute: ApiPublicJobsExpireDepositsRoute,
-  ApiPublicWebhooksPriscaRoute: ApiPublicWebhooksPriscaRoute,
+  ApiPublicWebhooksGeniuspayRoute: ApiPublicWebhooksGeniuspayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

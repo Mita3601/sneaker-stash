@@ -41,49 +41,63 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ minDeposit: number; gatewayConfigured: boolean }> => {
     return {
       minDeposit: MIN_DEPOSIT,
-      gatewayConfigured: ["PRISCA_API_HOST", "PRISCA_MERCHANT_CODE", "PRISCA_MERCHANT_SECRET"].every(
-        (k) => Boolean((process.env[k] ?? "").trim()),
+      gatewayConfigured: ["GENIUSPAY_API_KEY", "GENIUSPAY_API_SECRET"].every((k) =>
+        Boolean((process.env[k] ?? "").trim()),
       ),
     };
   },
 );
 
-/** Crée un recouvrement PRISCA et enregistre le dépôt en attente. */
+/** Crée un paiement GeniusPay (mode checkout) et enregistre le dépôt en attente. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => validate(raw))
   .handler(async ({ data, context }): Promise<DepositInit> => {
-    const { createCollection } = await import("@/lib/prisca.server");
-    const refId = newReference();
+    const { createPayment } = await import("@/lib/geniuspay.server");
+    const orderId = newReference();
 
-    // Enregistrement immédiat en attente, avant l'appel à PRISCA.
+    // Numéro au format international (+225… par défaut, selon le profil).
+    let phone = data.phone;
+    if (!phone.startsWith("+")) {
+      const { data: prof } = await context.supabase
+        .from("profiles")
+        .select("country_code")
+        .eq("id", context.userId)
+        .maybeSingle();
+      const cc = String(prof?.country_code ?? "+225").replace(/[^\d+]/g, "") || "+225";
+      const digits = phone.replace(/\D/g, "");
+      const ccDigits = cc.replace(/\D/g, "");
+      phone = digits.startsWith(ccDigits) && digits.length > 10 ? `+${digits}` : `${cc}${digits}`;
+    }
+
+    const created = await createPayment({
+      amount: data.amount,
+      orderId,
+      userId: context.userId,
+      name: data.name,
+      phone,
+    });
+
     const { error } = await context.supabase.rpc("create_gateway_deposit", {
       _amount: data.amount,
-      _reference: refId,
-      _metadata: { gateway: "prisca", ref_id: refId, statut: "pending", pay_phone: data.phone, customer_name: data.name },
+      _reference: created.reference,
+      _metadata: {
+        gateway: "geniuspay",
+        ref_id: orderId,
+        order_id: orderId,
+        statut: "pending",
+        checkout_url: created.checkoutUrl,
+        numero_send: phone,
+        nom_client: data.name,
+      },
     });
     if (error) throw new Error(error.message);
 
-    let created;
-    try {
-      created = await createCollection({ refId, amount: data.amount, customerName: data.name, payPhone: data.phone });
-    } catch (e) {
-      const { settle } = await import("@/lib/prisca-sync.server");
-      await settle(refId, false, 0, { gateway_event: "create_failed" }).catch(() => null);
-      throw e;
-    }
-    if (!created.url && !created.account) {
-      throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
-    }
-
     return {
-      reference: refId,
-      paymentLink: created.url,
-      account: created.account,
+      reference: created.reference,
+      paymentLink: created.checkoutUrl,
       amount: data.amount,
-      message: created.url
-        ? "Finalisez le paiement sur la page qui s'ouvre."
-        : `Envoyez ${data.amount} FCFA au numéro ${created.account}.`,
+      message: "Finalisez le paiement sur la page qui s'ouvre.",
     };
   });
 
@@ -106,7 +120,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!rows?.[0]) return { status: "unknown", amount: 0, reference: data.reference };
 
-    const { syncDeposit } = await import("@/lib/prisca-sync.server");
+    const { syncDeposit } = await import("@/lib/geniuspay-sync.server");
     return syncDeposit(data.reference);
   });
 
@@ -119,7 +133,7 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data }) => {
     if (!data.reference) return { ok: false, status: "unknown" as const };
-    const { syncDeposit } = await import("@/lib/prisca-sync.server");
+    const { syncDeposit } = await import("@/lib/geniuspay-sync.server");
     const result = await syncDeposit(data.reference);
     return { ok: result.status === "approved", ...result };
   });
