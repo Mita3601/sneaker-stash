@@ -45,7 +45,6 @@ import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
 import { Route as ApiPublicJobsExpireDepositsRouteImport } from './routes/api/public/jobs/expire-deposits'
 import { Route as ApiPublicWebhooksGeniuspayRouteImport } from './routes/api/public/webhooks/geniuspay'
-import { Route as ApiPublicWebhooksPriscaRouteImport } from './routes/api/public/webhooks/prisca'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -246,11 +245,6 @@ const ApiPublicWebhooksGeniuspayRoute =
     path: '/api/public/webhooks/geniuspay',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicWebhooksPriscaRoute = ApiPublicWebhooksPriscaRouteImport.update({
-  id: '/api/public/webhooks/prisca',
-  path: '/api/public/webhooks/prisca',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -288,7 +282,6 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -324,7 +317,6 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -364,7 +356,6 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
-  '/api/public/webhooks/prisca': typeof ApiPublicWebhooksPriscaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -404,7 +395,6 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
-    | '/api/public/webhooks/prisca'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -440,7 +430,6 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
-    | '/api/public/webhooks/prisca'
   id:
     | '__root__'
     | '/'
@@ -479,7 +468,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
-    | '/api/public/webhooks/prisca'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -490,7 +478,6 @@ export interface RootRouteChildren {
   AuthRegisterRoute: typeof AuthRegisterRoute
   ApiPublicJobsExpireDepositsRoute: typeof ApiPublicJobsExpireDepositsRoute
   ApiPublicWebhooksGeniuspayRoute: typeof ApiPublicWebhooksGeniuspayRoute
-  ApiPublicWebhooksPriscaRoute: typeof ApiPublicWebhooksPriscaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -747,13 +734,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksGeniuspayRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/webhooks/prisca': {
-      id: '/api/public/webhooks/prisca'
-      path: '/api/public/webhooks/prisca'
-      fullPath: '/api/public/webhooks/prisca'
-      preLoaderRoute: typeof ApiPublicWebhooksPriscaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -851,7 +831,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRegisterRoute: AuthRegisterRoute,
   ApiPublicJobsExpireDepositsRoute: ApiPublicJobsExpireDepositsRoute,
   ApiPublicWebhooksGeniuspayRoute: ApiPublicWebhooksGeniuspayRoute,
-  ApiPublicWebhooksPriscaRoute: ApiPublicWebhooksPriscaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

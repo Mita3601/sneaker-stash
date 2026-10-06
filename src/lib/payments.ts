@@ -7,7 +7,7 @@ export const DEPOSIT_TIMEOUT_MINUTES = 15;
 export type DepositInit = {
   reference: string;
   paymentLink: string;
-  /** Numéro à créditer si PRISCA renvoie la méthode ACCOUNT. */
+  /** Numéro à créditer si la passerelle renvoie un numéro à créditer. */
   account?: string;
   amount: number;
   message: string;
