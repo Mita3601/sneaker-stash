@@ -805,6 +805,17 @@ export type Database = {
         Args: { _metadata?: Json; _reference: string; _success: boolean }
         Returns: Json
       }
+      gateway_settle_deposit: {
+        Args: {
+          _credit_amount: number
+          _gateway: string
+          _key: string
+          _metadata?: Json
+          _reference: string
+          _success: boolean
+        }
+        Returns: Json
+      }
       get_referral_tree: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -840,16 +851,6 @@ export type Database = {
           metadata: Json
           reference: string
         }[]
-      }
-      prisca_settle_deposit: {
-        Args: {
-          _collected_amount: number
-          _key: string
-          _metadata?: Json
-          _ref_id: string
-          _success: boolean
-        }
-        Returns: Json
       }
       process_all_yields: { Args: never; Returns: number }
       purchase_product: { Args: { _product_id: string }; Returns: Json }
