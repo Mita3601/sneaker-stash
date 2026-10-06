@@ -120,7 +120,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!rows?.[0]) return { status: "unknown", amount: 0, reference: data.reference };
 
-    const { syncDeposit } = await import("@/lib/prisca-sync.server");
+    const { syncDeposit } = await import("@/lib/geniuspay-sync.server");
     return syncDeposit(data.reference);
   });
 
@@ -133,7 +133,7 @@ export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data }) => {
     if (!data.reference) return { ok: false, status: "unknown" as const };
-    const { syncDeposit } = await import("@/lib/prisca-sync.server");
+    const { syncDeposit } = await import("@/lib/geniuspay-sync.server");
     const result = await syncDeposit(data.reference);
     return { ok: result.status === "approved", ...result };
   });

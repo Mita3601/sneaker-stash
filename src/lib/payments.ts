@@ -1,4 +1,4 @@
-/** Règles et types partagés du système de recharge (PRISCA — recouvrement mobile money). */
+/** Règles et types partagés du système de recharge (GeniusPay — checkout mobile money). */
 export const MIN_DEPOSIT = 200;
 
 /** Le dépôt est automatiquement marqué échoué au-delà de ce délai. */
