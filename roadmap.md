@@ -11,3 +11,7 @@
 - [x] Paiement Ashtech Pay (lien de paiement, webhook, expiration 15 min)
 - [x] Retirer l'ancien système LeekPay
 - [ ] Enregistrer la clé de paiement ASHTECHPAY_HP_LIVE_KEY (en attente du client)
+
+- [x] Remplacer PRISCA par GeniusPay (checkout, webhook signé, vérification, expiration 15 min)
+- [ ] Dépôt test réel après publication (attend l’utilisateur)
+- [ ] Passer les clés GeniusPay en live (attend l’utilisateur)
