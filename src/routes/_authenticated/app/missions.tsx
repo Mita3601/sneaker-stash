@@ -37,11 +37,14 @@ function Missions() {
   }, [user?.id, qc]);
 
   const { data: missions = [] } = useQuery({
-    queryKey: ["missions"],
+    queryKey: ["missions", user?.id],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
+      // Only this user's progress rows (never another member's).
       const { data, error } = await supabase
         .from("missions")
         .select("*, user_missions(*)")
+        .eq("user_missions.user_id", user!.id)
         .order("sort_order");
       if (error) throw error;
       return data;
