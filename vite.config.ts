@@ -8,9 +8,9 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // Public (publishable) backend settings baked into the build so a deploy never ships without them.
 const PUBLIC_SUPABASE_URL =
-  process.env.VITE_SUPABASE_URL || "https://vcocpyeavvfnsxylwqjq.supabase.co";
+  process.env['VITE_SUPABASE_URL'] || "https://vcocpyeavvfnsxylwqjq.supabase.co";
 const PUBLIC_SUPABASE_KEY =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_0yiMlZtcug2l9LaA8EtfwA_oT-jx-OP";
+  process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || "sb_publishable_0yiMlZtcug2l9LaA8EtfwA_oT-jx-OP";
 
 export default defineConfig({
   vite: {
