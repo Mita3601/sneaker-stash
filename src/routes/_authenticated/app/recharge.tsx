@@ -79,6 +79,20 @@ function Recharge() {
     if (!phone && profile.data?.phone) setPhone(String(profile.data.phone));
   }, [profile.data, phone]);
 
+  // Retour depuis la page de paiement GeniusPay.
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get("paiement");
+    if (!status) return;
+    qc.invalidateQueries({ queryKey: ["profile"] });
+    qc.invalidateQueries({ queryKey: ["transactions"] });
+    if (status === "success") {
+      toast.success("Paiement reçu : votre solde est crédité automatiquement dès confirmation.");
+    } else {
+      toast.error("Le paiement n'a pas abouti. Vous pouvez réessayer.");
+    }
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [qc]);
+
   const pay = useMutation({
     mutationFn: () => initiate({ data: { amount: Number(amount), phone, name } }),
     onSuccess: (result) => {
