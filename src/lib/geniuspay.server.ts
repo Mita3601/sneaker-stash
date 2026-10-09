@@ -41,8 +41,9 @@ export async function createPayment(input: {
   userId: string;
   name: string;
   phone: string;
+  returnBase?: string;
 }): Promise<GeniusCreated> {
-  const appUrl = getAppUrl();
+  const appUrl = (input.returnBase || getAppUrl()).replace(/\/$/, "");
   const res = await fetch(`${BASE_URL}/payments`, {
     method: "POST",
     headers: headers(),
@@ -50,8 +51,8 @@ export async function createPayment(input: {
       amount: input.amount,
       description: `Dépôt commande #${input.orderId}`,
       customer: { name: input.name, phone: input.phone },
-      success_url: `${appUrl}/merci?status=success&reference=${encodeURIComponent(input.orderId)}`,
-      error_url: `${appUrl}/merci?status=error&reference=${encodeURIComponent(input.orderId)}`,
+      success_url: `${appUrl}/app/recharge?paiement=success`,
+      error_url: `${appUrl}/app/recharge?paiement=error`,
       metadata: { order_id: input.orderId, user_id: input.userId },
     }),
   });

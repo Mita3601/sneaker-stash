@@ -70,7 +70,20 @@ export const initiateDeposit = createServerFn({ method: "POST" })
       phone = digits.startsWith(ccDigits) && digits.length > 10 ? `+${digits}` : `${cc}${digits}`;
     }
 
+    // Retour sur le même site que celui d'où part le client (sa session y est active).
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const req = getRequest();
+    let returnBase: string | undefined;
+    try {
+      const raw = req?.headers.get("origin") || req?.headers.get("referer") || "";
+      const u = new URL(raw);
+      if (u.protocol === "https:" || u.hostname === "localhost") returnBase = u.origin;
+    } catch {
+      returnBase = undefined;
+    }
+
     const created = await createPayment({
+      returnBase,
       amount: data.amount,
       orderId,
       userId: context.userId,
