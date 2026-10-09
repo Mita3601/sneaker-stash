@@ -83,7 +83,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
     }
 
     const created = await createPayment({
-      returnBase,
+      ...(returnBase ? { returnBase } : {}),
       amount: data.amount,
       orderId,
       userId: context.userId,
