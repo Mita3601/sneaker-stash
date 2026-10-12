@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Card, Empty, StatusPill, SubHeader } from "@/components/ui-kit";
+import { Empty, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useSession";
-import { fcfa, shortDate } from "@/lib/app";
+import { fcfa, STATUS_LABELS } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/recharge-history")({
   head: () => ({
@@ -27,7 +27,7 @@ function RechargeHistory() {
   const { data: authUser } = useCurrentUser();
   const userId = authUser?.id ?? null;
 
-  const { data: rows = [] } = useQuery({
+  const { data: rows = [], isLoading, isError } = useQuery({
     queryKey: ["transactions", "deposit", userId],
     enabled: Boolean(userId),
     queryFn: async () => {
@@ -46,25 +46,27 @@ function RechargeHistory() {
 
   return (
     <>
-      <SubHeader title="Enregistrements de recharge" />
-      <div className="p-4">
-        {rows.length === 0 ? (
+      <SubHeader title="Historique de recharge" />
+      <div className="space-y-3 p-3">
+        {isLoading ? <p className="py-6 text-center text-sm text-muted-foreground">Chargement…</p> : isError ? <Empty title="Historique indisponible" text="Veuillez réessayer dans quelques instants." /> : rows.length === 0 ? (
           <Empty title="Pas encore de données" text="Vos recharges apparaîtront ici." />
         ) : (
-          <Card className="divide-y divide-border p-0">
+          <>
             {rows.map((r) => (
-              <div key={r.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-bold">{fcfa(r.amount)}</p>
-                  <p className="text-xs text-muted-foreground">{shortDate(r.created_at)}</p>
-                  {r.reference ? (
-                    <p className="text-xs text-muted-foreground">Réf. {r.reference}</p>
-                  ) : null}
+              <article key={r.id} className="min-w-0 rounded-md border border-border bg-card px-3 py-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dotted border-border py-2 text-sm font-bold">
+                  <h2 className="font-sans text-sm font-bold">Ordre de dépôt</h2><span>{fcfa(r.amount)}</span>
                 </div>
-                <StatusPill status={r.status} />
-              </div>
+                <dl className="text-xs">
+                  <div className="flex items-start justify-between gap-3 border-b border-border py-2"><dt className="shrink-0">Réf. commande</dt><dd className="min-w-0 break-all text-right">{r.reference ?? r.id}</dd></div>
+                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>Canal</dt><dd className="text-right">Paiement en ligne</dd></div>
+                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>État</dt><dd className={r.status === "approved" || r.status === "paid" ? "text-success" : r.status === "rejected" || r.status === "failed" ? "text-destructive" : "text-warning-foreground"}>{r.status === "pending" ? "Recharge en cours" : r.status === "paid" ? "Validé" : r.status === "failed" ? "Échec" : STATUS_LABELS[r.status] ?? r.status}</dd></div>
+                  <div className="flex justify-between gap-3 py-2"><dt>Temps</dt><dd className="text-right">{new Date(r.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</dd></div>
+                </dl>
+              </article>
             ))}
-          </Card>
+            <p className="py-1 text-center text-sm text-muted-foreground">Plus aucune donnée</p>
+          </>
         )}
       </div>
     </>

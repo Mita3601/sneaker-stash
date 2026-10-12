@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarCheck, Headphones, TrendingUp, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CreditCard, UsersRound, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import hero from "@/assets/dior-hero.jpg";
 import { AnnouncementModal } from "@/components/AnnouncementModal";
-import { Btn, Card } from "@/components/ui-kit";
+import { Btn } from "@/components/ui-kit";
 import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { fcfa, PERFUME_IMAGES, PERFUME_NAMES } from "@/lib/app";
@@ -31,13 +30,6 @@ export const Route = createFileRoute("/_authenticated/app/")({
 function Products() {
   const qc = useQueryClient();
   const { data: profile } = useProfile();
-  const [now, setNow] = useState(Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -61,29 +53,10 @@ function Products() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const claimCheckin = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc("claim_daily_checkin");
-      if (error) throw error;
-      return data as { reward?: number };
-    },
-    onSuccess: (data) => {
-      toast.success(`Rituel validé : +${fcfa(data?.reward ?? 100)}`);
-      qc.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const lastCheckinMs = profile?.last_checkin_at ? new Date(profile.last_checkin_at).getTime() : 0;
-  const nextCheckinAt = lastCheckinMs ? lastCheckinMs + 24 * 60 * 60 * 1000 : 0;
-  const remaining = Math.max(0, nextCheckinAt - now);
-  const canCheckIn = Boolean(profile?.id) && (!profile?.last_checkin_at || remaining === 0);
-  const checkinDays = profile?.checkin_count ?? 0;
-
   return (
     <>
       <AnnouncementModal />
-      <section className="relative h-[460px] overflow-hidden text-primary-foreground">
+      <section className="relative h-[310px] overflow-hidden text-primary-foreground">
         <img
           src={hero}
           alt="Parfum couture dans une lumière dorée"
@@ -104,82 +77,45 @@ function Products() {
         </header>
         <div className="absolute inset-x-0 bottom-8 px-6">
           <p className="text-[9px] uppercase tracking-[0.3em] text-accent">L’art de la matière</p>
-          <h2 className="mt-3 text-4xl font-medium italic leading-none">Une collection rare,<br />un revenu quotidien</h2>
+          <h2 className="mt-3 text-3xl font-medium italic leading-none">Une collection rare,<br />un revenu quotidien</h2>
         </div>
       </section>
 
-      <section className="grid grid-cols-3 border-b border-border bg-card">
+      <section className="grid grid-cols-3 gap-2 px-4 py-4">
         {[
-          { to: "/app/recharge", label: "Recharger", icon: Wallet },
-          { to: "/app/withdraw", label: "Retirer", icon: TrendingUp },
-          { to: "/app/support", label: "Conciergerie", icon: Headphones },
+          { to: "/app/recharge", label: "Recharger", icon: CreditCard },
+          { to: "/app/withdraw", label: "Retirer", icon: Wallet },
+          { to: "/app/support", label: "Conciergerie", icon: UsersRound },
         ].map(({ to, label, icon: Icon }) => (
-          <Link key={to} to={to} className="border-r border-border px-2 py-5 text-center last:border-r-0">
-            <Icon className="mx-auto size-4 text-accent" strokeWidth={1.5} />
-            <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.08em]">{label}</span>
+          <Link key={to} to={to} className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-md bg-gradient-primary px-1 py-4 text-center text-primary-foreground transition hover:opacity-90">
+            <Icon className="size-6 text-accent" strokeWidth={2.5} />
+            <span className="text-xs font-bold">{label}</span>
           </Link>
         ))}
       </section>
 
-      <section className="px-5 py-8">
-        <Card className="border-l-2 border-l-accent bg-card p-5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">Rituel quotidien</p>
-              <p className="mt-2 font-display text-3xl font-medium">Jour {checkinDays}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {canCheckIn ? "Votre récompense de 100 FCFA est disponible." : `Prochain rituel dans ${new Date(remaining).toISOString().slice(11, 19)}`}
-              </p>
-            </div>
-            <Btn className="shrink-0 px-4" disabled={!canCheckIn || claimCheckin.isPending} onClick={() => claimCheckin.mutate()}>
-              <CalendarCheck className="size-4" />
-              {claimCheckin.isPending ? "Validation" : "Pointer"}
-            </Btn>
-          </div>
-        </Card>
-      </section>
-
-      <section className="px-5 pb-8">
-        <div className="mb-6 flex items-end justify-between border-b border-border pb-4">
-          <div>
-            <p className="text-[9px] uppercase tracking-[0.28em] text-muted-foreground">Les fragrances</p>
-            <h2 className="mt-1 text-4xl font-medium">La collection</h2>
-          </div>
-          <span className="pb-1 text-xs text-muted-foreground">01 — 09</span>
-        </div>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-7">
+      <section className="px-4 pb-8">
+        <h2 className="sr-only">La collection</h2>
+        <div className="grid grid-cols-2 gap-2">
           {isLoading
             ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-72 animate-pulse bg-secondary" />)
-            : products.map((p, index) => {
+            : products.map((p) => {
                 const level = p.vip_level ?? "VIP1";
                 return (
-                  <article key={p.id}>
-                    <div className="relative overflow-hidden bg-card ring-1 ring-border">
-                      <img
-                        src={PERFUME_IMAGES[level]}
-                        alt={`Flacon ${PERFUME_NAMES[level] ?? p.name}`}
-                        loading="lazy"
-                        width={768}
-                        height={768}
-                        className="aspect-[4/5] w-full object-cover transition duration-500 hover:scale-[1.03]"
-                      />
-                      <span className="absolute left-2 top-2 bg-primary/85 px-2 py-1 text-[8px] font-bold text-primary-foreground backdrop-blur">{level}</span>
+                  <article key={p.id} className="flex min-w-0 flex-col rounded-sm bg-card p-2.5 shadow-card ring-1 ring-border/60">
+                    <h3 className="text-center font-sans text-base font-bold">{level}</h3>
+                    <img src={PERFUME_IMAGES[level]} alt={`Flacon ${PERFUME_NAMES[level] ?? p.name}`} loading="lazy" width={768} height={768} className="mt-2 aspect-square w-full object-cover" />
+                    <p className="mt-2 min-h-10 text-center font-display text-lg font-medium leading-5">{PERFUME_NAMES[level] ?? p.name}</p>
+                    <div className="mt-2 space-y-1 text-xs">
+                      <p className="font-bold text-accent-foreground">{fcfa(p.daily_yield)}</p>
+                      <p className="text-muted-foreground">Revenu quotidien</p>
+                      <p className="pt-1 font-bold text-accent-foreground">{fcfa(p.total_yield)}</p>
+                      <p className="text-muted-foreground">Revenu total</p>
                     </div>
-                    <div className="pt-3">
-                      <h3 className="text-xl font-medium leading-none">{PERFUME_NAMES[level] ?? p.name}</h3>
-                      <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Édition {p.name}</p>
-                      <div className="mt-3 border-y border-border py-2 text-[11px]">
-                        <div className="flex justify-between"><span className="text-muted-foreground">Par jour</span><strong className="text-accent-foreground">{fcfa(p.daily_yield)}</strong></div>
-                        <div className="mt-1 flex justify-between"><span className="text-muted-foreground">Rendement</span><strong>{fcfa(p.total_yield)}</strong></div>
-                      </div>
-                      <p className="mt-3 font-display text-xl font-semibold">{fcfa(p.price)}</p>
-                      <Btn
-                        full
-                        className="mt-2 min-h-9 px-2 py-2 text-[10px]"
-                        disabled={!p.is_active || buy.isPending}
-                        onClick={() => p.is_active && buy.mutate(p.id)}
-                      >
-                        {p.is_active ? "Sélectionner" : "Bientôt disponible"}
+                    <p className="mt-4 text-lg font-bold">{fcfa(p.price)}</p>
+                    <div className="mt-auto flex justify-end pt-3">
+                      <Btn className="min-h-8 px-3 py-2 text-[10px] tracking-normal" disabled={!p.is_active || buy.isPending} onClick={() => p.is_active && buy.mutate(p.id)}>
+                        {p.is_active ? "Acheter" : "Bientôt disponible"}
                       </Btn>
                     </div>
                   </article>

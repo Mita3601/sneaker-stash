@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep gift redemption in a standalone reusable component, independent of the account page, so it can be placed elsewhere without losing its existing wallet flow.
