@@ -1,9 +1,9 @@
 # Roadmap
 
-- [ ] Refaire le compte selon la référence, préserver missions et cadeaux hors de cette page
-- [ ] Présenter chaque recharge comme un reçu détaillé
-- [ ] Adapter actions et vignettes de collection, retirer le pointage visible
-- [ ] Vérifier les pages avec une session connectée
+- [x] Refaire le compte selon la référence, préserver missions et cadeaux hors de cette page
+- [x] Présenter chaque recharge comme un reçu détaillé
+- [x] Adapter actions et vignettes de collection, retirer le pointage visible
+- [x] Vérifier les pages avec une session connectée
 
 - [x] Définir la direction visuelle Dior Editorial Archive
 - [x] Générer les visuels de parfums
