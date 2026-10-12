@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import hero from "@/assets/dior-auth.jpg";
-import { Card, Empty, StatTile } from "@/components/ui-kit";
+import { Empty, StatTile } from "@/components/ui-kit";
 import { useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { countdown, fcfa, nextClaimAt, PERFUME_IMAGES, PERFUME_NAMES, shortDate } from "@/lib/app";
+import { fcfa, nextClaimAt, PERFUME_IMAGES, PERFUME_NAMES } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/my-products")({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/app/my-products")({
       { property: "og:title", content: "Mes parfums — Dior" },
       {
         property: "og:description",
-        content: "Revenus quotidiens à réclamer toutes les 24 heures.",
+        content: "Vos parfums achetés et leurs revenus quotidiens automatiques.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -104,33 +104,27 @@ function MyProducts() {
     };
   }, [items, now, claim]);
 
-  const active = items.filter((i) => i.status === "active");
-  const dailyTotal = active.reduce((sum, i) => sum + Number(i.products?.daily_yield ?? 0), 0);
   const earned = items.reduce((sum, i) => sum + Number(i.total_earned ?? 0), 0);
 
   return (
     <>
-      <header className="relative overflow-hidden text-primary-foreground">
+      <header className="m-3 overflow-hidden rounded-sm">
+        <h1 className="sr-only">Mes parfums</h1>
         <img
           src={hero}
            alt="Collection de parfums Dior"
            width={1536}
            height={1024}
-          className="h-44 w-full object-cover"
+          className="aspect-[16/9] w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-deep/70" />
-        <div className="absolute inset-0 flex flex-col justify-end px-4 py-5">
-          <p className="font-display text-4xl font-medium">{fcfa(dailyTotal)}</p>
-          <p className="text-xs opacity-90">Les revenus quotidiens générés par mes parfums</p>
-        </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 p-4">
-        <StatTile label="Nombre de parfums" value={items.length} />
+      <div className="grid grid-cols-2 gap-3 px-4 py-2">
+        <StatTile label="Quantité achetée" value={items.length} />
         <StatTile label="Mes revenus" value={fcfa(earned)} />
       </div>
 
-      <section className="space-y-3 px-4 pb-6">
+      <section className="divide-y divide-border px-4 pb-6">
         {items.length === 0 ? (
           <Empty
             title="Aucun parfum pour le moment"
@@ -138,41 +132,29 @@ function MyProducts() {
           />
         ) : (
           items.map((item) => {
-            const ready = nextClaimAt(item.last_claim_date, item.purchase_date) <= now;
             return (
-              <Card key={item.id} className="flex gap-3">
+              <article key={item.id} className="grid grid-cols-[64px_minmax(0,1fr)] items-start gap-3 py-5">
                 <img
                   src={PERFUME_IMAGES[item.products?.vip_level ?? "VIP1"]}
                    alt={PERFUME_NAMES[item.products?.vip_level ?? "VIP1"] ?? "Parfum"}
                   loading="lazy"
                   width={512}
                   height={512}
-                  className="size-20 rounded-xl object-cover"
+                  className="mt-1 size-16 rounded-sm object-cover"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                     <p className="font-display text-xl font-semibold">{PERFUME_NAMES[item.products?.vip_level ?? "VIP1"] ?? item.products?.name}</p>
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-primary">
-                      {item.products?.vip_level}
-                    </span>
+                <div className="min-w-0">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                    <h2 className="min-w-0 font-sans text-sm font-bold">{item.products?.vip_level ?? item.products?.name}</h2>
+                    <span className="shrink-0 text-sm font-bold">{fcfa(item.products?.price)}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Acheté le {shortDate(item.purchase_date)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Gagné : {fcfa(item.total_earned)} / {fcfa(item.products?.total_yield)}
-                  </p>
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-primary">
-                      {item.status === "completed"
-                        ? "Terminé"
-                        : ready
-                          ? `Crédit automatique + ${fcfa(item.products?.daily_yield)}`
-                          : countdown(nextClaimAt(item.last_claim_date, item.purchase_date) - now)}
-                    </span>
+                  <div className="mt-3 space-y-3 text-xs leading-relaxed text-muted-foreground">
+                    <p>Revenu quotidien : {fcfa(item.products?.daily_yield)}</p>
+                    <p>Revenu total : {fcfa(item.products?.total_yield)}</p>
+                    <p>Période de validité : {item.products?.duration_days ?? "—"} jours</p>
+                    <p>Heure d'achat : {new Date(item.purchase_date).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</p>
                   </div>
                 </div>
-              </Card>
+              </article>
             );
           })
         )}

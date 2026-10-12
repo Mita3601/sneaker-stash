@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Adapter les reçus de retrait et la liste des parfums achetés aux nouvelles références
+- [ ] Vérifier ces deux pages avec une session connectée
+
 - [x] Refaire le compte selon la référence, préserver missions et cadeaux hors de cette page
 - [x] Présenter chaque recharge comme un reçu détaillé
 - [x] Adapter actions et vignettes de collection, retirer le pointage visible
