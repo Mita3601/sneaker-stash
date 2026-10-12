@@ -1,5 +1,10 @@
 # Roadmap
 
+- [ ] Refaire le compte selon la référence, préserver missions et cadeaux hors de cette page
+- [ ] Présenter chaque recharge comme un reçu détaillé
+- [ ] Adapter actions et vignettes de collection, retirer le pointage visible
+- [ ] Vérifier les pages avec une session connectée
+
 - [x] Définir la direction visuelle Dior Editorial Archive
 - [x] Générer les visuels de parfums
 - [x] Appliquer les nouveaux tokens, polices et composants partagés
