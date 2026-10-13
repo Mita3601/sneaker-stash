@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Card, Empty, StatusPill, SubHeader } from "@/components/ui-kit";
+import { Empty, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useSession";
-import { fcfa, shortDate, COUNTRIES } from "@/lib/app";
+import { fcfa } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/withdraw-history")({
   head: () => ({
@@ -27,7 +27,7 @@ function WithdrawHistory() {
   const { data: authUser } = useCurrentUser();
   const userId = authUser?.id ?? null;
 
-  const { data: rows = [] } = useQuery({
+  const { data: rows = [], isLoading, isError } = useQuery({
     queryKey: ["transactions", "withdrawal", userId],
     enabled: Boolean(userId),
     queryFn: async () => {
@@ -35,7 +35,7 @@ function WithdrawHistory() {
 
       const { data, error } = await supabase
         .from("transactions")
-        .select("*, profiles(phone, country_code)")
+        .select("*")
         .eq("type", "withdraw")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
@@ -44,102 +44,35 @@ function WithdrawHistory() {
     },
   });
 
-  const getCountryFlag = (code: string) => {
-    return COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
-  };
-
   return (
     <>
-      <SubHeader title="Registres de retrait" />
-      <div className="p-4">
-        {rows.length === 0 ? (
+      <SubHeader title="Historique des retraits" />
+      <div className="space-y-3 p-3">
+        {isLoading ? <p className="py-6 text-center text-sm text-muted-foreground">Chargement…</p> : isError ? <Empty title="Historique indisponible" text="Veuillez réessayer dans quelques instants." /> : rows.length === 0 ? (
           <Empty title="Pas encore de données" text="Vos retraits apparaîtront ici." />
         ) : (
-          <div className="space-y-4">
+          <>
             {rows.map((r) => {
-              const metadata = (r.metadata as Record<string, unknown> | null) ?? {};
-              const provider = typeof metadata["provider"] === "string" ? metadata["provider"] : "-";
-              const accountNumber =
-                typeof metadata["account_number"] === "string"
-                  ? metadata["account_number"]
-                  : "-";
-              const accountName =
-                typeof metadata["account_name"] === "string" ? metadata["account_name"] : "-";
-              const countryCode =
-                typeof r.profiles?.country_code === "string" ? r.profiles.country_code : "-";
-              const phone = typeof r.profiles?.phone === "string" ? r.profiles.phone : "-";
               const fee = Number(r.fee ?? 0);
               const net = Number(r.net_amount ?? Math.max(0, Number(r.amount ?? 0) - fee));
 
               return (
-                <Card key={r.id} className="space-y-3 p-4 border-l-4 border-l-primary">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xl font-black text-foreground">{fcfa(r.amount)}</p>
-                      <p className="text-xs text-muted-foreground">{shortDate(r.created_at)}</p>
-                    </div>
-                    <StatusPill status={r.status} />
+                <article key={r.id} className="min-w-0 rounded-md border border-border bg-card px-3 py-1">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-dotted border-border py-2 text-sm font-bold">
+                    <h2 className="min-w-0 font-sans text-sm font-bold">Ordre de retrait</h2>
+                    <span className="shrink-0">{fcfa(r.amount)}</span>
                   </div>
-
-                  <div className="grid gap-2 text-xs">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">
-                          ID du retrait
-                        </p>
-                        <p className="font-mono text-foreground break-all">{r.id}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">Pays</p>
-                        <p className="font-medium text-foreground">
-                          {getCountryFlag(countryCode)} {countryCode}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">Mobile</p>
-                        <p className="font-medium text-foreground">{phone}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">Opérateur</p>
-                        <p className="font-medium text-foreground">{provider}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">Compte</p>
-                        <p className="font-mono text-foreground">{accountNumber}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold uppercase text-muted-foreground">
-                          Bénéficiaire
-                        </p>
-                        <p className="font-medium text-foreground">{accountName}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border pt-2 space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Montant demandé</span>
-                      <span className="font-semibold">{fcfa(r.amount)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Frais (15%)</span>
-                      <span className="font-semibold text-red-600">-{fcfa(fee)}</span>
-                    </div>
-                    <div className="flex justify-between border-t border-border pt-1">
-                      <span className="font-semibold">Transféré</span>
-                      <span className="font-bold text-primary">{fcfa(net)}</span>
-                    </div>
-                  </div>
-                </Card>
+                  <dl className="text-xs">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 border-b border-border py-2"><dt>Réf. commande</dt><dd className="min-w-0 break-all text-right">{r.reference ?? r.id}</dd></div>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border py-2"><dt className="min-w-0">Montant reçu</dt><dd>{fcfa(net)}</dd></div>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border py-2"><dt className="min-w-0">État</dt><dd className={r.status === "approved" ? "text-success" : r.status === "rejected" ? "text-destructive" : "text-warning-foreground"}>{r.status === "approved" ? "Succès" : r.status === "rejected" ? "Rejeté" : "En attente"}</dd></div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 py-2"><dt>Temps</dt><dd className="min-w-0 text-right">{new Date(r.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</dd></div>
+                  </dl>
+                </article>
               );
             })}
-          </div>
+            <p className="py-1 text-center text-sm text-muted-foreground">Plus aucune donnée</p>
+          </>
         )}
       </div>
     </>
