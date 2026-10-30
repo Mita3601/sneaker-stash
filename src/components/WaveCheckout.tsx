@@ -5,32 +5,12 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { DEPOSIT_TIMEOUT_MINUTES } from "@/lib/payments";
+import gopayLogo from "@/assets/gopay-logo.png.asset.json";
+import waveLogo from "@/assets/wave-logo.png.asset.json";
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
 
 const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
-
-function WaveLogo({ size = 64 }: { size?: number }) {
-  // Couleurs officielles de la marque Wave.
-  return (
-    <span
-      className="grid place-items-center rounded-full"
-      style={{ width: size, height: size, background: "#1DC8F2" }}
-      aria-label="Wave"
-    >
-      <svg viewBox="0 0 48 48" width={size * 0.6} height={size * 0.6} aria-hidden>
-        <g fill="#ffffff">
-          <rect x="15" y="12" width="4" height="14" rx="2" />
-          <rect x="22" y="9" width="4" height="20" rx="2" />
-          <rect x="29" y="13" width="4" height="12" rx="2" />
-        </g>
-        <text x="24" y="42" textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff" fontFamily="Arial, sans-serif">
-          wave
-        </text>
-      </svg>
-    </span>
-  );
-}
 
 async function copy(text: string, label: string) {
   try {
