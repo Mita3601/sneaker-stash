@@ -108,36 +108,36 @@ export function WaveCheckout({
   const ss = String(left % 60).padStart(2, "0");
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-3">
-      <div className="relative mx-auto max-w-md rounded-3xl bg-card p-5 text-foreground shadow-xl">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-3">
+      <div className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl">
         <button
           type="button"
           onClick={onClose}
           aria-label="Fermer"
-          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-muted-foreground text-primary-foreground"
+          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-[#5B6675] text-white"
         >
           <X className="size-5" />
         </button>
 
         {!deposit ? (
           <div className="space-y-5 pt-2">
-            <p className="text-center font-display text-2xl uppercase tracking-widest text-primary">Dior Pay</p>
+            <div className="flex flex-col items-center"><div className="flex -space-x-4"><span className="size-10 rounded-full bg-[#E9A23B] ring-2 ring-[#C47F1A]" /><span className="grid size-11 place-items-center rounded-full bg-[#F2B544] ring-2 ring-[#C47F1A]"><span className="size-3 rotate-45 bg-white" /></span><span className="size-10 rounded-full bg-[#E9A23B] ring-2 ring-[#C47F1A]" /></div><p className="text-lg font-bold tracking-widest text-[#C47F1A]">GOPAY</p></div>
             <p className="text-sm leading-relaxed">
               Veuillez remplir votre mode de paiement et le compte de paiement réel que vous utiliserez pour
               effectuer le paiement.
             </p>
             <p className="text-sm">
-              Montant de paiement : <span className="ml-2 text-xl font-bold text-primary">{fmt(amount)}</span>
+              Montant de paiement : <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
             </p>
             <p className="text-sm">Veuillez sélectionner un mode de paiement</p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-primary bg-card p-4">
+              <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-[#F5B83D] bg-white p-4 shadow-[0_0_0_3px_#FDECC8]">
                 <WaveLogo />
-                <span className="text-center text-sm font-bold">Wave Côte d&apos;Ivoire</span>
+                <span className="text-center text-sm font-bold text-[#1F2937]">Wave Côte d&apos;Ivoire</span>
               </div>
             </div>
-            <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-4">
-              <span className="font-bold text-primary">+225</span>
+            <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] px-4 py-4">
+              <span className="font-bold text-[#9A4A0C]">+225</span>
               <input
                 inputMode="tel"
                 value={phone}
@@ -147,8 +147,8 @@ export function WaveCheckout({
                 className="min-w-0 flex-1 bg-transparent text-lg outline-none"
               />
             </label>
-            <div className="flex gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              <AlertCircle className="mt-0.5 size-5 shrink-0" />
+            <div className="flex gap-3 rounded-2xl border border-[#FBD5DB] bg-[#FFF1F2] p-4 text-sm text-[#BE123C]">
+              <AlertCircle className="mt-0.5 size-5 shrink-0 fill-[#F59E0B] text-white" />
               <p>
                 Veuillez remplir votre compte de paiement avec précision. Un remplissage incorrect peut entraîner
                 la perte des fonds transférés.
@@ -159,7 +159,7 @@ export function WaveCheckout({
                 type="button"
                 disabled={create.isPending}
                 onClick={() => create.mutate()}
-                className="flex w-4/5 items-center justify-center gap-2 rounded-full bg-gradient-deep py-4 text-lg font-bold text-primary-foreground shadow-lg disabled:opacity-60"
+                className="flex w-4/5 items-center justify-center gap-2 rounded-full bg-[linear-gradient(90deg,#F59E0B,#EA8A0C)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55] disabled:opacity-60"
               >
                 {create.isPending ? "Création..." : "Confirmer"} <ArrowRight className="size-5" />
               </button>
@@ -167,14 +167,14 @@ export function WaveCheckout({
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="flex items-center justify-between border-b border-border pb-4 pr-12">
-              <span className="font-display text-xl uppercase tracking-widest text-primary">Dior Pay</span>
+            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4 pr-12">
+              <span className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-[#F59E0B]"><span className="size-4 rotate-45 rounded-sm border-[3px] border-white" /></span><span className="text-xl font-bold tracking-widest text-[#E07B00]">GOPAY</span></span>
               <div className="text-center">
-                <p className="text-[11px] text-muted-foreground">La transaction expire dans</p>
+                <p className="text-[11px] text-[#6B7280]">La transaction expire dans</p>
                 <div className="mt-1 flex items-center gap-1 font-mono text-sm font-bold">
-                  <span className="rounded-md bg-foreground px-2 py-1 text-background">00</span>:
-                  <span className="rounded-md bg-foreground px-2 py-1 text-background">{mm}</span>:
-                  <span className="rounded-md bg-foreground px-2 py-1 text-background">{ss}</span>
+                  <span className="rounded-md bg-[#111827] px-2 py-1 text-white">00</span>:
+                  <span className="rounded-md bg-[#111827] px-2 py-1 text-white">{mm}</span>:
+                  <span className="rounded-md bg-[#111827] px-2 py-1 text-white">{ss}</span>
                 </div>
               </div>
             </div>
@@ -187,24 +187,24 @@ export function WaveCheckout({
 
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-full bg-secondary"><CreditCard className="size-4" /></span>
+                <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><CreditCard className="size-4" /></span>
                 <div>
                   <p className="font-bold">Copiez ce compte</p>
-                  <p className="text-sm text-muted-foreground">
-                    Copiez ce compte <span className="font-bold text-primary">Wave</span> et effectuez le paiement
+                  <p className="text-sm text-[#6B7280]">
+                    Copiez ce compte <span className="font-bold text-[#E07B00]">Wave</span> et effectuez le paiement
                   </p>
                 </div>
               </div>
-              <div className="space-y-4 rounded-2xl border border-border p-4">
+              <div className="space-y-4 rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
                 <div>
-                  <p className="text-sm text-muted-foreground">Montant total payable :</p>
-                  <p className="text-2xl font-bold text-primary">{fmt(deposit.amount)}</p>
+                  <p className="text-sm text-[#6B7280]">Montant total payable :</p>
+                  <p className="text-2xl font-bold text-[#E07B00]">{fmt(deposit.amount)}</p>
                 </div>
                 <Row label="Wave Compte" value={WAVE_ACCOUNT.display} onCopy={() => copy(WAVE_ACCOUNT.number, "Numéro")} />
                 <Row label="Nom du compte" value={WAVE_ACCOUNT.name} onCopy={() => copy(WAVE_ACCOUNT.name, "Nom")} />
-                <div className="flex items-center justify-between border-t border-border pt-3">
-                  <p className="text-sm text-muted-foreground">
-                    Réf. <span className="font-bold text-foreground">{deposit.reference}</span>
+                <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
+                  <p className="text-sm text-[#6B7280]">
+                    Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
                   </p>
                   <CopyBtn onClick={() => copy(deposit.reference, "Référence")} />
                 </div>
@@ -214,36 +214,36 @@ export function WaveCheckout({
                 onClick={() => {
                   copy(WAVE_ACCOUNT.number, "Numéro Wave");
                 }}
-                className="w-full rounded-full bg-gradient-deep py-4 text-lg font-bold text-primary-foreground shadow-lg"
+                className="w-full rounded-full bg-[linear-gradient(90deg,#F59E0B,#EA8A0C)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
               >
                 Cliquez pour payer
               </button>
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-center text-xs text-[#6B7280]">
                 Ouvrez votre application Wave et envoyez {fmt(deposit.amount)} au {WAVE_ACCOUNT.display}.
               </p>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-full bg-secondary"><RefreshCw className="size-4" /></span>
+                <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><RefreshCw className="size-4" /></span>
                 <div>
                   <p className="font-bold">Paiement achevé ?</p>
-                  <p className="text-sm text-muted-foreground">
-                    Collez le SMS Wave puis cliquez sur <span className="font-bold text-primary">« Rafraîchir »</span>
+                  <p className="text-sm text-[#6B7280]">
+                    Collez le SMS Wave puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
                   </p>
                 </div>
               </div>
-              <div className="space-y-3 rounded-2xl border border-border bg-secondary/40 p-4">
+              <div className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFB] p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Montant attendu :</p>
+                    <p className="text-sm text-[#6B7280]">Montant attendu :</p>
                     <p className="font-bold">{fmt(deposit.amount)}</p>
                   </div>
                   <button
                     type="button"
                     disabled={proof.isPending || sent}
                     onClick={() => proof.mutate()}
-                    className="rounded-full bg-gradient-deep px-5 py-3 font-bold text-primary-foreground disabled:opacity-60"
+                    className="rounded-full bg-[linear-gradient(90deg,#F59E0B,#EA8A0C)] px-5 py-3 font-bold text-white disabled:opacity-60"
                   >
                     {sent ? "Envoyé" : proof.isPending ? "Envoi..." : "Rafraîchir"}
                   </button>
@@ -255,19 +255,19 @@ export function WaveCheckout({
                   disabled={sent}
                   rows={3}
                   placeholder="Collez ici le SMS reçu de Wave…"
-                  className="w-full rounded-xl border border-border bg-card p-3 text-sm outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-[#D1D5DB] bg-white p-3 text-sm outline-none focus:border-[#F59E0B]"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[#6B7280]">
                   Après l&apos;envoi du SMS, la recharge reste en cours jusqu&apos;à la vérification du versement par
                   l&apos;administrateur.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 border-t border-border pt-4">
-              <span className="grid size-9 place-items-center rounded-full bg-secondary"><Smartphone className="size-4" /></span>
+            <div className="flex items-center gap-3 border-t border-[#E5E7EB] pt-4">
+              <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><Smartphone className="size-4" /></span>
               <div>
-                <p className="text-sm text-muted-foreground">Votre compte de paiement :</p>
+                <p className="text-sm text-[#6B7280]">Votre compte de paiement :</p>
                 <p className="font-bold">{deposit.payerPhone}</p>
               </div>
             </div>
@@ -280,7 +280,7 @@ export function WaveCheckout({
 
 function CopyBtn({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-label="Copier" className="grid size-11 place-items-center rounded-xl border border-border">
+    <button type="button" onClick={onClick} aria-label="Copier" className="grid size-11 place-items-center rounded-xl border border-[#E5E7EB] text-[#374151]">
       <Copy className="size-4" />
     </button>
   );
@@ -290,8 +290,8 @@ function Row({ label, value, onCopy }: { label: string; value: string; onCopy: (
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-xl font-bold text-primary">{value}</p>
+        <p className="text-sm text-[#6B7280]">{label}</p>
+        <p className="text-xl font-bold text-[#E07B00]">{value}</p>
       </div>
       <CopyBtn onClick={onCopy} />
     </div>
