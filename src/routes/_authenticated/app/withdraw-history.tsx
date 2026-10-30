@@ -67,7 +67,7 @@ function WithdrawHistory() {
                     <span>Montant reçu</span>
                   </div>
                   <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-2 border-b border-border py-2.5">
-                    <span className="min-w-0 break-all">{r.reference ?? r.id}</span>
+                    <span className="min-w-0 break-all">{r.reference ?? orderRef(r.created_at, r.id)}</span>
                     <span className="text-right font-semibold">{fcfa(net)}</span>
                   </div>
                   <dl className="px-3">
@@ -83,4 +83,11 @@ function WithdrawHistory() {
       </div>
     </>
   );
+}
+
+function orderRef(createdAt: string, id: string) {
+  const d = new Date(createdAt);
+  const p = (n: number) => String(n).padStart(2, "0");
+  const digits = id.replace(/\D/g, "").padEnd(6, "0").slice(0, 6);
+  return `T${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${digits}`;
 }
