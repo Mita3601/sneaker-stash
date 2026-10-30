@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793372442968,
+      "tag": "0000_wave_manual_deposit",
+      "breakpoints": true
+    }
+  ]
+}
