@@ -218,7 +218,7 @@ function Recharge() {
         </h1>
       </section>
       <div className="space-y-4 bg-secondary p-4">
-        {!gatewayReady && !isCI ? (
+        {!gatewayReady && !isManual ? (
           <Card>
             <p className="text-sm font-bold">Paiement momentanément indisponible</p>
             <p className="mt-1 text-xs text-muted-foreground">

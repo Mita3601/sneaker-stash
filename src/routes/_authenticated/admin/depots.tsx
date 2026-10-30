@@ -223,8 +223,8 @@ function AdminDepots() {
                         const sms = typeof metadata["sms"] === "string" ? metadata["sms"] : undefined;
                         return (
                           <>
-                            {payer ? <p>Wave du client : <b className="text-foreground">{payer}</b></p> : null}
-                            {sms ? <p className="whitespace-pre-wrap rounded-lg bg-secondary p-2 text-foreground">SMS : {sms}</p> : metadata["gateway"] === "wave_manual" ? <p>SMS non encore envoyé</p> : null}
+                            {payer ? <p>Numéro du client : <b className="text-foreground">{payer}</b></p> : null}
+                            {sms ? <p className="whitespace-pre-wrap rounded-lg bg-secondary p-2 text-foreground">SMS : {sms}</p> : /_manual$/.test(String(metadata["gateway"] ?? "")) ? <p>SMS non encore envoyé</p> : null}
                             {gatewayTxId ? <p>Transaction gateway : {gatewayTxId}</p> : null}
                             {localRef ? <p>Référence locale : {localRef}</p> : null}
                             {paymentUrl ? (
