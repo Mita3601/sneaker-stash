@@ -285,7 +285,7 @@ function Recharge() {
                 </button>
               ))}
 
-              {!isCI ? (<>
+              {!isManual ? (<>
               <Field label="Numéro mobile money">
                 <input
                   inputMode="tel"
@@ -304,12 +304,16 @@ function Recharge() {
                 />
               </Field>
               </>) : (
-                <p className="text-xs text-muted-foreground">Paiement par Wave Côte d&apos;Ivoire, validé par l&apos;administrateur.</p>
+                <p className="text-xs text-muted-foreground">
+                  {isCI
+                    ? "Paiement par Wave Côte d'Ivoire, validé par l'administrateur."
+                    : "Paiement par Orange Money Cameroun, validé par l'administrateur."}
+                </p>
               )}
             </Card>
 
             <div className="flex justify-center">
-              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || (!gatewayReady && !isCI)}>
+              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || (!gatewayReady && !isManual)}>
                 {pay.isPending ? "Création du paiement..." : "Confirmer"}
               </Btn>
             </div>
