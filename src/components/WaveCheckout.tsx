@@ -110,7 +110,7 @@ export function WaveCheckout({
               Montant de paiement : <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
             </p>
             <p className="text-sm">Veuillez sélectionner un mode de paiement</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex justify-center">
               <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-[#F5B83D] bg-white p-4 shadow-[0_0_0_3px_#FDECC8]">
                 <img src={waveLogo.url} alt="Wave" className="h-16 w-auto" />
                 <span className="text-center text-sm font-bold text-[#1F2937]">Wave Côte d&apos;Ivoire</span>
