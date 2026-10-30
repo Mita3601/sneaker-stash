@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
-import { WaveCheckout } from "@/components/WaveCheckout";
+import { ManualCheckout, ORANGE_PROVIDER, WAVE_PROVIDER, type ManualProvider } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { COUNTRIES, fcfa } from "@/lib/app";
@@ -77,7 +77,7 @@ function Recharge() {
   const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [waveOpen, setWaveOpen] = useState(false);
+  const [manualProvider, setManualProvider] = useState<ManualProvider | null>(null);
   const startedAt = useRef<number>(0);
 
   useEffect(() => {
