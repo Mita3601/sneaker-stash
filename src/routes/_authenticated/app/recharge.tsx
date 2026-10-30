@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Check, ChevronLeft, CreditCard, ReceiptText } from "lucide-react";
+import heroImg from "@/assets/dior-hero.jpg";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { Btn, Card, Field, inputClass, SubHeader } from "@/components/ui-kit";
+import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
 import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { fcfa } from "@/lib/app";
+import { COUNTRIES, fcfa } from "@/lib/app";
 import { checkDepositStatus, getPaymentOptions, initiateDeposit } from "@/lib/payments.functions";
 import { DEPOSIT_TIMEOUT_MINUTES, MIN_DEPOSIT, type DepositInit } from "@/lib/payments";
 
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [1000, 4000, 8000, 12000, 20000, 50000];
+const PRESETS = [2000, 8000, 20000, 60000];
 const POLL_MS = 5000;
 const TIMEOUT_MS = DEPOSIT_TIMEOUT_MINUTES * 60 * 1000;
 
@@ -58,7 +60,7 @@ function Recharge() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("phone")
+        .select("phone, country_code")
         .eq("id", userId!)
         .maybeSingle();
       if (error) throw error;
@@ -68,7 +70,8 @@ function Recharge() {
 
   const gatewayReady = options.data ? options.data.gatewayConfigured : true;
 
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("2000");
+  const [country, setCountry] = useState(COUNTRIES[0]!.code);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
@@ -78,6 +81,11 @@ function Recharge() {
   useEffect(() => {
     if (!phone && profile.data?.phone) setPhone(String(profile.data.phone));
   }, [profile.data, phone]);
+
+  useEffect(() => {
+    const cc = String(profile.data?.country_code ?? "");
+    if (COUNTRIES.some((c) => c.code === cc)) setCountry(cc);
+  }, [profile.data]);
 
   // Retour depuis la page de paiement GeniusPay.
   useEffect(() => {
@@ -94,7 +102,16 @@ function Recharge() {
   }, [qc]);
 
   const pay = useMutation({
-    mutationFn: () => initiate({ data: { amount: Number(amount), phone, name } }),
+    mutationFn: () => {
+      const digits = phone.replace(/\D/g, "");
+      const ccDigits = country.replace(/\D/g, "");
+      const intl = phone.startsWith("+")
+        ? phone
+        : digits.startsWith(ccDigits) && digits.length > 10
+          ? `+${digits}`
+          : `${country}${digits}`;
+      return initiate({ data: { amount: Number(amount), phone: intl, name } });
+    },
     onSuccess: (result) => {
       setDeposit(result);
       setPhase("pending");
@@ -147,7 +164,7 @@ function Recharge() {
   function reset() {
     setDeposit(null);
     setPhase("idle");
-    setAmount("");
+    setAmount("2000");
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -169,64 +186,96 @@ function Recharge() {
 
   return (
     <>
-      <SubHeader title="Recharger" />
-      <div className="space-y-3 p-4">
-        <Card>
-          <p className="text-sm font-bold">Recharge mobile money sécurisée</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Indiquez un montant (minimum {fcfa(MIN_DEPOSIT)}), puis payez avec Orange Money, MTN,
-            Moov ou Wave sur la page sécurisée. Votre solde est crédité automatiquement dès la
-            confirmation. Sans confirmation sous {DEPOSIT_TIMEOUT_MINUTES} minutes, la demande est
-            annulée.
-          </p>
-        </Card>
-
+      <section className="relative h-48 overflow-hidden bg-gradient-deep">
+        <img src={heroImg} alt="Flacons de parfum Dior" className="absolute inset-0 h-full w-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/0 to-foreground/40" />
+        <Link to="/app/me" aria-label="Retour" className="absolute left-3 top-3 grid size-10 place-items-center rounded-full bg-foreground/30 text-primary-foreground">
+          <ChevronLeft className="size-6" />
+        </Link>
+        <Link to="/app/recharge-history" aria-label="Historique des recharges" className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-foreground/30 text-primary-foreground">
+          <ReceiptText className="size-5" />
+        </Link>
+        <h1 className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-5xl font-medium uppercase tracking-widest text-primary-foreground drop-shadow">
+          Recharge
+        </h1>
+      </section>
+      <div className="space-y-4 bg-secondary p-4">
         {!gatewayReady ? (
           <Card>
             <p className="text-sm font-bold">Paiement momentanément indisponible</p>
             <p className="mt-1 text-xs text-muted-foreground">
               La passerelle de paiement n&apos;est pas encore activée. Réessayez plus tard ou
-              contactez le service client via notre groupe Telegram ou @{/* placeholder */}usr_marc.
+              contactez le service client.
             </p>
           </Card>
         ) : null}
 
         {phase === "idle" ? (
-          <Card>
-            <form onSubmit={onSubmit} className="space-y-4">
-              <Field label="Montant">
-                <input
-                  inputMode="numeric"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                  placeholder={String(MIN_DEPOSIT)}
-                  className={inputClass}
-                />
-              </Field>
-
-              <div className="grid grid-cols-3 gap-2">
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <p className="px-1 text-base text-foreground">Le montant de la recharge</p>
+              <div className="grid grid-cols-4 gap-2">
                 {PRESETS.map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setAmount(String(p))}
-                    className="rounded-xl bg-secondary py-2 text-xs font-bold text-primary"
+                    className={`rounded-md border py-3 text-sm transition ${
+                      amount === String(p)
+                        ? "border-foreground bg-gradient-deep text-primary-foreground"
+                        : "border-border bg-card text-foreground"
+                    }`}
                   >
-                    {fcfa(p)}
+                    {p.toLocaleString("en-US")}
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="px-1 text-base text-foreground">Saisir un autre montant</p>
+              <label className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3">
+                <span className="text-muted-foreground">FCFA</span>
+                <input
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+                  placeholder={String(MIN_DEPOSIT)}
+                  className="min-w-0 flex-1 bg-transparent outline-none"
+                  aria-label="Montant"
+                />
+              </label>
+            </div>
+
+            <Card className="space-y-3">
+              <p className="text-base text-foreground">Méthode de recharge</p>
+              {COUNTRIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => setCountry(c.code)}
+                  className={`flex w-full items-center gap-3 rounded-md px-4 py-3 text-left transition ${
+                    country === c.code
+                      ? "bg-gradient-deep text-primary-foreground"
+                      : "border border-border bg-card text-foreground"
+                  }`}
+                >
+                  <CreditCard className="size-5" />
+                  <span className="flex-1">{c.label}</span>
+                  <span className="text-xs opacity-70">{c.code}</span>
+                  {country === c.code ? <Check className="size-4" /> : null}
+                </button>
+              ))}
 
               <Field label="Numéro mobile money">
                 <input
                   inputMode="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ""))}
-                  placeholder="07XXXXXXXX"
+                  placeholder="XXXXXXXX"
                   className={inputClass}
                 />
               </Field>
-
               <Field label="Nom du titulaire">
                 <input
                   value={name}
@@ -235,14 +284,27 @@ function Recharge() {
                   className={inputClass}
                 />
               </Field>
+            </Card>
 
-              <Btn full disabled={pay.isPending || !gatewayReady}>
-                {pay.isPending
-                  ? "Création du paiement..."
-                  : `Recharger ${amount ? fcfa(Number(amount)) : ""}`}
+            <div className="flex justify-center">
+              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || !gatewayReady}>
+                {pay.isPending ? "Création du paiement..." : "Confirmer"}
               </Btn>
-            </form>
-          </Card>
+            </div>
+            <Link to="/app/recharge-history" className="block text-center text-sm text-primary underline-offset-2 hover:underline">
+              Si la recharge n&apos;est pas créditée, consultez votre historique ici
+            </Link>
+
+            <ol className="list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-foreground">
+              <li>Le montant minimum du dépôt est de {fcfa(MIN_DEPOSIT)}.</li>
+              <li>Choisissez votre pays, puis payez avec le numéro mobile money indiqué.</li>
+              <li>Suivez scrupuleusement les instructions de la page de paiement sécurisée.</li>
+              <li>
+                Sans confirmation sous {DEPOSIT_TIMEOUT_MINUTES} minutes, la demande est annulée ;
+                contactez alors le service client avec votre référence.
+              </li>
+            </ol>
+          </form>
         ) : null}
 
         {phase === "pending" && deposit ? (
