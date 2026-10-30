@@ -218,7 +218,7 @@ export function WaveCheckout({
               <button
                 type="button"
                 onClick={() => copy(WAVE_ACCOUNT.number, "Numéro Wave")}
-                className="relative z-10 my-6 w-full rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
+                className="relative z-10 my-6 ml-12 w-[calc(100%-3rem)] rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
               >
                 Cliquez pour payer
               </button>
