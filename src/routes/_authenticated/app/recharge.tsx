@@ -173,6 +173,10 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
+    if (country === "+225") {
+      setWaveOpen(true);
+      return;
+    }
     if (phone.replace(/\D/g, "").length < 8) {
       toast.error("Indiquez votre numéro mobile money");
       return;
@@ -184,8 +188,14 @@ function Recharge() {
     pay.mutate();
   }
 
+  const isCI = country === "+225";
+
   return (
     <>
+      {waveOpen ? (
+        <WaveCheckout amount={Number(amount)} defaultPhone={phone} onClose={() => setWaveOpen(false)} />
+      ) : null}
+
       <section className="relative h-48 overflow-hidden bg-gradient-deep">
         <img src={heroImg} alt="Flacons de parfum Dior" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/0 to-foreground/40" />
