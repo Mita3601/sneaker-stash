@@ -108,7 +108,7 @@ export function WaveCheckout({
   const ss = String(left % 60).padStart(2, "0");
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-3">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-3">
       <div className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl">
         <button
           type="button"
@@ -204,7 +204,7 @@ export function WaveCheckout({
                 <Row label="Nom du compte" value={WAVE_ACCOUNT.name} onCopy={() => copy(WAVE_ACCOUNT.name, "Nom")} />
                 <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
                   <p className="text-sm text-[#6B7280]">
-                    Réf. <span className="font-bold text-foreground">{deposit.reference}</span>
+                    Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
                   </p>
                   <CopyBtn onClick={() => copy(deposit.reference, "Référence")} />
                 </div>
