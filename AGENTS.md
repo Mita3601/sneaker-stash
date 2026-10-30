@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep gift redemption in a standalone reusable component, independent of the account page, so it can be placed elsewhere without losing its existing wallet flow.
+
+- Manual mobile-money deposits (Wave CI, Orange CM) go through the generic public.create_manual_deposit / public.submit_manual_proof functions; a new country is a provider config in src/components/WaveCheckout.tsx, never a new SQL function.

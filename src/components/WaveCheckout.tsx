@@ -7,8 +7,48 @@ import { supabase } from "@/integrations/supabase/client";
 import { DEPOSIT_TIMEOUT_MINUTES } from "@/lib/payments";
 import gopayLogo from "@/assets/gopay-logo.png.asset.json";
 import waveLogo from "@/assets/wave-logo.png.asset.json";
+import orangeLogo from "@/assets/orange-money-logo.png.asset.json";
+
+export type ManualProvider = {
+  providerName: string;
+  channel: string;
+  methodLabel: string;
+  methodWord: string;
+  logo: string;
+  dial: string;
+  phonePlaceholder: string;
+  copyNumLabel: string;
+  account: { number: string; display: string; name: string };
+};
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
+
+// Numéro provisoire : remplacer dès que le numéro Orange Money réel est communiqué.
+export const ORANGE_ACCOUNT = { number: "690000000", display: "690 00 00 00", name: "Dior International" };
+
+export const WAVE_PROVIDER: ManualProvider = {
+  providerName: "Wave",
+  channel: "Wave Côte d'Ivoire",
+  methodLabel: "Wave Côte d'Ivoire",
+  methodWord: "Wave",
+  logo: waveLogo.url,
+  dial: "+225",
+  phonePlaceholder: "07XXXXXXXX",
+  copyNumLabel: "Numéro Wave",
+  account: WAVE_ACCOUNT,
+};
+
+export const ORANGE_PROVIDER: ManualProvider = {
+  providerName: "Orange",
+  channel: "Orange Money Cameroun",
+  methodLabel: "Orange Money Cameroun",
+  methodWord: "Orange Money",
+  logo: orangeLogo.url,
+  dial: "+237",
+  phonePlaceholder: "6XXXXXXXX",
+  copyNumLabel: "Numéro Orange Money",
+  account: ORANGE_ACCOUNT,
+};
 
 const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
 
@@ -23,17 +63,23 @@ async function copy(text: string, label: string) {
 
 type Deposit = { reference: string; amount: number; payerPhone: string; createdAt: number };
 
-export function WaveCheckout({
+export function ManualCheckout({
   amount,
   defaultPhone,
+  provider,
   onClose,
 }: {
   amount: number;
   defaultPhone: string;
+  provider: ManualProvider;
   onClose: () => void;
 }) {
   const qc = useQueryClient();
-  const [phone, setPhone] = useState(/^\+?225/.test(defaultPhone) ? defaultPhone.replace(/^\+?225/, "") : "");
+  const [phone, setPhone] = useState(
+    new RegExp(`^\\+?${provider.dial.replace(/\D/g, "")}`).test(defaultPhone)
+      ? defaultPhone.replace(new RegExp(`^\\+?${provider.dial.replace(/\D/g, "")}`), "")
+      : "",
+  );
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [sms, setSms] = useState("");
   const [left, setLeft] = useState(DEPOSIT_TIMEOUT_MINUTES * 60);
@@ -51,11 +97,13 @@ export function WaveCheckout({
   const create = useMutation({
     mutationFn: async () => {
       const digits = phone.replace(/\D/g, "");
-      if (digits.length < 8) throw new Error("Indiquez votre numéro Wave");
-      const payerPhone = `+225${digits}`;
-      const { data, error } = await supabase.rpc("create_wave_manual_deposit", {
+      if (digits.length < 8) throw new Error(`Indiquez votre numéro ${provider.methodWord}`);
+      const payerPhone = `${provider.dial}${digits}`;
+      const { data, error } = await supabase.rpc("create_manual_deposit", {
         _amount: amount,
         _payer_phone: payerPhone,
+        _provider: provider.providerName,
+        _channel: provider.channel,
       });
       if (error) throw error;
       const r = data as { reference: string };
@@ -70,7 +118,7 @@ export function WaveCheckout({
 
   const proof = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("submit_wave_proof", {
+      const { error } = await supabase.rpc("submit_manual_proof", {
         _reference: deposit!.reference,
         _sms: sms,
       });
@@ -112,18 +160,18 @@ export function WaveCheckout({
             <p className="text-sm">Veuillez sélectionner un mode de paiement</p>
             <div className="flex justify-center">
               <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-[#F5B83D] bg-white p-4 shadow-[0_0_0_3px_#FDECC8]">
-                <img src={waveLogo.url} alt="Wave" className="h-16 w-auto" />
-                <span className="text-center text-sm font-bold text-[#1F2937]">Wave Côte d&apos;Ivoire</span>
+                <img src={provider.logo} alt={provider.methodWord} className="h-16 w-auto" />
+                <span className="text-center text-sm font-bold text-[#1F2937]">{provider.methodLabel}</span>
               </div>
             </div>
             <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] px-4 py-4">
-              <span className="font-bold text-[#9A4A0C]">+225</span>
+              <span className="font-bold text-[#9A4A0C]">{provider.dial}</span>
               <input
                 inputMode="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                placeholder="07XXXXXXXX"
-                aria-label="Numéro Wave"
+                placeholder={provider.phonePlaceholder}
+                aria-label={`Numéro ${provider.methodWord}`}
                 className="min-w-0 flex-1 bg-transparent text-lg outline-none"
               />
             </label>
@@ -173,7 +221,7 @@ export function WaveCheckout({
                   <div>
                     <p className="text-lg font-bold text-[#111827]">Copiez ce compte</p>
                     <p className="text-sm text-[#6B7280]">
-                      Copiez ce compte <span className="font-bold text-[#E07B00]">Wave</span> et effectuez le paiement
+                      Copiez ce compte <span className="font-bold text-[#E07B00]">{provider.methodWord}</span> et effectuez le paiement
                     </p>
                   </div>
                   <div className="space-y-4 rounded-2xl border border-[#E5E7EB] p-5 shadow-sm">
@@ -184,8 +232,8 @@ export function WaveCheckout({
                       </div>
                       <span className="grid size-12 place-items-center rounded-full border border-[#E5E7EB] text-sm font-bold text-[#1D6FD8]">EN</span>
                     </div>
-                    <Row label="Wave Compte" value={WAVE_ACCOUNT.display} onCopy={() => copy(WAVE_ACCOUNT.number, "Numéro")} />
-                    <Row label="Nom du compte" value={WAVE_ACCOUNT.name} onCopy={() => copy(WAVE_ACCOUNT.name, "Nom")} />
+                    <Row label={`${provider.methodWord} Compte`} value={provider.account.display} onCopy={() => copy(provider.account.number, "Numéro")} />
+                    <Row label="Nom du compte" value={provider.account.name} onCopy={() => copy(provider.account.name, "Nom")} />
                     <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
                       <p className="text-sm text-[#4B5563]">
                         Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
@@ -197,7 +245,7 @@ export function WaveCheckout({
               </div>
               <button
                 type="button"
-                onClick={() => copy(WAVE_ACCOUNT.number, "Numéro Wave")}
+                onClick={() => copy(provider.account.number, provider.copyNumLabel)}
                 className="relative z-10 my-6 ml-12 w-[calc(100%-3rem)] rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
               >
                 Cliquez pour payer
@@ -208,7 +256,7 @@ export function WaveCheckout({
                   <div>
                     <p className="text-lg font-bold text-[#111827]">Paiement achevé ?</p>
                     <p className="text-sm text-[#6B7280]">
-                      Collez le SMS Wave puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
+                      Collez le SMS {provider.methodWord} puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
                     </p>
                   </div>
                   <div className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFB] p-5">
@@ -232,7 +280,7 @@ export function WaveCheckout({
                       onChange={(e) => setSms(e.target.value.slice(0, 1000))}
                       disabled={sent}
                       rows={3}
-                      placeholder="Collez ici le SMS reçu de Wave…"
+                      placeholder={`Collez ici le SMS reçu de ${provider.methodWord}…`}
                       className="w-full rounded-xl border border-[#D1D5DB] bg-white p-3 text-sm outline-none focus:border-[#F59E0B]"
                     />
                     <p className="text-xs text-[#9CA3AF]">
