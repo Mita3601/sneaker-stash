@@ -29,6 +29,14 @@ export const Route = createFileRoute("/_authenticated/app/my-products")({
   component: MyProducts,
 });
 
+// La validité se déduit du catalogue : revenu total / revenu quotidien (ex. VIP3 : 567 000 / 3 150 = 180 jours).
+function validityDays(product: { daily_yield?: number | string | null; total_yield?: number | string | null } | null | undefined): string {
+  const daily = Number(product?.daily_yield ?? 0);
+  const total = Number(product?.total_yield ?? 0);
+  if (daily <= 0 || total <= 0) return "—";
+  return String(Math.round(total / daily));
+}
+
 function MyProducts() {
   const qc = useQueryClient();
   const { data: profile } = useProfile();
@@ -150,7 +158,7 @@ function MyProducts() {
                   <div className="mt-3 space-y-3 text-xs leading-relaxed text-muted-foreground">
                     <p>Revenu quotidien : {fcfa(item.products?.daily_yield)}</p>
                     <p>Revenu total : {fcfa(item.products?.total_yield)}</p>
-                    <p>Période de validité : {item.products?.duration_days ?? "—"} jours</p>
+                    <p>Période de validité : {validityDays(item.products)} jours</p>
                     <p>Heure d'achat : {new Date(item.purchase_date).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</p>
                   </div>
                 </div>
