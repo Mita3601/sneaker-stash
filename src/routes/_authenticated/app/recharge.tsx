@@ -175,8 +175,8 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
-    if (country === "+225") {
-      setWaveOpen(true);
+    if (country === "+225" || country === "+237") {
+      setManualProvider(country === "+225" ? WAVE_PROVIDER : ORANGE_PROVIDER);
       return;
     }
     if (phone.replace(/\D/g, "").length < 8) {
@@ -191,11 +191,17 @@ function Recharge() {
   }
 
   const isCI = country === "+225";
+  const isManual = isCI || country === "+237";
 
   return (
     <>
-      {waveOpen ? (
-        <WaveCheckout amount={Number(amount)} defaultPhone={phone} onClose={() => setWaveOpen(false)} />
+      {manualProvider ? (
+        <ManualCheckout
+          amount={Number(amount)}
+          defaultPhone={phone}
+          provider={manualProvider}
+          onClose={() => setManualProvider(null)}
+        />
       ) : null}
 
       <section className="relative h-48 overflow-hidden bg-gradient-deep">
