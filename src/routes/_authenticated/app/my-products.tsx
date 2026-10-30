@@ -150,7 +150,7 @@ function MyProducts() {
                   <div className="mt-3 space-y-3 text-xs leading-relaxed text-muted-foreground">
                     <p>Revenu quotidien : {fcfa(item.products?.daily_yield)}</p>
                     <p>Revenu total : {fcfa(item.products?.total_yield)}</p>
-                    <p>Période de validité : {item.products?.duration_days ?? "—"} jours</p>
+                    <p>Période de validité : {validityDays(item.products)} jours</p>
                     <p>Heure d'achat : {new Date(item.purchase_date).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</p>
                   </div>
                 </div>
