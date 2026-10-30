@@ -5,32 +5,12 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { DEPOSIT_TIMEOUT_MINUTES } from "@/lib/payments";
+import gopayLogo from "@/assets/gopay-logo.png.asset.json";
+import waveLogo from "@/assets/wave-logo.png.asset.json";
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
 
 const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
-
-function WaveLogo({ size = 64 }: { size?: number }) {
-  // Couleurs officielles de la marque Wave.
-  return (
-    <span
-      className="grid place-items-center rounded-full"
-      style={{ width: size, height: size, background: "#1DC8F2" }}
-      aria-label="Wave"
-    >
-      <svg viewBox="0 0 48 48" width={size * 0.6} height={size * 0.6} aria-hidden>
-        <g fill="#ffffff">
-          <rect x="15" y="12" width="4" height="14" rx="2" />
-          <rect x="22" y="9" width="4" height="20" rx="2" />
-          <rect x="29" y="13" width="4" height="12" rx="2" />
-        </g>
-        <text x="24" y="42" textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff" fontFamily="Arial, sans-serif">
-          wave
-        </text>
-      </svg>
-    </span>
-  );
-}
 
 async function copy(text: string, label: string) {
   try {
@@ -121,7 +101,7 @@ export function WaveCheckout({
 
         {!deposit ? (
           <div className="space-y-5 pt-2">
-            <div className="flex flex-col items-center"><div className="flex -space-x-4"><span className="size-10 rounded-full bg-[#E9A23B] ring-2 ring-[#C47F1A]" /><span className="grid size-11 place-items-center rounded-full bg-[#F2B544] ring-2 ring-[#C47F1A]"><span className="size-3 rotate-45 bg-white" /></span><span className="size-10 rounded-full bg-[#E9A23B] ring-2 ring-[#C47F1A]" /></div><p className="text-lg font-bold tracking-widest text-[#C47F1A]">GOPAY</p></div>
+            <div className="flex flex-col items-center"><img src={gopayLogo.url} alt="GOPAY" className="h-16 w-auto" /></div>
             <p className="text-sm leading-relaxed">
               Veuillez remplir votre mode de paiement et le compte de paiement réel que vous utiliserez pour
               effectuer le paiement.
@@ -130,9 +110,9 @@ export function WaveCheckout({
               Montant de paiement : <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
             </p>
             <p className="text-sm">Veuillez sélectionner un mode de paiement</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex justify-center">
               <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-[#F5B83D] bg-white p-4 shadow-[0_0_0_3px_#FDECC8]">
-                <WaveLogo />
+                <img src={waveLogo.url} alt="Wave" className="h-16 w-auto" />
                 <span className="text-center text-sm font-bold text-[#1F2937]">Wave Côte d&apos;Ivoire</span>
               </div>
             </div>
@@ -168,7 +148,7 @@ export function WaveCheckout({
         ) : (
           <div className="space-y-5">
             <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4 pr-12">
-              <span className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-[linear-gradient(135deg,#F5A623,#EA8A0C)]"><span className="size-4 rotate-45 rounded-sm border-[3px] border-white" /></span><span className="text-xl font-bold tracking-widest text-[#E07B00]">GOPAY</span></span>
+              <span className="flex items-center"><img src={gopayLogo.url} alt="GOPAY" className="h-11 w-auto" /></span>
               <div className="text-center">
                 <p className="text-[11px] text-[#6B7280]">La transaction expire dans</p>
                 <div className="mt-1 flex items-center gap-1 font-mono text-sm font-bold">
