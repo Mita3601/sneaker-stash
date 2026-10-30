@@ -53,7 +53,7 @@ export function WaveCheckout({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
-  const [phone, setPhone] = useState(defaultPhone.replace(/^\+?225/, ""));
+  const [phone, setPhone] = useState(/^\+?225/.test(defaultPhone) ? defaultPhone.replace(/^\+?225/, "") : "");
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [sms, setSms] = useState("");
   const [left, setLeft] = useState(DEPOSIT_TIMEOUT_MINUTES * 60);
