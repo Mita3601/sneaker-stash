@@ -219,8 +219,12 @@ function AdminDepots() {
                             ? metadata["payment_url"]
                             : undefined;
 
+                        const payer = typeof metadata["payer_phone"] === "string" ? metadata["payer_phone"] : undefined;
+                        const sms = typeof metadata["sms"] === "string" ? metadata["sms"] : undefined;
                         return (
                           <>
+                            {payer ? <p>Wave du client : <b className="text-foreground">{payer}</b></p> : null}
+                            {sms ? <p className="whitespace-pre-wrap rounded-lg bg-secondary p-2 text-foreground">SMS : {sms}</p> : metadata["gateway"] === "wave_manual" ? <p>SMS non encore envoyé</p> : null}
                             {gatewayTxId ? <p>Transaction gateway : {gatewayTxId}</p> : null}
                             {localRef ? <p>Référence locale : {localRef}</p> : null}
                             {paymentUrl ? (

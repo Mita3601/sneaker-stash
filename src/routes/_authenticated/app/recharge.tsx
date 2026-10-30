@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
+import { WaveCheckout } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { COUNTRIES, fcfa } from "@/lib/app";
@@ -76,6 +77,7 @@ function Recharge() {
   const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
+  const [waveOpen, setWaveOpen] = useState(false);
   const startedAt = useRef<number>(0);
 
   useEffect(() => {
@@ -173,6 +175,10 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
+    if (country === "+225") {
+      setWaveOpen(true);
+      return;
+    }
     if (phone.replace(/\D/g, "").length < 8) {
       toast.error("Indiquez votre numéro mobile money");
       return;
@@ -184,8 +190,14 @@ function Recharge() {
     pay.mutate();
   }
 
+  const isCI = country === "+225";
+
   return (
     <>
+      {waveOpen ? (
+        <WaveCheckout amount={Number(amount)} defaultPhone={phone} onClose={() => setWaveOpen(false)} />
+      ) : null}
+
       <section className="relative h-48 overflow-hidden bg-gradient-deep">
         <img src={heroImg} alt="Flacons de parfum Dior" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/0 to-foreground/40" />
@@ -200,7 +212,7 @@ function Recharge() {
         </h1>
       </section>
       <div className="space-y-4 bg-secondary p-4">
-        {!gatewayReady ? (
+        {!gatewayReady && !isCI ? (
           <Card>
             <p className="text-sm font-bold">Paiement momentanément indisponible</p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -267,6 +279,7 @@ function Recharge() {
                 </button>
               ))}
 
+              {!isCI ? (<>
               <Field label="Numéro mobile money">
                 <input
                   inputMode="tel"
@@ -284,10 +297,13 @@ function Recharge() {
                   className={inputClass}
                 />
               </Field>
+              </>) : (
+                <p className="text-xs text-muted-foreground">Paiement par Wave Côte d&apos;Ivoire, validé par l&apos;administrateur.</p>
+              )}
             </Card>
 
             <div className="flex justify-center">
-              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || !gatewayReady}>
+              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || (!gatewayReady && !isCI)}>
                 {pay.isPending ? "Création du paiement..." : "Confirmer"}
               </Btn>
             </div>
