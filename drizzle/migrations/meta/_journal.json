@@ -8,6 +8,13 @@
       "when": 1793372442968,
       "tag": "0000_wave_manual_deposit",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793373734663,
+      "tag": "0001_manual_deposit_generic",
+      "breakpoints": true
     }
   ]
 }

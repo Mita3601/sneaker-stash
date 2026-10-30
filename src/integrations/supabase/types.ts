@@ -786,6 +786,15 @@ export type Database = {
         }
         Returns: Json
       }
+      create_manual_deposit: {
+        Args: {
+          _amount: number
+          _channel: string
+          _payer_phone: string
+          _provider: string
+        }
+        Returns: Json
+      }
       create_wave_manual_deposit: {
         Args: { _amount: number; _payer_phone: string }
         Returns: Json
@@ -866,6 +875,10 @@ export type Database = {
         Returns: Json
       }
       revoke_wrong_sponsor_products: { Args: never; Returns: undefined }
+      submit_manual_proof: {
+        Args: { _reference: string; _sms: string }
+        Returns: Json
+      }
       submit_wave_proof: {
         Args: { _reference: string; _sms: string }
         Returns: Json
