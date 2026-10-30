@@ -8,7 +8,7 @@ import { DEPOSIT_TIMEOUT_MINUTES } from "@/lib/payments";
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
 
-const fmt = (n: number) => `XOF ${n.toLocaleString("fr-FR")}`;
+const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
 
 function WaveLogo({ size = 64 }: { size?: number }) {
   // Couleurs officielles de la marque Wave.
@@ -109,7 +109,7 @@ export function WaveCheckout({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-3">
-      <div className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl">
+      <div className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
         <button
           type="button"
           onClick={onClose}
@@ -168,7 +168,7 @@ export function WaveCheckout({
         ) : (
           <div className="space-y-5">
             <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4 pr-12">
-              <span className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-[#F59E0B]"><span className="size-4 rotate-45 rounded-sm border-[3px] border-white" /></span><span className="text-xl font-bold tracking-widest text-[#E07B00]">GOPAY</span></span>
+              <span className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-[linear-gradient(135deg,#F5A623,#EA8A0C)]"><span className="size-4 rotate-45 rounded-sm border-[3px] border-white" /></span><span className="text-xl font-bold tracking-widest text-[#E07B00]">GOPAY</span></span>
               <div className="text-center">
                 <p className="text-[11px] text-[#6B7280]">La transaction expire dans</p>
                 <div className="mt-1 flex items-center gap-1 font-mono text-sm font-bold">
@@ -185,82 +185,82 @@ export function WaveCheckout({
               </p>
             ) : null}
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><CreditCard className="size-4" /></span>
-                <div>
-                  <p className="font-bold">Copiez ce compte</p>
-                  <p className="text-sm text-[#6B7280]">
-                    Copiez ce compte <span className="font-bold text-[#E07B00]">Wave</span> et effectuez le paiement
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-4 rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
-                <div>
-                  <p className="text-sm text-[#6B7280]">Montant total payable :</p>
-                  <p className="text-2xl font-bold text-[#E07B00]">{fmt(deposit.amount)}</p>
-                </div>
-                <Row label="Wave Compte" value={WAVE_ACCOUNT.display} onCopy={() => copy(WAVE_ACCOUNT.number, "Numéro")} />
-                <Row label="Nom du compte" value={WAVE_ACCOUNT.name} onCopy={() => copy(WAVE_ACCOUNT.name, "Nom")} />
-                <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
-                  <p className="text-sm text-[#6B7280]">
-                    Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
-                  </p>
-                  <CopyBtn onClick={() => copy(deposit.reference, "Référence")} />
+            <div className="relative">
+              <span aria-hidden className="absolute bottom-6 left-[17px] top-9 border-l-2 border-dashed border-[#D1D5DB]" />
+              <div className="relative flex gap-3">
+                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]"><CreditCard className="size-4" /></span>
+                <div className="min-w-0 flex-1 space-y-4">
+                  <div>
+                    <p className="text-lg font-bold text-[#111827]">Copiez ce compte</p>
+                    <p className="text-sm text-[#6B7280]">
+                      Copiez ce compte <span className="font-bold text-[#E07B00]">Wave</span> et effectuez le paiement
+                    </p>
+                  </div>
+                  <div className="space-y-4 rounded-2xl border border-[#E5E7EB] p-5 shadow-sm">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-[#4B5563]">Montant total payable :</p>
+                        <p className="text-2xl font-bold text-[#E07B00]">{fmt(deposit.amount)}</p>
+                      </div>
+                      <span className="grid size-12 place-items-center rounded-full border border-[#E5E7EB] text-sm font-bold text-[#1D6FD8]">EN</span>
+                    </div>
+                    <Row label="Wave Compte" value={WAVE_ACCOUNT.display} onCopy={() => copy(WAVE_ACCOUNT.number, "Numéro")} />
+                    <Row label="Nom du compte" value={WAVE_ACCOUNT.name} onCopy={() => copy(WAVE_ACCOUNT.name, "Nom")} />
+                    <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
+                      <p className="text-sm text-[#4B5563]">
+                        Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
+                      </p>
+                      <CopyBtn onClick={() => copy(deposit.reference, "Référence")} />
+                    </div>
+                  </div>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  copy(WAVE_ACCOUNT.number, "Numéro Wave");
-                }}
-                className="w-full rounded-full bg-[linear-gradient(90deg,#F59E0B,#EA8A0C)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
+                onClick={() => copy(WAVE_ACCOUNT.number, "Numéro Wave")}
+                className="relative z-10 my-6 w-full rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
               >
                 Cliquez pour payer
               </button>
-              <p className="text-center text-xs text-[#6B7280]">
-                Ouvrez votre application Wave et envoyez {fmt(deposit.amount)} au {WAVE_ACCOUNT.display}.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><RefreshCw className="size-4" /></span>
-                <div>
-                  <p className="font-bold">Paiement achevé ?</p>
-                  <p className="text-sm text-[#6B7280]">
-                    Collez le SMS Wave puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFB] p-4">
-                <div className="flex items-center justify-between">
+              <div className="relative flex gap-3">
+                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]"><RefreshCw className="size-4" /></span>
+                <div className="min-w-0 flex-1 space-y-4">
                   <div>
-                    <p className="text-sm text-[#6B7280]">Montant attendu :</p>
-                    <p className="font-bold">{fmt(deposit.amount)}</p>
+                    <p className="text-lg font-bold text-[#111827]">Paiement achevé ?</p>
+                    <p className="text-sm text-[#6B7280]">
+                      Collez le SMS Wave puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    disabled={proof.isPending || sent}
-                    onClick={() => proof.mutate()}
-                    className="rounded-full bg-[linear-gradient(90deg,#F59E0B,#EA8A0C)] px-5 py-3 font-bold text-white disabled:opacity-60"
-                  >
-                    {sent ? "Envoyé" : proof.isPending ? "Envoi..." : "Rafraîchir"}
-                  </button>
+                  <div className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFB] p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-[#4B5563]">Montant attendu :</p>
+                        <p className="text-lg font-bold text-[#111827]">{fmt(deposit.amount)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={proof.isPending || sent}
+                        onClick={() => proof.mutate()}
+                        className="rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] px-6 py-3 font-bold text-white disabled:opacity-60"
+                      >
+                        {sent ? "Envoyé" : proof.isPending ? "Envoi..." : "Rafraîchir"}
+                      </button>
+                    </div>
+                    <p className="font-bold text-[#111827]">SMS de la transaction :</p>
+                    <textarea
+                      value={sms}
+                      onChange={(e) => setSms(e.target.value.slice(0, 1000))}
+                      disabled={sent}
+                      rows={3}
+                      placeholder="Collez ici le SMS reçu de Wave…"
+                      className="w-full rounded-xl border border-[#D1D5DB] bg-white p-3 text-sm outline-none focus:border-[#F59E0B]"
+                    />
+                    <p className="text-xs text-[#9CA3AF]">
+                      Après l&apos;envoi du SMS, la recharge reste en cours jusqu&apos;à la vérification du versement par
+                      l&apos;administrateur.
+                    </p>
+                  </div>
                 </div>
-                <p className="font-bold">SMS de la transaction :</p>
-                <textarea
-                  value={sms}
-                  onChange={(e) => setSms(e.target.value.slice(0, 1000))}
-                  disabled={sent}
-                  rows={3}
-                  placeholder="Collez ici le SMS reçu de Wave…"
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white p-3 text-sm outline-none focus:border-[#F59E0B]"
-                />
-                <p className="text-xs text-[#6B7280]">
-                  Après l&apos;envoi du SMS, la recharge reste en cours jusqu&apos;à la vérification du versement par
-                  l&apos;administrateur.
-                </p>
               </div>
             </div>
 
