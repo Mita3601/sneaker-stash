@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Reproduire Équipe et Accueil selon les cinq nouvelles références, sans changer les règles financières
+- [ ] Ajouter la page Invités avec niveaux 1, 2 et 3 dépliables
+- [ ] Vérifier les flèches, les listes et le rendu connecté sur téléphone et ordinateur
+
 - [x] Reçus de retrait, page équipe et page recharge selon les références
 - [ ] Vérifier ces deux pages avec une session connectée
 
