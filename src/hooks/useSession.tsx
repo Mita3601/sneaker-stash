@@ -43,10 +43,17 @@ export function useProfile() {
   });
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
-      qc.removeQueries({ queryKey: ["profile"] });
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      // INITIAL_SESSION and token refresh must not remove active query observers.
+      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+      qc.setQueryData(["auth-user"], session?.user ?? null);
+      if (event === "SIGNED_OUT") {
+        qc.removeQueries({ queryKey: ["profile"] });
+        qc.removeQueries({ queryKey: ["team"] });
+        qc.removeQueries({ queryKey: ["is-admin"] });
+        return;
+      }
       qc.invalidateQueries({ queryKey: ["profile"] });
-      qc.invalidateQueries({ queryKey: ["auth-user"] });
       qc.invalidateQueries({ queryKey: ["is-admin"] });
     });
 
