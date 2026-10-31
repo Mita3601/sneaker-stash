@@ -31,11 +31,13 @@ export function useProfile() {
         .maybeSingle();
       if (error) throw error;
 
-      if (!data) {
+      // Some Data API transports return a one-row array for maybeSingle.
+      const profile = Array.isArray(data) ? data[0] : data;
+      if (!profile) {
         throw new Error("Profil introuvable pour l'utilisateur authentifié.");
       }
 
-      return data;
+      return profile;
     },
     retry: false,
   });
