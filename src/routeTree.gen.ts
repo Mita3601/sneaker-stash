@@ -33,6 +33,7 @@ import { Route as AuthenticatedAppAddBankRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppChangePasswordRouteImport } from './routes/_authenticated/app/change-password'
 import { Route as AuthenticatedAppDownloadRouteImport } from './routes/_authenticated/app/download'
 import { Route as AuthenticatedAppHistoryRouteImport } from './routes/_authenticated/app/history'
+import { Route as AuthenticatedAppInviteesRouteImport } from './routes/_authenticated/app/invitees'
 import { Route as AuthenticatedAppMeRouteImport } from './routes/_authenticated/app/me'
 import { Route as AuthenticatedAppMissionsRouteImport } from './routes/_authenticated/app/missions'
 import { Route as AuthenticatedAppMyProductsRouteImport } from './routes/_authenticated/app/my-products'
@@ -176,6 +177,12 @@ const AuthenticatedAppHistoryRoute = AuthenticatedAppHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppInviteesRoute =
+  AuthenticatedAppInviteesRouteImport.update({
+    id: '/invitees',
+    path: '/invitees',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppMeRoute = AuthenticatedAppMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/app/download': typeof AuthenticatedAppDownloadRoute
   '/app/history': typeof AuthenticatedAppHistoryRoute
+  '/app/invitees': typeof AuthenticatedAppInviteesRoute
   '/app/me': typeof AuthenticatedAppMeRoute
   '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
@@ -303,6 +311,7 @@ export interface FileRoutesByTo {
   '/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/app/download': typeof AuthenticatedAppDownloadRoute
   '/app/history': typeof AuthenticatedAppHistoryRoute
+  '/app/invitees': typeof AuthenticatedAppInviteesRoute
   '/app/me': typeof AuthenticatedAppMeRoute
   '/app/missions': typeof AuthenticatedAppMissionsRoute
   '/app/my-products': typeof AuthenticatedAppMyProductsRoute
@@ -342,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/app/change-password': typeof AuthenticatedAppChangePasswordRoute
   '/_authenticated/app/download': typeof AuthenticatedAppDownloadRoute
   '/_authenticated/app/history': typeof AuthenticatedAppHistoryRoute
+  '/_authenticated/app/invitees': typeof AuthenticatedAppInviteesRoute
   '/_authenticated/app/me': typeof AuthenticatedAppMeRoute
   '/_authenticated/app/missions': typeof AuthenticatedAppMissionsRoute
   '/_authenticated/app/my-products': typeof AuthenticatedAppMyProductsRoute
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/app/change-password'
     | '/app/download'
     | '/app/history'
+    | '/app/invitees'
     | '/app/me'
     | '/app/missions'
     | '/app/my-products'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/app/change-password'
     | '/app/download'
     | '/app/history'
+    | '/app/invitees'
     | '/app/me'
     | '/app/missions'
     | '/app/my-products'
@@ -454,6 +466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/change-password'
     | '/_authenticated/app/download'
     | '/_authenticated/app/history'
+    | '/_authenticated/app/invitees'
     | '/_authenticated/app/me'
     | '/_authenticated/app/missions'
     | '/_authenticated/app/my-products'
@@ -650,6 +663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHistoryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/invitees': {
+      id: '/_authenticated/app/invitees'
+      path: '/invitees'
+      fullPath: '/app/invitees'
+      preLoaderRoute: typeof AuthenticatedAppInviteesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/me': {
       id: '/_authenticated/app/me'
       path: '/me'
@@ -774,6 +794,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppChangePasswordRoute: typeof AuthenticatedAppChangePasswordRoute
   AuthenticatedAppDownloadRoute: typeof AuthenticatedAppDownloadRoute
   AuthenticatedAppHistoryRoute: typeof AuthenticatedAppHistoryRoute
+  AuthenticatedAppInviteesRoute: typeof AuthenticatedAppInviteesRoute
   AuthenticatedAppMeRoute: typeof AuthenticatedAppMeRoute
   AuthenticatedAppMissionsRoute: typeof AuthenticatedAppMissionsRoute
   AuthenticatedAppMyProductsRoute: typeof AuthenticatedAppMyProductsRoute
@@ -794,6 +815,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppChangePasswordRoute: AuthenticatedAppChangePasswordRoute,
   AuthenticatedAppDownloadRoute: AuthenticatedAppDownloadRoute,
   AuthenticatedAppHistoryRoute: AuthenticatedAppHistoryRoute,
+  AuthenticatedAppInviteesRoute: AuthenticatedAppInviteesRoute,
   AuthenticatedAppMeRoute: AuthenticatedAppMeRoute,
   AuthenticatedAppMissionsRoute: AuthenticatedAppMissionsRoute,
   AuthenticatedAppMyProductsRoute: AuthenticatedAppMyProductsRoute,

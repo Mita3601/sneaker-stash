@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Reproduire Équipe et Accueil selon les cinq nouvelles références, sans changer les règles financières
+- [x] Ajouter la page Invités avec niveaux 1, 2 et 3 dépliables
+- [x] Vérifier les flèches, les listes et le rendu connecté sur téléphone et ordinateur
+
 - [x] Reçus de retrait, page équipe et page recharge selon les références
 - [ ] Vérifier ces deux pages avec une session connectée
 
@@ -18,7 +22,7 @@
 - [x] Vérifier les erreurs de compilation et d'exécution
 - [x] Paiement Ashtech Pay (lien de paiement, webhook, expiration 15 min)
 - [x] Retirer l'ancien système LeekPay
-- [ ] Enregistrer la clé de paiement ASHTECHPAY_HP_LIVE_KEY (en attente du client)
+- [x] Ancienne clé Ashtech abandonnée : prestataire remplacé par GeniusPay
 
 - [x] Remplacer PRISCA par GeniusPay (checkout, webhook signé, vérification, expiration 15 min)
 - [ ] Dépôt test réel après publication (attend l’utilisateur)
