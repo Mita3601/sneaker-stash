@@ -9,12 +9,12 @@ import { fcfa, STATUS_LABELS } from "@/lib/app";
 export const Route = createFileRoute("/_authenticated/app/recharge-history")({
   head: () => ({
     meta: [
-      { title: "Enregistrements de recharge — Dior Parfums" },
+      { title: "Registres des paiements — Dior Parfums" },
       {
         name: "description",
         content: "Historique complet de vos dépôts et de leur statut de validation.",
       },
-      { property: "og:title", content: "Enregistrements de recharge — Dior Parfums" },
+      { property: "og:title", content: "Registres des paiements — Dior Parfums" },
       { property: "og:description", content: "Suivez la validation de chaque dépôt." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -46,7 +46,7 @@ function RechargeHistory() {
 
   return (
     <>
-      <SubHeader title="Historique de recharge" />
+      <SubHeader title="Registres des paiements" />
       <div className="space-y-3 p-3">
         {isLoading ? <p className="py-6 text-center text-sm text-muted-foreground">Chargement…</p> : isError ? <Empty title="Historique indisponible" text="Veuillez réessayer dans quelques instants." /> : rows.length === 0 ? (
           <Empty title="Pas encore de données" text="Vos recharges apparaîtront ici." />
@@ -55,12 +55,12 @@ function RechargeHistory() {
             {rows.map((r) => (
               <article key={r.id} className="min-w-0 rounded-md border border-border bg-card px-3 py-1">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dotted border-border py-2 text-sm font-bold">
-                  <h2 className="font-sans text-sm font-bold">Ordre de dépôt</h2><span>{fcfa(r.amount)}</span>
+                  <h2 className="font-sans text-sm font-bold">Ordre de paiement</h2><span>{fcfa(r.amount)}</span>
                 </div>
-                <dl className="text-xs">
-                  <div className="flex items-start justify-between gap-3 border-b border-border py-2"><dt className="shrink-0">Réf. commande</dt><dd className="min-w-0 break-all text-right">{r.reference ?? r.id}</dd></div>
-                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>Canal</dt><dd className="text-right">Paiement en ligne</dd></div>
-                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>État</dt><dd className={r.status === "approved" || r.status === "paid" ? "text-success" : r.status === "rejected" || r.status === "failed" ? "text-destructive" : "text-warning-foreground"}>{r.status === "pending" ? "Recharge en cours" : r.status === "paid" ? "Validé" : r.status === "failed" ? "Échec" : STATUS_LABELS[r.status] ?? r.status}</dd></div>
+                 <dl className="text-xs">
+                  <div className="flex items-start justify-between gap-3 border-b border-border py-2"><dt className="shrink-0">Ordre</dt><dd className="min-w-0 break-all text-right">{r.reference ?? r.id}</dd></div>
+                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>Canal</dt><dd className="text-right">{/orange/i.test(r.gateway ?? "") ? "Chaîne de recharge (Cameroun)" : /wave/i.test(r.gateway ?? "") ? "Chaîne de recharge (Côte d'Ivoire)" : "Paiement en ligne"}</dd></div>
+                  <div className="flex justify-between gap-3 border-b border-border py-2"><dt>État</dt><dd className={r.status === "approved" || r.status === "paid" ? "text-success" : r.status === "rejected" || r.status === "failed" ? "text-destructive" : "text-warning-foreground"}>{r.status === "pending" ? "Paiement en cours" : r.status === "paid" ? "Validé" : r.status === "failed" ? "Échec" : STATUS_LABELS[r.status] ?? r.status}</dd></div>
                   <div className="flex justify-between gap-3 py-2"><dt>Temps</dt><dd className="text-right">{new Date(r.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</dd></div>
                 </dl>
               </article>
