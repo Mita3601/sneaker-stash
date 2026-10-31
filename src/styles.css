@@ -35,6 +35,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-product-income: var(--product-income);
+  --color-action-icon: var(--action-icon);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --shadow-card: var(--shadow-card);
@@ -75,6 +77,10 @@
   --border: oklch(0.84 0.018 80);
   --input: oklch(0.89 0.014 80);
   --ring: oklch(0.7 0.075 80);
+  --product-income: oklch(0.62 0.25 23);
+  --action-icon: oklch(0.9 0.1 85);
+  --gradient-actions: linear-gradient(90deg, var(--primary-deep), var(--primary));
+  --gradient-team-stat: linear-gradient(90deg, var(--primary), var(--primary-deep));
 
   --gradient-primary: linear-gradient(
     135deg,
@@ -114,6 +120,14 @@
 
 @utility bg-gradient-deep {
   background-image: var(--gradient-deep);
+}
+
+@utility bg-gradient-actions {
+  background-image: var(--gradient-actions);
+}
+
+@utility bg-gradient-team-stat {
+  background-image: var(--gradient-team-stat);
 }
 
 @utility text-gradient-primary {
