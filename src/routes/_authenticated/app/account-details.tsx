@@ -1,20 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Card, Empty, StatTile, StatusPill, SubHeader } from "@/components/ui-kit";
+import { Btn } from "@/components/ui-kit";
+import { FinanceHeader } from "@/components/FinanceLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useSession";
-import { CREDIT_TYPES, fcfa, shortDate, TX_LABELS } from "@/lib/app";
+import { CREDIT_TYPES, TX_LABELS } from "@/lib/app";
 
 export const Route = createFileRoute("/_authenticated/app/account-details")({
   head: () => ({
     meta: [
-      { title: "Détails du compte — Dior Parfums" },
+      { title: "Détails du financement — Dior Parfums" },
       {
         name: "description",
-        content: "Consultez vos revenus du jour, sur 7 jours et sur 30 jours.",
+        content: "Consultez vos recharges, retraits et mouvements du compte Dior.",
       },
-      { property: "og:title", content: "Détails du compte — Dior Parfums" },
+      { property: "og:title", content: "Détails du financement — Dior Parfums" },
       { property: "og:description", content: "Tous vos mouvements de compte au même endroit." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -43,60 +45,20 @@ function AccountDetails() {
     },
   });
 
-  const approved = txs.filter((t) => t.status === "approved");
-  const sumSince = (days: number) => {
-    const from = Date.now() - days * 86_400_000;
-    return approved
-      .filter((t) => CREDIT_TYPES.includes(t.type) && new Date(t.created_at).getTime() >= from)
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-  };
-  const credited = approved
-    .filter((t) => CREDIT_TYPES.includes(t.type))
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  const debited = approved
-    .filter((t) => !CREDIT_TYPES.includes(t.type))
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
+  const [tab, setTab] = useState("account");
+  const visible = txs.filter((t) => tab === "deposit" ? t.type === "deposit" : tab === "withdraw" ? t.type === "withdraw" : t.type !== "deposit" && t.type !== "withdraw");
   return (
-    <>
-      <SubHeader title="Détails du compte" />
-      <div className="space-y-3 p-4">
-        <div className="grid grid-cols-3 gap-2">
-          <StatTile label="Aujourd'hui" value={fcfa(sumSince(1))} />
-          <StatTile label="7 jours" value={fcfa(sumSince(7))} />
-          <StatTile label="30 jours" value={fcfa(sumSince(30))} />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <StatTile label="Total crédité" value={fcfa(credited)} />
-          <StatTile label="Total débité" value={fcfa(debited)} />
-        </div>
-
-        {txs.length === 0 ? (
-          <Empty title="Aucun mouvement" text="Vos transactions apparaîtront ici." />
-        ) : (
-          <Card className="divide-y divide-border p-0">
-            {txs.map((t) => (
-              <div key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold">{TX_LABELS[t.type] ?? t.type}</p>
-                  <p className="text-xs text-muted-foreground">{shortDate(t.created_at)}</p>
-                </div>
-                <div className="text-right">
-                  <p
-                    className={`text-sm font-bold ${
-                      CREDIT_TYPES.includes(t.type) ? "text-primary" : "text-destructive"
-                    }`}
-                  >
-                    {CREDIT_TYPES.includes(t.type) ? "+" : "-"}
-                    {fcfa(t.amount)}
-                  </p>
-                  <StatusPill status={t.status} />
-                </div>
-              </div>
-            ))}
-          </Card>
-        )}
+    <div className="finance-page bg-muted">
+      <FinanceHeader title="Détails du financement" />
+      <div role="tablist" aria-label="Mouvements financiers" className="grid h-16 grid-cols-3 bg-gradient-actions text-primary-foreground">
+        {[{id:"deposit",label:"Recharger"},{id:"withdraw",label:"Retirer"},{id:"account",label:"Compte"}].map(({id,label}) => <Btn key={id} role="tab" aria-selected={tab === id} variant="outline" onClick={() => setTab(id)} className={`rounded-none bg-transparent text-base normal-case tracking-normal text-primary-foreground shadow-none ring-0 ${tab === id ? "font-bold" : "font-normal opacity-80"}`}>{label}</Btn>)}
       </div>
-    </>
+      <div role="tabpanel" className="min-h-[65vh] bg-muted">
+        {visible.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">Aucun mouvement</p> : visible.map((t) => <div key={t.id} className="flex min-h-24 items-center justify-between gap-4 bg-card px-8 py-5">
+          <div className="min-w-0"><p className={`text-base ${CREDIT_TYPES.includes(t.type) ? "text-success" : "text-foreground"}`}>{TX_LABELS[t.type] ?? t.type}</p><p className="mt-2 text-sm text-muted-foreground">{new Date(t.created_at).toLocaleString("fr-FR", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"})}</p></div>
+          <p className="shrink-0 text-base text-muted-foreground">FCFA {new Intl.NumberFormat("fr-FR").format(Number(t.amount))}</p>
+        </div>)}
+      </div>
+    </div>
   );
 }
