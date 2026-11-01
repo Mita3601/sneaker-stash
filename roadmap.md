@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Refaire Mon compte, bilan financier, retrait, gestion bancaire et recharge selon les huit photos
+- [ ] Vérifier les cinq pages et leurs interactions avec une session connectée
+
 - [x] Reproduire Équipe et Accueil selon les cinq nouvelles références, sans changer les règles financières
 - [x] Ajouter la page Invités avec niveaux 1, 2 et 3 dépliables
 - [x] Vérifier les flèches, les listes et le rendu connecté sur téléphone et ordinateur
