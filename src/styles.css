@@ -135,3 +135,9 @@
   background-clip: text;
   color: transparent;
 }
+
+.finance-page { min-height: calc(100dvh - 5rem); background: var(--card); }
+.finance-page h1, .finance-page h2, .finance-page h3 { font-family: var(--font-sans); }
+.finance-page .finance-button { letter-spacing: 0; text-transform: none; }
+.finance-instructions { scroll-margin-top: 5rem; }
+.finance-instructions li { padding-left: .1rem; }
