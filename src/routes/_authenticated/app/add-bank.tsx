@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ClipboardList, CreditCard, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { Btn, Card, Empty, Field, inputClass, SubHeader } from "@/components/ui-kit";
+import { Btn } from "@/components/ui-kit";
+import { FinanceHeader, financeButton, financeInput } from "@/components/FinanceLayout";
 import { useCurrentUser, useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { PROVIDERS } from "@/lib/app";
@@ -33,7 +34,8 @@ function AddBank() {
   const qc = useQueryClient();
   const { data: user } = useCurrentUser();
   const { data: profile } = useProfile();
-  const [provider, setProvider] = useState(PROVIDERS[0]!);
+  const [provider, setProvider] = useState("");
+  const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
@@ -41,10 +43,11 @@ function AddBank() {
     queryKey: ["bank-accounts", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
+      if (!user) return [];
       const { data, error } = await supabase
         .from("bank_accounts")
         .select("*")
-        .eq("user_id", user!.id)
+        .eq("user_id", user.id)
         .order("created_at");
       if (error) throw error;
       return data;
@@ -53,8 +56,9 @@ function AddBank() {
 
   const add = useMutation({
     mutationFn: async () => {
+      if (!user) throw new Error("Veuillez vous connecter");
       const { error } = await supabase.from("bank_accounts").insert({
-        user_id: user!.id,
+        user_id: user.id,
         provider,
         account_name: name.trim(),
         account_number: number.trim(),
@@ -66,6 +70,7 @@ function AddBank() {
       toast.success("Compte de retrait ajouté");
       setName("");
       setNumber("");
+      setAdding(false);
       qc.invalidateQueries({ queryKey: ["bank-accounts"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -88,19 +93,14 @@ function AddBank() {
 
   const availableProviders = getProvidersForCountry(profile?.country_code);
 
-  useEffect(() => {
-    if (!availableProviders.includes(provider)) {
-      setProvider(availableProviders[0] ?? "");
-    }
-  }, [availableProviders, provider]);
-
   const remove = useMutation({
     mutationFn: async (id: string) => {
+      if (!user) throw new Error("Veuillez vous connecter");
       const { error } = await supabase
         .from("bank_accounts")
         .delete()
         .eq("id", id)
-        .eq("user_id", user!.id);
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -112,6 +112,10 @@ function AddBank() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!availableProviders.includes(provider)) {
+      toast.error("Sélectionnez le type de portefeuille");
+      return;
+    }
     if (name.trim().length < 3) {
       toast.error("Renseignez le nom du titulaire");
       return;
@@ -124,71 +128,26 @@ function AddBank() {
   }
 
   return (
-    <>
-      <SubHeader title="Ajouter un compte de retrait" />
-      <div className="space-y-3 p-4">
-        <Card>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <Field label="Opérateur">
-              <select
-                value={provider}
-                onChange={(e) => setProvider(e.target.value)}
-                className={inputClass}
-              >
-                {availableProviders.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Nom du titulaire">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nom et prénoms"
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Numéro de compte" hint="Le numéro mobile money qui recevra vos retraits">
-              <input
-                inputMode="numeric"
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-                placeholder="07 00 00 00 00"
-                className={inputClass}
-              />
-            </Field>
-            <Btn full disabled={add.isPending}>
-              {add.isPending ? "Enregistrement..." : "Enregistrer"}
-            </Btn>
-          </form>
-        </Card>
-
-        {accounts.length === 0 ? (
-          <Empty title="Aucun compte enregistré" text="Ajoutez un compte pour pouvoir retirer." />
-        ) : (
-          <Card className="divide-y divide-border p-0">
-            {accounts.map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-bold">
-                    {a.provider} · {a.account_number}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{a.account_name}</p>
-                </div>
-                <button
-                  onClick={() => remove.mutate(a.id)}
-                  className="rounded-xl p-2 text-destructive hover:bg-destructive/10"
-                  aria-label="Supprimer le compte"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
-            ))}
-          </Card>
-        )}
-      </div>
-    </>
+    <div className="finance-page">
+      {adding ? <>
+        <FinanceHeader title="Ajouter un compte de retrait" />
+        <form onSubmit={onSubmit} className="px-5 pt-9">
+          <label className="block space-y-3"><span className="font-display text-xl">*Sélectionnez le type de portefeuille</span><select aria-label="Type de portefeuille" value={provider} onChange={(e) => setProvider(e.target.value)} className={financeInput}><option value="">Veuillez sélectionner</option>{availableProviders.map((p) => <option key={p} value={p}>{p}</option>)}</select></label>
+          <label className="mt-7 block space-y-3"><span className="font-display text-xl">*Nom</span><input aria-label="Nom du titulaire" value={name} onChange={(e) => setName(e.target.value)} placeholder="Veuillez entrer votre nom" className={financeInput} /></label>
+          <label className="mt-7 block space-y-3"><span className="font-display text-xl">*Compte portefeuille</span><input aria-label="Compte portefeuille" inputMode="tel" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Numéro local ou avec l’indicatif de votre pays" className={financeInput} /></label>
+          <Btn full className={`${financeButton} mx-auto mt-16 w-5/6 rounded-full`} disabled={add.isPending}>{add.isPending ? "Enregistrement..." : "Ajouter"}</Btn>
+          <Btn full type="button" variant="outline" className="mt-4 border-0 bg-transparent text-sm font-normal normal-case tracking-normal shadow-none ring-0" onClick={() => setAdding(false)}>Annuler</Btn>
+        </form>
+      </> : <>
+        <FinanceHeader title="Gestion de compte bancaire" />
+        {accounts.length === 0 ? <div className="px-5 pt-24">
+          <div className="relative mx-auto grid h-48 w-64 place-items-center text-muted-foreground/20" aria-label="Aucun compte enregistré"><div className="absolute bottom-3 h-16 w-full rounded-full bg-muted/50" /><ClipboardList className="relative size-40" strokeWidth={1} /></div>
+          <Btn full className={`${financeButton} mx-auto mt-14 w-5/6 rounded-2xl`} onClick={() => setAdding(true)}>Ajouter</Btn>
+        </div> : <div className="space-y-4 px-5 py-6">
+          {accounts.map((a) => <div key={a.id} className="flex items-center gap-3 border-b border-border py-4"><CreditCard className="size-7 text-muted-foreground" /><div className="min-w-0 flex-1"><p className="text-base font-bold">{a.provider} · {a.account_number}</p><p className="mt-1 text-sm text-muted-foreground">{a.account_name}</p></div><Btn variant="outline" title="Supprimer le compte" className="bg-transparent p-2 text-destructive shadow-none ring-0" disabled={remove.isPending} onClick={() => { if (window.confirm("Supprimer ce compte de retrait ?")) remove.mutate(a.id); }} aria-label="Supprimer le compte"><Trash2 className="size-5" /></Btn></div>)}
+          <Btn full className={`${financeButton} mt-6`} onClick={() => setAdding(true)}>Ajouter</Btn>
+        </div>}
+      </>}
+    </div>
   );
 }

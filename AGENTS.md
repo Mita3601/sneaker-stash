@@ -15,3 +15,4 @@
 
 - Team overview and invitee lists share the browser-safe query options in src/lib/team.ts so all three referral levels and first-purchase validity stay consistent without duplicating data access.
 - Home action links use the reusable HomeActions component with source SVG icons and semantic gradient tokens to keep their proportions and styling consistent.
+- Account financial pages share FinanceLayout header and control styles; keep forms unframed and retain existing payment and wallet operations so presentation changes do not alter financial behavior.

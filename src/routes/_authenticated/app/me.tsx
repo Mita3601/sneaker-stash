@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChartNoAxesCombined, ChevronRight, CreditCard, Eye, EyeOff, FilePenLine, Headset, Info, KeyRound, PlayCircle, Power, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { ChartNoAxesCombined, ChevronRight, CreditCard, Copy, FilePenLine, Headset, Info, KeyRound, PlayCircle, Power, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 import hero from "@/assets/dior-auth.jpg";
 import { Btn } from "@/components/ui-kit";
+
 import { useIsAdmin, useProfile } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { fcfa } from "@/lib/app";
+
 
 export const Route = createFileRoute("/_authenticated/app/me")({
   head: () => ({ meta: [
@@ -41,7 +42,7 @@ function Me() {
   const qc = useQueryClient();
   const { data: profile } = useProfile();
   const { data: isAdmin } = useIsAdmin();
-  const [show, setShow] = useState(false);
+
 
   async function signOut() {
     await qc.cancelQueries();
@@ -52,43 +53,44 @@ function Me() {
 
   return (
     <>
-      <header className="relative m-3 overflow-hidden text-primary-foreground">
-        <img src={hero} alt="Collection de parfums Dior" width={1536} height={1024} className="h-64 w-full object-cover" />
-        <div className="absolute inset-0 bg-primary-deep/65 p-5">
+      <header className="relative overflow-hidden text-primary-foreground">
+        <img src={hero} alt="Collection de parfums Dior" width={1536} height={1024} className="h-[267px] w-full object-cover" />
+        <div className="absolute inset-0 bg-primary-deep/50 px-3 py-8">
           <h1 className="sr-only">Mon compte</h1>
-          <p className="text-sm">Numéro de téléphone</p>
-          <div className="mt-2 flex items-center gap-2">
-            <p className="text-lg font-bold">{show ? profile?.phone : "•".repeat(10)}</p>
-            <Btn variant="outline" className="min-h-8 border-0 bg-transparent p-1 text-primary-foreground shadow-none ring-0 hover:bg-primary-foreground/10" onClick={() => setShow((value) => !value)} aria-label={show ? "Masquer le numéro" : "Afficher le numéro"}>
-              {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </Btn>
+          <p className="text-base">Numéro de téléphone</p>
+          <div className="mt-2 flex items-center gap-3">
+            <p className="text-xl font-bold">{profile?.phone || "—"}</p>
+            <Btn variant="outline" title="Copier le numéro" className="min-h-8 border-0 bg-transparent p-1 text-primary-foreground shadow-none ring-0" onClick={async () => {
+              if (!profile?.phone) return;
+              try { await navigator.clipboard.writeText(profile.phone); toast.success("Numéro copié"); }
+              catch { toast.error("Impossible de copier le numéro"); }
+            }} aria-label="Copier le numéro"><Copy className="size-5" /></Btn>
           </div>
-          <div className="absolute bottom-9 left-5 right-5">
-            <p className="text-sm">Solde du compte</p>
-            <p className="mt-2 text-2xl font-bold">{fcfa(profile?.balance)}</p>
+          <div className="absolute bottom-16 left-3 right-3">
+            <p className="text-base">Solde du compte</p>
+            <p className="mt-1 text-xl font-bold"><span className="text-base">FCFA </span><span className="text-3xl">{new Intl.NumberFormat("fr-FR").format(Number(profile?.balance ?? 0))}</span></p>
           </div>
         </div>
       </header>
-
-      <div className="grid grid-cols-2 gap-2 px-4 py-2">
-        <Link to="/app/recharge" className="flex min-h-14 items-center justify-center rounded-md bg-gradient-primary px-3 text-sm font-semibold text-primary-foreground">Recharger</Link>
-        <Link to="/app/withdraw" className="flex min-h-14 items-center justify-center rounded-md bg-gradient-primary px-3 text-sm font-semibold text-primary-foreground">Retrait</Link>
+      <div className="grid grid-cols-2 gap-3 px-1.5 pb-2 pt-5">
+        <Link to="/app/recharge" className="flex h-[73px] items-center justify-center rounded-md bg-gradient-actions text-base font-bold text-primary-foreground">Recharger</Link>
+        <Link to="/app/withdraw" className="flex h-[73px] items-center justify-center rounded-md bg-gradient-actions text-base font-bold text-primary-foreground">Retrait</Link>
       </div>
 
-      <div className="space-y-3 px-4 pb-5 pt-1">
+      <div className="space-y-6 px-1.5 pb-5 pt-1">
         {groups.map((items, index) => (
           <div key={index} className="overflow-hidden rounded-md bg-muted">
             {items.map(({ to, label, icon: Icon }) => (
-              <Link key={to} to={to} className="flex min-h-14 items-center gap-4 px-5 py-4 transition hover:bg-secondary">
-                <Icon className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.8} />
-                <span className="min-w-0 flex-1 text-sm font-medium">{label}</span>
+              <Link key={to} to={to} className="flex min-h-[61px] items-center gap-7 px-8 py-4 transition hover:bg-secondary">
+                <Icon className="size-6 shrink-0 text-muted-foreground" strokeWidth={1.8} />
+                <span className="min-w-0 flex-1 text-base font-normal">{label}</span>
                 <ChevronRight className="size-4 shrink-0" />
               </Link>
             ))}
             {index === 1 && <>
-              {isAdmin && <Link to="/admin" className="flex min-h-14 items-center gap-4 px-5 py-4 hover:bg-secondary"><ShieldCheck className="size-5 shrink-0 text-muted-foreground" /><span className="flex-1 text-sm font-medium">Panneau administrateur</span><ChevronRight className="size-4" /></Link>}
-              <Btn full variant="ghost" className="justify-start gap-4 rounded-none bg-transparent px-5 py-4 text-left text-sm font-medium normal-case tracking-normal shadow-none hover:bg-secondary" onClick={signOut}>
-                <Power className="size-5 shrink-0 text-muted-foreground" /><span className="flex-1">Sortie sécurisée</span><ChevronRight className="size-4" />
+              {isAdmin && <Link to="/admin" className="flex min-h-[61px] items-center gap-7 px-8 py-4 hover:bg-secondary"><ShieldCheck className="size-6 shrink-0 text-muted-foreground" /><span className="flex-1 text-base font-normal">Panneau administrateur</span><ChevronRight className="size-4" /></Link>}
+              <Btn full variant="ghost" className="justify-start gap-4 rounded-none bg-transparent px-5 py-4 text-left text-base font-normal normal-case tracking-normal shadow-none hover:bg-secondary" onClick={signOut}>
+                <Power className="size-6 shrink-0 text-muted-foreground" /><span className="flex-1">Sortie sécurisée</span><ChevronRight className="size-4" />
               </Btn>
             </>}
           </div>
