@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ChevronLeft, CreditCard, ReceiptText } from "lucide-react";
-import heroImg from "@/assets/dior-hero.jpg";
+
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
+import { FinanceHeader, financeButton } from "@/components/FinanceLayout";
 import { ManualCheckout, ORANGE_PROVIDER, WAVE_PROVIDER, type ManualProvider } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,12 +21,12 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
       {
         name: "description",
         content:
-          "Rechargez votre solde par mobile money (Orange, MTN, Moov, Wave). Crédit automatique dès confirmation.",
+          "Rechargez votre solde par mobile money (Orange, MTN, Moov, Wave). Crédit après validation du paiement.",
       },
       { property: "og:title", content: "Recharge — Dior Parfums" },
       {
         property: "og:description",
-        content: "Dépôt mobile money sécurisé, solde crédité automatiquement.",
+        content: "Dépôt mobile money sécurisé, solde crédité après validation.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [2000, 8000, 20000, 60000];
+const PRESETS = [3500, 7000, 12000, 20000, 40000, 75000, 100000, 150000, 250000];
 const POLL_MS = 5000;
 const TIMEOUT_MS = DEPOSIT_TIMEOUT_MINUTES * 60 * 1000;
 
@@ -59,10 +59,11 @@ function Recharge() {
     queryKey: ["profile", userId],
     enabled: Boolean(userId),
     queryFn: async () => {
+      if (!userId) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("phone, country_code")
-        .eq("id", userId!)
+        .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -72,7 +73,7 @@ function Recharge() {
   const gatewayReady = options.data ? options.data.gatewayConfigured : true;
 
   const [amount, setAmount] = useState("2000");
-  const [country, setCountry] = useState(COUNTRIES[0]!.code);
+  const [country, setCountry] = useState(COUNTRIES[0]?.code ?? "+225");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
@@ -204,134 +205,21 @@ function Recharge() {
         />
       ) : null}
 
-      <section className="relative h-48 overflow-hidden bg-gradient-deep">
-        <img src={heroImg} alt="Flacons de parfum Dior" className="absolute inset-0 h-full w-full object-cover opacity-80" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/0 to-foreground/40" />
-        <Link to="/app/me" aria-label="Retour" className="absolute left-3 top-3 grid size-10 place-items-center rounded-full bg-foreground/30 text-primary-foreground">
-          <ChevronLeft className="size-6" />
-        </Link>
-        <Link to="/app/recharge-history" aria-label="Historique des recharges" className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-foreground/30 text-primary-foreground">
-          <ReceiptText className="size-5" />
-        </Link>
-        <h1 className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-5xl font-medium uppercase tracking-widest text-primary-foreground drop-shadow">
-          Recharge
-        </h1>
-      </section>
-      <div className="space-y-4 bg-secondary p-4">
-        {!gatewayReady && !isManual ? (
-          <Card>
-            <p className="text-sm font-bold">Paiement momentanément indisponible</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              La passerelle de paiement n&apos;est pas encore activée. Réessayez plus tard ou
-              contactez le service client.
-            </p>
-          </Card>
-        ) : null}
-
-        {phase === "idle" ? (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <p className="px-1 text-base text-foreground">Le montant de la recharge</p>
-              <div className="grid grid-cols-4 gap-2">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setAmount(String(p))}
-                    className={`rounded-md border py-3 text-sm transition ${
-                      amount === String(p)
-                        ? "border-foreground bg-gradient-deep text-primary-foreground"
-                        : "border-border bg-card text-foreground"
-                    }`}
-                  >
-                    {p.toLocaleString("en-US")}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="px-1 text-base text-foreground">Saisir un autre montant</p>
-              <label className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3">
-                <span className="text-muted-foreground">FCFA</span>
-                <input
-                  inputMode="numeric"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                  placeholder={String(MIN_DEPOSIT)}
-                  className="min-w-0 flex-1 bg-transparent outline-none"
-                  aria-label="Montant"
-                />
-              </label>
-            </div>
-
-            <Card className="space-y-3">
-              <p className="text-base text-foreground">Méthode de recharge</p>
-              {COUNTRIES.map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  onClick={() => setCountry(c.code)}
-                  className={`flex w-full items-center gap-3 rounded-md px-4 py-3 text-left transition ${
-                    country === c.code
-                      ? "bg-gradient-deep text-primary-foreground"
-                      : "border border-border bg-card text-foreground"
-                  }`}
-                >
-                  <CreditCard className="size-5" />
-                  <span className="flex-1">{c.label}</span>
-                  <span className="text-xs opacity-70">{c.code}</span>
-                  {country === c.code ? <Check className="size-4" /> : null}
-                </button>
-              ))}
-
-              {!isManual ? (<>
-              <Field label="Numéro mobile money">
-                <input
-                  inputMode="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ""))}
-                  placeholder="XXXXXXXX"
-                  className={inputClass}
-                />
-              </Field>
-              <Field label="Nom du titulaire">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nom et prénoms"
-                  className={inputClass}
-                />
-              </Field>
-              </>) : (
-                <p className="text-xs text-muted-foreground">
-                  {isCI
-                    ? "Paiement par Wave Côte d'Ivoire, validé par l'administrateur."
-                    : "Paiement par Orange Money Cameroun, validé par l'administrateur."}
-                </p>
-              )}
-            </Card>
-
-            <div className="flex justify-center">
-              <Btn className="w-2/3 rounded-full py-4 text-base" disabled={pay.isPending || (!gatewayReady && !isManual)}>
-                {pay.isPending ? "Création du paiement..." : "Confirmer"}
-              </Btn>
-            </div>
-            <Link to="/app/recharge-history" className="block text-center text-sm text-primary underline-offset-2 hover:underline">
-              Si la recharge n&apos;est pas créditée, consultez votre historique ici
-            </Link>
-
-            <ol className="list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-foreground">
-              <li>Le montant minimum du dépôt est de {fcfa(MIN_DEPOSIT)}.</li>
-              <li>Choisissez votre pays, puis payez avec le numéro mobile money indiqué.</li>
-              <li>Suivez scrupuleusement les instructions de la page de paiement sécurisée.</li>
-              <li>
-                Sans confirmation sous {DEPOSIT_TIMEOUT_MINUTES} minutes, la demande est annulée ;
-                contactez alors le service client avec votre référence.
-              </li>
-            </ol>
-          </form>
-        ) : null}
+      <div className="finance-page">
+      <FinanceHeader title="Recharger" info="recharge-instructions" />
+      <div className="px-5 pb-10 pt-7">
+        {!gatewayReady && !isManual && <p className="mb-5 text-sm text-destructive">Paiement momentanément indisponible. Réessayez plus tard ou contactez le service client.</p>}
+        {phase === "idle" && <form onSubmit={onSubmit}>
+          <div className="flex flex-wrap items-baseline gap-2"><h2 className="text-lg font-bold">Montant de la recharge</h2><span className="text-sm">(Minimum {fcfa(MIN_DEPOSIT)})</span></div>
+          <div className="mt-9 grid grid-cols-4 gap-2">
+            {PRESETS.map((p) => <Btn key={p} type="button" variant="outline" aria-pressed={amount === String(p)} onClick={() => setAmount(String(p))} className={`h-11 rounded-md px-1 text-sm font-normal normal-case tracking-normal shadow-card ${amount === String(p) ? "bg-secondary ring-primary" : "bg-card text-muted-foreground ring-border/40"}`}>{p}</Btn>)}
+          </div>
+          <label className="mt-7 flex h-12 items-center gap-4 rounded-md border border-border px-5"><span>FCFA</span><input inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} placeholder="Veuillez saisir le montant de la recharge" className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" aria-label="Montant" /></label>
+          <h2 className="mb-3 mt-8 px-2 text-lg font-bold">Méthode de recharge</h2>
+          <div className="space-y-2" role="group" aria-label="Pays de recharge">{COUNTRIES.map((c) => <Btn key={c.code} type="button" variant="outline" aria-pressed={country === c.code} onClick={() => setCountry(c.code)} className={`h-12 w-full rounded-md text-sm font-normal normal-case tracking-normal shadow-card ${country === c.code ? "bg-secondary ring-border" : "bg-card ring-border/40"}`}>Chaîne de recharge ({c.label})</Btn>)}</div>
+          {!isManual && <div className="mt-5 space-y-4"><Field label="Numéro mobile money"><input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ""))} placeholder="XXXXXXXX" className={inputClass} /></Field><Field label="Nom du titulaire"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom et prénoms" className={inputClass} /></Field></div>}
+          <Btn full className={`${financeButton} mt-14`} disabled={pay.isPending || (!gatewayReady && !isManual)}>{pay.isPending ? "Création du paiement..." : "Rechargez maintenant"}</Btn>
+        </form>}
 
         {phase === "pending" && deposit ? (
           <Card className="space-y-3">
@@ -388,6 +276,18 @@ function Recharge() {
             </Btn>
           </Card>
         ) : null}
+      <section id="recharge-instructions" className="finance-instructions mt-12 px-2">
+        <h2 className="text-lg font-bold">Instructions de recharge</h2>
+        <ol className="mt-6 list-decimal space-y-4 pl-4 text-sm leading-relaxed">
+          <li>Le dépôt minimum est de {fcfa(MIN_DEPOSIT)}. Les dépôts inférieurs à ce montant ne seront pas crédités sur votre compte.</li>
+          <li>Veuillez utiliser les informations de paiement les plus récentes pour chaque dépôt.</li>
+          <li>Le montant saisi doit correspondre au montant du paiement.</li>
+          <li>Pour Wave Côte d'Ivoire et Orange Money Cameroun, votre dépôt est crédité après vérification et validation par l'administration.</li>
+          <li>Si votre dépôt n'est pas crédité après validation, veuillez contacter le service client avec votre référence et votre preuve de paiement. Le délai de la demande est de {DEPOSIT_TIMEOUT_MINUTES} minutes.</li>
+        </ol>
+        <Link to="/app/recharge-history" className="mt-8 block text-sm text-muted-foreground underline">Historique des recharges</Link>
+      </section>
+      </div>
       </div>
     </>
   );
