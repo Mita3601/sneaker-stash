@@ -1,7 +1,8 @@
 # Roadmap
 
-- [ ] Refaire Mon compte, bilan financier, retrait, gestion bancaire et recharge selon les huit photos
-- [ ] Vérifier les cinq pages et leurs interactions avec une session connectée
+- [x] Refaire Mon compte, bilan financier, retrait, gestion bancaire et recharge selon les huit photos
+- [x] Vérifier les cinq pages connectées, les onglets, l’ajout vide et l’ouverture Wave, sans opération financière
+- [ ] Compléter le contrôle des minimums et des instructions (session de vérification expirée ; nouvelle connexion requise)
 
 - [x] Reproduire Équipe et Accueil selon les cinq nouvelles références, sans changer les règles financières
 - [x] Ajouter la page Invités avec niveaux 1, 2 et 3 dépliables
