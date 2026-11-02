@@ -43,8 +43,11 @@ export function BottomNav() {
             <Link
               to={item.to}
               activeOptions={{ exact: item.to === "/app" }}
-              className="flex flex-col items-center gap-1 py-2.5 text-xs font-semibold text-primary-foreground/60"
-              activeProps={{ className: "text-accent" }}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 py-2.5 text-xs font-semibold ${
+                  isActive ? "text-accent" : "text-primary-foreground/60"
+                }`
+              }
             >
               {({ isActive }) => (
                 <>
