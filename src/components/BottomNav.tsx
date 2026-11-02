@@ -19,12 +19,19 @@ function TeamIcon({ className }: { className?: string }) {
   );
 }
 
-const items = [
+type NavItem = {
+  to: string;
+  label: string;
+  path?: string;
+  icon?: (props: { className?: string }) => ReactElement;
+};
+
+const items: NavItem[] = [
   { to: "/app", label: "Maison", path: HOME_PATH },
   { to: "/app/my-products", label: "Projet", path: CART_PATH },
   { to: "/app/team", label: "Équipe", icon: TeamIcon },
   { to: "/app/me", label: "Le mien", path: PERSON_PATH },
-] as const;
+];
 
 export function BottomNav() {
   return (
