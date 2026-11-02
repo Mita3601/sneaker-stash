@@ -1,18 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { Btn, Card, SubHeader } from "@/components/ui-kit";
+import { SubHeader } from "@/components/ui-kit";
 import hero from "@/assets/image1.jpg";
 
 export const Route = createFileRoute("/_authenticated/app/regulation")({
   head: () => ({
     meta: [
-      { title: "Réglementation — Dior Parfums" },
+      { title: "Règles de la plateforme — Dior Parfums" },
       {
         name: "description",
-        content: "Règles d’utilisation et informations importantes de Dior Parfums.",
+        content: "Règles d’utilisation et conditions en vigueur de Dior Parfums.",
       },
-      { property: "og:title", content: "Réglementation — Dior Parfums" },
+      { property: "og:title", content: "Règles de la plateforme — Dior Parfums" },
       {
         property: "og:description",
         content: "Lisez les règles de fonctionnement de la plateforme.",
@@ -24,71 +23,57 @@ export const Route = createFileRoute("/_authenticated/app/regulation")({
   component: Regulation,
 });
 
+const rules = [
+  "Dépôt minimum : 200 FCFA, crédité après approbation du paiement.",
+  "Bonus d'inscription : 1 500 FCFA pour les nouveaux comptes.",
+  "Le revenu quotidien, le montant total et la durée sont affichés avant l’achat et enregistrés lors de sa confirmation.",
+  "Commissions : 27 % au niveau 1, 2 % au niveau 2 et 1 % au niveau 3, uniquement sur les achats réglés avec de l'argent réel.",
+  "Chaque achat dispose de son propre cycle. Les revenus de plusieurs parfums achetés peuvent se cumuler.",
+  "Les revenus dus sont automatiquement crédités sur le solde interne toutes les 24 heures, à partir de l’heure d’achat. Les demandes de retrait restent soumises aux conditions indiquées sur la page Retrait.",
+  "Retrait minimum : 1 000 FCFA, frais de 15 %, 2 retraits maximum par jour.",
+  "Rejoignez notre groupe Telegram pour en savoir plus sur les opportunités de gains !",
+];
+
 function Regulation() {
   return (
-    <>
-      <SubHeader title="Règlementation" />
+    <div className="bg-background pb-10">
+      <SubHeader title="Règles de la plateforme" />
 
-      <div className="p-4 space-y-4">
-        <Card className="overflow-hidden">
-          <img src={hero} alt="Plan de revenus" className="w-full h-auto rounded-md" />
-        </Card>
+      <div className="space-y-5 px-5 pt-6 text-[17px] leading-relaxed text-foreground">
+        <img src={hero} alt="Tableau des parfums" className="h-auto w-full" />
 
-        <Card>
-          <p className="text-base font-bold">Présentation</p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Dior Parfums propose une expérience de collection inspirée de la haute parfumerie.
-            Sélectionnez des fragrances exclusives pour participer au développement de la
-            plateforme, générer un revenu quotidien et construire progressivement votre
-            portefeuille.
-          </p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Lorsqu'un ami que vous invitez s'inscrit et investit, vous recevez immédiatement une
-            prime de 27 % sur son investissement.
-          </p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Lorsque les membres de votre équipe de deuxième niveau investissent, vous recevez une
-            prime de 2 %.
-          </p>
-          <p className="text-sm text-muted-foreground mb-3">
-            Lorsque les membres de votre équipe de troisième niveau investissent, vous recevez une
-            prime de 1 %.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Une fois que les membres de votre équipe ont investi, la prime est immédiatement
-            créditée sur votre compte et vous pouvez la retirer immédiatement.
-          </p>
-        </Card>
+        <p>Conditions en vigueur</p>
+        <p className="font-bold">Bienvenue : 1 500 FCFA · Dépôt minimum : 200 FCFA</p>
+        <p>
+          Parrainage sur les achats réglés : <strong>27 % · 2 % · 1 %</strong>.
+        </p>
+        <p>
+          Cette plateforme mobile propose une collection de parfums Dior, un espace client et
+          des fonctionnalités dédiées au suivi des produits, à l’équipe et aux informations de
+          financement.
+        </p>
+        <p className="pt-2">Bienvenue sur votre espace Dior Parfums.</p>
 
-        <Card className="space-y-2">
-          <p className="text-sm font-bold">Règles essentielles</p>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>1. Investissez 4 000 FCFA et retirez 1500 FCFA immédiatement.</li>
-            <li>2. Bonus d'inscription : 1500 FCFA</li>
-            <li>3. Bonus de connexion quotidienne : 100 FCFA</li>
-            <li>4. Taux de rendement quotidien : 18,75%</li>
-            <li>
-              5. Invitez vos filleuls à investir et vous recevez immédiatement une prime de 27 % sur
-              leur investissement.
-            </li>
-            <li>
-              6. Vos revenus sont automatiquement versés sur votre compte 24 h/24 et peuvent être
-              retirés à tout moment de 08h a 18h.
-            </li>
-            <li>
-              7. Rejoignez le groupe Telegram pour en savoir plus sur les opportunités de gains.
-            </li>
-          </ul>
-        </Card>
+        <ol className="list-decimal space-y-5 pl-8">
+          {rules.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ol>
 
-        <div className="flex gap-2">
-          <Link to="/app/support" className="flex-1">
-            <Btn full variant="outline">
-              Contacter le support
-            </Btn>
-          </Link>
-        </div>
+        <p className="pt-2">Récompenses de parrainage</p>
+        <p>
+          Les commissions portent uniquement sur les achats réglés avec de l’argent réel. Aucun
+          versement sur les fonds crédités par l’administration ni sur le bonus de bienvenue.
+          Les fractions de FCFA sont arrondies à l’entier inférieur.
+        </p>
+
+        <p className="pt-4 text-[13px] leading-relaxed text-muted-foreground">
+          Les revenus des parfums achetés sont crédités sur le solde interne toutes les 24
+          heures, dans les limites de leur montant total et de leur durée. Les parfums offerts
+          par l’administration ne génèrent pas de commission. Les retraits suivent les
+          conditions de la page Retrait.
+        </p>
       </div>
-    </>
+    </div>
   );
 }
