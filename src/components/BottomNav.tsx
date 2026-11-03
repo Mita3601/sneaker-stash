@@ -43,15 +43,15 @@ export function BottomNav() {
             <Link
               to={item.to}
               activeOptions={{ exact: item.to === "/app" }}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-1 py-2.5 text-xs font-semibold ${
-                  isActive ? "text-accent" : "text-primary-foreground/60"
-                }`
-              }
+              className="flex flex-col items-center gap-1 py-2.5 text-xs font-semibold"
             >
-              {({ isActive }) => (
+              {({ isActive }: { isActive: boolean }) => (
                 <>
-                  <span className="grid size-9 place-items-center">
+                  <span
+                    className={`grid size-9 place-items-center ${
+                      isActive ? "text-accent" : "text-primary-foreground/60"
+                    }`}
+                  >
                     {"icon" in item && item.icon ? (
                       <item.icon className="size-7" />
                     ) : (
@@ -60,7 +60,9 @@ export function BottomNav() {
                       </svg>
                     )}
                   </span>
-                  {item.label}
+                  <span className={isActive ? "text-accent" : "text-primary-foreground/60"}>
+                    {item.label}
+                  </span>
                 </>
               )}
             </Link>
