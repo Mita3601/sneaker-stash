@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactElement } from "react";
 
-const HOME_PATH =
-  "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z";
+const HOME_PATH = "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z";
 const CART_PATH =
   "M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.67h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zM17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z";
 const STAR_PATH =
@@ -36,14 +35,14 @@ const items: NavItem[] = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[430px] border-t border-primary-foreground/15 bg-gradient-deep">
+    <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[430px] border-t border-white/10 bg-[#010b18]">
       <ul className="grid grid-cols-4">
         {items.map((item) => (
           <li key={item.to}>
             <Link
               to={item.to}
               activeOptions={{ exact: item.to === "/app" }}
-              className="flex flex-col items-center gap-1 py-2.5 text-xs font-semibold"
+              className="flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-all"
             >
               {({ isActive }: { isActive: boolean }) => (
                 <>
@@ -53,14 +52,21 @@ export function BottomNav() {
                     }`}
                   >
                     {"icon" in item && item.icon ? (
-                      <item.icon className="size-7" />
+                      <item.icon
+                        className={`size-7 ${isActive ? "scale-110 text-[#f3c64a]" : "text-white/90"}`}
+                      />
                     ) : (
-                      <svg viewBox="0 0 24 24" className="size-7" fill="currentColor" aria-hidden>
+                      <svg
+                        viewBox="0 0 24 24"
+                        className={`size-7 ${isActive ? "scale-110 text-[#f3c64a]" : "text-white/90"}`}
+                        fill="currentColor"
+                        aria-hidden
+                      >
                         <path d={item.path} />
                       </svg>
                     )}
                   </span>
-                  <span className={isActive ? "text-accent" : "text-primary-foreground/60"}>
+                  <span className={isActive ? "text-[#f3c64a]" : "text-white/80"}>
                     {item.label}
                   </span>
                 </>

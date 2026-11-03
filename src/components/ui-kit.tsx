@@ -32,7 +32,7 @@ export function Btn({ children, variant = "primary", className, full, ...rest }:
     <button
       {...rest}
       className={cn(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] transition active:scale-[0.98] disabled:opacity-50",
+        "flex min-h-11 items-center justify-center gap-2 rounded-sm px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] transition active:scale-[0.98] disabled:opacity-50",
         variants[variant],
         full && "w-full",
         className,
@@ -68,11 +68,12 @@ export const inputClass =
 
 export function SubHeader({ title, to = "/app/me" }: { title: string; to?: string }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-primary-foreground/15 bg-gradient-deep px-3 py-4 text-primary-foreground">
-      <Link to={to} className="rounded-sm p-1.5 hover:bg-primary-foreground/10">
+    <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-black/5 bg-[#e8e8e8] px-3 py-4 text-[#1a1a1a]">
+      <Link to={to} className="rounded-sm p-1.5 text-[#1a1a1a] hover:bg-black/5">
         <ChevronLeft className="size-5" />
       </Link>
-      <h1 className="text-xl font-medium">{title}</h1>
+      <h1 className="flex-1 text-center text-[18px] font-bold">{title}</h1>
+      <span aria-hidden="true" className="w-7" />
     </header>
   );
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -113,33 +114,114 @@ function Withdraw() {
       <div className="px-5 pb-10 pt-3">
         <section className="relative aspect-[1.78] overflow-hidden rounded-md">
           <img src={hero} alt="Parfums Dior" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-primary-deep/35 text-primary-foreground"><div className="absolute right-3 top-3 text-right"><p className="text-base font-bold">Solde du compte</p><p className="mt-2 text-base">FCFA <span className="text-3xl font-bold">{new Intl.NumberFormat("fr-FR").format(Number(profile?.balance ?? 0))}</span></p></div></div>
+          <div className="absolute inset-0 bg-primary-deep/35 text-primary-foreground">
+            <div className="absolute right-3 top-3 text-right">
+              <p className="text-base font-bold">Solde du compte</p>
+              <p className="mt-2 text-base">
+                FCFA{" "}
+                <span className="text-3xl font-bold">
+                  {new Intl.NumberFormat("fr-FR").format(Number(profile?.balance ?? 0))}
+                </span>
+              </p>
+            </div>
+          </div>
         </section>
         <form onSubmit={onSubmit} className="mt-5">
-          <label className="block text-lg font-bold" htmlFor="withdraw-account">Compte de retrait</label>
-          <select id="withdraw-account" value={selected} onChange={(e) => setAccountId(e.target.value)} className="mt-4 h-14 w-full rounded-md border border-border bg-card px-3 text-sm shadow-card">
-            {accounts.length === 0 && <option value="">Sélectionnez le compte portefeuille de retrait</option>}
-            {accounts.map((a) => <option key={a.id} value={a.id}>{a.provider} · {a.account_number}</option>)}
-          </select>
-          {accounts.length === 0 && <Link to="/app/add-bank" className="mt-2 block text-sm text-primary underline">Ajouter un compte de retrait</Link>}
-          <div className="mb-5 mt-6 flex items-center justify-between gap-2"><label htmlFor="withdraw-amount" className="text-lg font-bold">Montant du retrait</label><span className="text-sm font-bold">Frais : {WITHDRAW_FEE_RATE * 100} %</span></div>
-          <div className="flex h-14 items-center gap-4 px-4"><span>FCFA</span><input id="withdraw-amount" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} placeholder="Veuillez choisir le montant du retrait" className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" /></div>
-          <p className="mt-5 text-sm">Montant reçu: FCFA {new Intl.NumberFormat("fr-FR", {minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.max(value-fee,0))}</p>
-          <p className="mt-2 text-center text-sm text-accent">Minimum : {fcfa(WITHDRAW_MIN)} · 2 retraits par jour · Un achat requis.</p>
-          <Btn full className={`${financeButton} mt-8`} disabled={submit.isPending}>{submit.isPending ? "Envoi..." : "Retirer de l'argent maintenant"}</Btn>
+          <label className="block text-lg font-bold" htmlFor="withdraw-account">
+            Compte de retrait
+          </label>
+          <div className="relative mt-4">
+            <select
+              id="withdraw-account"
+              value={selected}
+              onChange={(e) => setAccountId(e.target.value)}
+              className="h-14 w-full appearance-none rounded-xl border border-[#d9d9d9] bg-[#f3f3f3] px-4 pr-11 text-base text-[#1f1f1f] outline-none transition focus:border-[#c7c7c7]"
+            >
+              {accounts.length === 0 && <option value="">Veuillez sélectionner</option>}
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.provider} · {a.account_number}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-[#4a4a4a]" />
+          </div>
+
+          {accounts.length === 0 && (
+            <Link to="/app/add-bank" className="mt-2 block text-sm text-primary underline">
+              Ajouter un compte de retrait
+            </Link>
+          )}
+
+          <div className="mb-5 mt-6 flex items-center justify-between gap-2">
+            <label htmlFor="withdraw-amount" className="text-lg font-bold">
+              Montant du retrait
+            </label>
+            <span className="text-sm font-bold">Frais : {WITHDRAW_FEE_RATE * 100} %</span>
+          </div>
+
+          <div className="flex h-14 items-center gap-4 rounded-xl border border-[#d9d9d9] bg-[#f3f3f3] px-4">
+            <span className="text-base font-medium text-[#1f1f1f]">FCFA</span>
+            <input
+              id="withdraw-amount"
+              inputMode="numeric"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+              placeholder="Veuillez choisir le montant du retrait"
+              className="min-w-0 flex-1 bg-transparent text-base text-[#1f1f1f] outline-none placeholder:text-[#7d7d7d]"
+            />
+          </div>
+
+          <p className="mt-5 text-sm">
+            Montant reçu: FCFA{" "}
+            {new Intl.NumberFormat("fr-FR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(Math.max(value - fee, 0))}
+          </p>
+          <p className="mt-2 text-center text-sm text-accent">
+            Minimum : {fcfa(WITHDRAW_MIN)} · 2 retraits par jour · Un achat requis.
+          </p>
+          <Btn full className={`${financeButton} mt-8`} disabled={submit.isPending}>
+            {submit.isPending ? "Envoi..." : "Retirer de l'argent maintenant"}
+          </Btn>
         </form>
         <section id="withdraw-instructions" className="finance-instructions mt-16 px-2">
           <h2 className="text-lg font-bold">Instructions de retrait</h2>
           <ol className="mt-6 list-decimal space-y-4 pl-4 text-sm leading-relaxed">
             <li>Vous devez avoir acheté au moins un parfum avant de demander un retrait.</li>
-            <li>Le minimum de retrait est de {fcfa(WITHDRAW_MIN)}. Les demandes sont ouvertes 24 h sur 24, avec un maximum de 2 retraits par jour.</li>
-            <li>Les frais sont de {WITHDRAW_FEE_RATE * 100} %. Le montant net est indiqué avant confirmation.</li>
-            <li>La demande est transmise à l'administration pour versement manuel. Son enregistrement ne signifie pas que le versement a déjà été effectué.</li>
-            <li>Veuillez saisir correctement les informations de votre compte de retrait : toute information incorrecte entraînera l'échec du retrait.</li>
-            <li>Le montant demandé doit être disponible sur votre solde. Il est réservé pendant le traitement et libéré si la demande est refusée.</li>
+            <li>
+              Le minimum de retrait est de {fcfa(WITHDRAW_MIN)}. Les demandes sont ouvertes 24 h sur
+              24, avec un maximum de 2 retraits par jour.
+            </li>
+            <li>
+              Les frais sont de {WITHDRAW_FEE_RATE * 100} %. Le montant net est indiqué avant
+              confirmation.
+            </li>
+            <li>
+              La demande est transmise à l'administration pour versement manuel. Son enregistrement
+              ne signifie pas que le versement a déjà été effectué.
+            </li>
+            <li>
+              Veuillez saisir correctement les informations de votre compte de retrait : toute
+              information incorrecte entraînera l'échec du retrait.
+            </li>
+            <li>
+              Le montant demandé doit être disponible sur votre solde. Il est réservé pendant le
+              traitement et libéré si la demande est refusée.
+            </li>
           </ol>
-          <p className="mt-9 text-xs leading-relaxed text-muted-foreground">Retrait minimum : {fcfa(WITHDRAW_MIN)}. Frais : {WITHDRAW_FEE_RATE * 100} %. Un achat et un solde disponible suffisant sont nécessaires. Consultez l'historique pour suivre votre demande.</p>
-          <Link to="/app/withdraw-history" className="mt-6 block text-sm text-muted-foreground underline">Historique des retraits</Link>
+          <p className="mt-9 text-xs leading-relaxed text-muted-foreground">
+            Retrait minimum : {fcfa(WITHDRAW_MIN)}. Frais : {WITHDRAW_FEE_RATE * 100} %. Un achat et
+            un solde disponible suffisant sont nécessaires. Consultez l'historique pour suivre votre
+            demande.
+          </p>
+          <Link
+            to="/app/withdraw-history"
+            className="mt-6 block text-sm text-muted-foreground underline"
+          >
+            Historique des retraits
+          </Link>
         </section>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
+import { GiftCodeForm } from "@/components/GiftCodeForm";
 import { Btn, Card, SubHeader } from "@/components/ui-kit";
 import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,8 +67,24 @@ function Missions() {
 
   return (
     <>
-      <SubHeader title="Récompenses pour les tâches" />
+      <SubHeader title="Cadeaux & missions" />
       <div className="space-y-3 p-4">
+        <Card className="bg-gradient-primary text-primary-foreground">
+          <p className="text-sm font-bold uppercase tracking-[0.08em] opacity-80">
+            Système de points
+          </p>
+          <p className="mt-2 text-lg font-bold">
+            Récupérez des bons cadeaux et avancez vos missions
+          </p>
+        </Card>
+
+        <Card>
+          <p className="text-sm font-bold">Code cadeau</p>
+          <div className="mt-3">
+            <GiftCodeForm />
+          </div>
+        </Card>
+
         {missions.map((m) => {
           const progressRow = m.user_missions?.[0];
           const progress = Number(progressRow?.progress ?? 0);
