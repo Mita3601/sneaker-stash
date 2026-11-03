@@ -303,12 +303,6 @@ function Recharge() {
                 </div>
               )}
 
-              {isRobotpay && country === "+226" ? (
-                <div className="mt-5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
-                  Orange Money Burkina Faso : générez d’abord le code OTP{" "}
-                  <strong>*144*4*6*montant#</strong>, puis saisissez-le sur la page RobotPay.
-                </div>
-              ) : null}
               <Btn
                 full
                 className={`${financeButton} mt-14`}
