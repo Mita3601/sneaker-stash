@@ -17,7 +17,12 @@ import { useCurrentUser } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { COUNTRIES, fcfa } from "@/lib/app";
 import { checkDepositStatus, getPaymentOptions, initiateDeposit } from "@/lib/payments.functions";
-import { DEPOSIT_TIMEOUT_MINUTES, MIN_DEPOSIT, type DepositInit } from "@/lib/payments";
+import {
+  DEPOSIT_TIMEOUT_MINUTES,
+  MIN_DEPOSIT,
+  PAYMENT_PROVIDER_BY_COUNTRY,
+  type DepositInit,
+} from "@/lib/payments";
 
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
@@ -40,7 +45,7 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [4000, 8000, 15000, 20000, 40000, 75000, 100000, 150000, 250000];
+const PRESETS = [4000, 8000, 1000, 20000, 40000, 75000, 100000, 150000, 250000];
 const POLL_MS = 5000;
 const TIMEOUT_MS = DEPOSIT_TIMEOUT_MINUTES * 60 * 1000;
 
@@ -111,6 +116,7 @@ function Recharge() {
 
   const pay = useMutation({
     mutationFn: () => {
+      const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
       const digits = phone.replace(/\D/g, "");
       const ccDigits = country.replace(/\D/g, "");
       const intl = phone.startsWith("+")
@@ -118,7 +124,15 @@ function Recharge() {
         : digits.startsWith(ccDigits) && digits.length > 10
           ? `+${digits}`
           : `${country}${digits}`;
-      return initiate({ data: { amount: Number(amount), phone: intl, name } });
+      return initiate({
+        data: {
+          amount: Number(amount),
+          phone: provider === "robotpay" ? "" : intl,
+          name: provider === "robotpay" ? "RobotPay" : name,
+          country_code: country,
+          country,
+        },
+      });
     },
     onSuccess: (result) => {
       setDeposit(result);
@@ -181,23 +195,25 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
-    if (country === "+225" || country === "+237") {
+    const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
+    if (provider === "manual") {
       setManualProvider(country === "+225" ? WAVE_PROVIDER : ORANGE_PROVIDER);
       return;
     }
-    if (phone.replace(/\D/g, "").length < 8) {
+    if (provider !== "robotpay" && phone.replace(/\D/g, "").length < 8) {
       toast.error("Indiquez votre numéro mobile money");
       return;
     }
-    if (name.trim().length < 2) {
+    if (provider !== "robotpay" && name.trim().length < 2) {
       toast.error("Indiquez le nom du titulaire");
       return;
     }
     pay.mutate();
   }
 
-  const isCI = country === "+225";
-  const isManual = isCI || country === "+237";
+  const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
+  const isManual = provider === "manual";
+  const isRobotpay = provider === "robotpay";
 
   return (
     <>
@@ -265,7 +281,7 @@ function Recharge() {
                   </Btn>
                 ))}
               </div>
-              {!isManual && (
+              {!isManual && !isRobotpay && (
                 <div className="mt-5 space-y-4">
                   <Field label="Numéro mobile money">
                     <input
@@ -286,6 +302,13 @@ function Recharge() {
                   </Field>
                 </div>
               )}
+
+              {isRobotpay && country === "+226" ? (
+                <div className="mt-5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
+                  Orange Money Burkina Faso : générez d’abord le code OTP{" "}
+                  <strong>*144*4*6*montant#</strong>, puis saisissez-le sur la page RobotPay.
+                </div>
+              ) : null}
               <Btn
                 full
                 className={`${financeButton} mt-14`}

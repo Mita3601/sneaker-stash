@@ -44,8 +44,10 @@ import { Route as AuthenticatedAppSupportRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/app/withdraw'
 import { Route as AuthenticatedAppWithdrawHistoryRouteImport } from './routes/_authenticated/app/withdraw-history'
+import { Route as PaymentRobotpayReturnRouteImport } from './routes/payment/robotpay/return'
 import { Route as ApiPublicJobsExpireDepositsRouteImport } from './routes/api/public/jobs/expire-deposits'
 import { Route as ApiPublicWebhooksGeniuspayRouteImport } from './routes/api/public/webhooks/geniuspay'
+import { Route as ApiPublicWebhooksRobotpayRouteImport } from './routes/api/public/webhooks/robotpay'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -240,6 +242,11 @@ const AuthenticatedAppWithdrawHistoryRoute =
     path: '/withdraw-history',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const PaymentRobotpayReturnRoute = PaymentRobotpayReturnRouteImport.update({
+  id: '/payment/robotpay/return',
+  path: '/payment/robotpay/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsExpireDepositsRoute =
   ApiPublicJobsExpireDepositsRouteImport.update({
     id: '/api/public/jobs/expire-deposits',
@@ -250,6 +257,12 @@ const ApiPublicWebhooksGeniuspayRoute =
   ApiPublicWebhooksGeniuspayRouteImport.update({
     id: '/api/public/webhooks/geniuspay',
     path: '/api/public/webhooks/geniuspay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWebhooksRobotpayRoute =
+  ApiPublicWebhooksRobotpayRouteImport.update({
+    id: '/api/public/webhooks/robotpay',
+    path: '/api/public/webhooks/robotpay',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -286,10 +299,12 @@ export interface FileRoutesByFullPath {
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/payment/robotpay/return': typeof PaymentRobotpayReturnRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
+  '/api/public/webhooks/robotpay': typeof ApiPublicWebhooksRobotpayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -322,10 +337,12 @@ export interface FileRoutesByTo {
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/payment/robotpay/return': typeof PaymentRobotpayReturnRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
+  '/api/public/webhooks/robotpay': typeof ApiPublicWebhooksRobotpayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -362,10 +379,12 @@ export interface FileRoutesById {
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
   '/_authenticated/app/withdraw': typeof AuthenticatedAppWithdrawRoute
   '/_authenticated/app/withdraw-history': typeof AuthenticatedAppWithdrawHistoryRoute
+  '/payment/robotpay/return': typeof PaymentRobotpayReturnRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/jobs/expire-deposits': typeof ApiPublicJobsExpireDepositsRoute
   '/api/public/webhooks/geniuspay': typeof ApiPublicWebhooksGeniuspayRoute
+  '/api/public/webhooks/robotpay': typeof ApiPublicWebhooksRobotpayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -402,10 +421,12 @@ export interface FileRouteTypes {
     | '/app/team'
     | '/app/withdraw'
     | '/app/withdraw-history'
+    | '/payment/robotpay/return'
     | '/admin/'
     | '/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
+    | '/api/public/webhooks/robotpay'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -438,10 +459,12 @@ export interface FileRouteTypes {
     | '/app/team'
     | '/app/withdraw'
     | '/app/withdraw-history'
+    | '/payment/robotpay/return'
     | '/admin'
     | '/app'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
+    | '/api/public/webhooks/robotpay'
   id:
     | '__root__'
     | '/'
@@ -477,10 +500,12 @@ export interface FileRouteTypes {
     | '/_authenticated/app/team'
     | '/_authenticated/app/withdraw'
     | '/_authenticated/app/withdraw-history'
+    | '/payment/robotpay/return'
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
     | '/api/public/jobs/expire-deposits'
     | '/api/public/webhooks/geniuspay'
+    | '/api/public/webhooks/robotpay'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -489,8 +514,10 @@ export interface RootRouteChildren {
   MerciRoute: typeof MerciRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  PaymentRobotpayReturnRoute: typeof PaymentRobotpayReturnRoute
   ApiPublicJobsExpireDepositsRoute: typeof ApiPublicJobsExpireDepositsRoute
   ApiPublicWebhooksGeniuspayRoute: typeof ApiPublicWebhooksGeniuspayRoute
+  ApiPublicWebhooksRobotpayRoute: typeof ApiPublicWebhooksRobotpayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -740,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppWithdrawHistoryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/payment/robotpay/return': {
+      id: '/payment/robotpay/return'
+      path: '/payment/robotpay/return'
+      fullPath: '/payment/robotpay/return'
+      preLoaderRoute: typeof PaymentRobotpayReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/expire-deposits': {
       id: '/api/public/jobs/expire-deposits'
       path: '/api/public/jobs/expire-deposits'
@@ -752,6 +786,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/webhooks/geniuspay'
       fullPath: '/api/public/webhooks/geniuspay'
       preLoaderRoute: typeof ApiPublicWebhooksGeniuspayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/robotpay': {
+      id: '/api/public/webhooks/robotpay'
+      path: '/api/public/webhooks/robotpay'
+      fullPath: '/api/public/webhooks/robotpay'
+      preLoaderRoute: typeof ApiPublicWebhooksRobotpayRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -851,8 +892,10 @@ const rootRouteChildren: RootRouteChildren = {
   MerciRoute: MerciRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  PaymentRobotpayReturnRoute: PaymentRobotpayReturnRoute,
   ApiPublicJobsExpireDepositsRoute: ApiPublicJobsExpireDepositsRoute,
   ApiPublicWebhooksGeniuspayRoute: ApiPublicWebhooksGeniuspayRoute,
+  ApiPublicWebhooksRobotpayRoute: ApiPublicWebhooksRobotpayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

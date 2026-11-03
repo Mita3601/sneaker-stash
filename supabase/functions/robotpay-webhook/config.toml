@@ -1,0 +1,2 @@
+[functions.robotpay-webhook]
+verify_jwt = false
