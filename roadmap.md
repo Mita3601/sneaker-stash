@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Intégrer RobotPay pour les dépôts BF, CI, Cameroun et Bénin ; conserver les anciens parcours
+- [ ] Garantir le rattachement sécurisé de chaque paiement à son utilisateur (attend une confirmation sur les références RobotPay)
+- [ ] Configurer les secrets et le webhook RobotPay, puis vérifier les crédits uniques et les retours
+
 - [x] Refaire Mon compte, bilan financier, retrait, gestion bancaire et recharge selon les huit photos
 - [x] Vérifier les cinq pages connectées, les onglets, l’ajout vide et l’ouverture Wave, sans opération financière
 - [ ] Compléter le contrôle des minimums et des instructions (session de vérification expirée ; nouvelle connexion requise)
