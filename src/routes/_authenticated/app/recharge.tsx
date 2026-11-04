@@ -9,8 +9,8 @@ import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
 import { FinanceHeader, financeButton } from "@/components/FinanceLayout";
 import {
   ManualCheckout,
-  ORANGE_PROVIDER,
-  WAVE_PROVIDER,
+  CI_PROVIDERS,
+  CM_PROVIDERS,
   type ManualProvider,
 } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
@@ -88,7 +88,7 @@ function Recharge() {
   const [name, setName] = useState("");
   const [deposit, setDeposit] = useState<DepositInit | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [manualProvider, setManualProvider] = useState<ManualProvider | null>(null);
+  const [manualProvider, setManualProvider] = useState<ManualProvider[] | null>(null);
   const startedAt = useRef<number>(0);
 
   useEffect(() => {
@@ -197,7 +197,7 @@ function Recharge() {
     }
     const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
     if (provider === "manual") {
-      setManualProvider(country === "+225" ? WAVE_PROVIDER : ORANGE_PROVIDER);
+      setManualProvider(country === "+225" ? CI_PROVIDERS : CM_PROVIDERS);
       return;
     }
     if (provider !== "robotpay" && phone.replace(/\D/g, "").length < 8) {
@@ -221,7 +221,7 @@ function Recharge() {
         <ManualCheckout
           amount={Number(amount)}
           defaultPhone={phone}
-          provider={manualProvider}
+          providers={manualProvider}
           onClose={() => setManualProvider(null)}
         />
       ) : null}

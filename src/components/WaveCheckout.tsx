@@ -14,7 +14,7 @@ export type ManualProvider = {
   channel: string;
   methodLabel: string;
   methodWord: string;
-  logo: string;
+  logo: string | null;
   dial: string;
   phonePlaceholder: string;
   copyNumLabel: string;
@@ -50,6 +50,27 @@ export const ORANGE_PROVIDER: ManualProvider = {
   account: ORANGE_ACCOUNT,
 };
 
+// Numéros provisoires Orange/MTN : à remplacer par les numéros réels communiqués.
+export const CI_PROVIDERS: ManualProvider[] = [
+  WAVE_PROVIDER,
+  { ...WAVE_PROVIDER, providerName: "Orange", channel: "Orange Money Côte d'Ivoire", methodLabel: "Orange Money", methodWord: "Orange Money", logo: orangeLogo.url, copyNumLabel: "Numéro Orange Money" },
+  { ...WAVE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Côte d'Ivoire", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN" },
+];
+
+export const CM_PROVIDERS: ManualProvider[] = [
+  ORANGE_PROVIDER,
+  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN" },
+];
+
+function MethodLogo({ p }: { p: ManualProvider }) {
+  if (p.logo) return <img src={p.logo} alt={p.methodWord} className="size-[72px] rounded-full object-cover" />;
+  return (
+    <span className="grid size-[68px] place-items-center rounded-full bg-[#FFCC00]">
+      <span className="rounded-[50%] border-[3px] border-black px-2 py-0.5 text-sm font-black text-black">MTN</span>
+    </span>
+  );
+}
+
 const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
 
 async function copy(text: string, label: string) {
@@ -66,15 +87,16 @@ type Deposit = { reference: string; amount: number; payerPhone: string; createdA
 export function ManualCheckout({
   amount,
   defaultPhone,
-  provider,
+  providers,
   onClose,
 }: {
   amount: number;
   defaultPhone: string;
-  provider: ManualProvider;
+  providers: ManualProvider[];
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const [provider, setProvider] = useState<ManualProvider>(providers[0]!);
   const [phone, setPhone] = useState(
     new RegExp(`^\\+?${provider.dial.replace(/\D/g, "")}`).test(defaultPhone)
       ? defaultPhone.replace(new RegExp(`^\\+?${provider.dial.replace(/\D/g, "")}`), "")
@@ -150,19 +172,30 @@ export function ManualCheckout({
         {!deposit ? (
           <div className="space-y-5 pt-2">
             <div className="flex flex-col items-center"><img src={gopayLogo.url} alt="GOPAY" className="h-16 w-auto" /></div>
-            <p className="text-sm leading-relaxed">
+            <p className="text-base leading-relaxed">
               Veuillez remplir votre mode de paiement et le compte de paiement réel que vous utiliserez pour
               effectuer le paiement.
             </p>
-            <p className="text-sm">
+            <p className="text-base">
               Montant de paiement : <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
             </p>
-            <p className="text-sm">Veuillez sélectionner un mode de paiement</p>
-            <div className="flex justify-center">
-              <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-[#F5B83D] bg-white p-4 shadow-[0_0_0_3px_#FDECC8]">
-                <img src={provider.logo} alt={provider.methodWord} className="h-16 w-auto" />
-                <span className="text-center text-sm font-bold text-[#1F2937]">{provider.methodLabel}</span>
-              </div>
+            <p className="text-base">Veuillez sélectionner un mode de paiement</p>
+            <div className="grid grid-cols-2 gap-4">
+              {providers.map((p) => {
+                const on = p.channel === provider.channel;
+                return (
+                  <button
+                    key={p.channel}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setProvider(p)}
+                    className={`flex flex-col items-center gap-3 rounded-2xl bg-white px-2 py-7 ${on ? "border-2 border-[#F5B83D] shadow-[0_0_0_3px_#FDECC8]" : "border border-[#E5E7EB]"}`}
+                  >
+                    <MethodLogo p={p} />
+                    <span className="text-center text-base font-bold text-[#1F2937]">{p.methodLabel}</span>
+                  </button>
+                );
+              })}
             </div>
             <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] px-4 py-4">
               <span className="font-bold text-[#9A4A0C]">{provider.dial}</span>

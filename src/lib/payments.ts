@@ -7,10 +7,10 @@ export const DEPOSIT_TIMEOUT_MINUTES = 15;
 export type PaymentProvider = "robotpay" | "geniuspay" | "manual";
 
 export const PAYMENT_PROVIDER_BY_COUNTRY: Record<string, PaymentProvider> = {
-  "+225": "robotpay",
+  "+225": "manual",
   "+226": "robotpay",
   "+229": "robotpay",
-  "+237": "robotpay",
+  "+237": "manual",
 };
 
 export type DepositInit = {
