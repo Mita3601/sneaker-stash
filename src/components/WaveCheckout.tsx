@@ -49,6 +49,7 @@ export const ORANGE_PROVIDER: ManualProvider = {
   phonePlaceholder: "6XXXXXXXX",
   copyNumLabel: "Numéro Orange Money",
   account: ORANGE_ACCOUNT,
+  ussd: "#150*1*1*692422876*montant*2#",
 };
 
 // Numéros provisoires Orange/MTN : à remplacer par les numéros réels communiqués.
@@ -60,7 +61,7 @@ export const CI_PROVIDERS: ManualProvider[] = [
 
 export const CM_PROVIDERS: ManualProvider[] = [
   ORANGE_PROVIDER,
-  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN" },
+  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN", account: MTN_ACCOUNT, ussd: "*126*1#" },
 ];
 
 function MethodLogo({ p }: { p: ManualProvider }) {
