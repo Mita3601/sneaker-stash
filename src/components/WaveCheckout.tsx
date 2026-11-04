@@ -269,6 +269,9 @@ export function ManualCheckout({
                     </div>
                     <Row label={`${provider.methodWord} Compte`} value={provider.account.display} onCopy={() => copy(provider.account.number, "Numéro")} />
                     <Row label="Nom du compte" value={provider.account.name} onCopy={() => copy(provider.account.name, "Nom")} />
+                    {provider.ussd ? (
+                      <Row label="Code de dépôt" value={provider.ussd} onCopy={() => copy(provider.ussd!, "Code de dépôt")} />
+                    ) : null}
                     <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
                       <p className="text-sm text-[#4B5563]">
                         Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
