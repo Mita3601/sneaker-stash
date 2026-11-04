@@ -436,6 +436,110 @@ export type Database = {
         }
         Relationships: []
       }
+      robotpay_deposits: {
+        Row: {
+          amount: number
+          country: string
+          created_at: string
+          credited_at: string | null
+          currency: string
+          id: string
+          status: string
+          tx_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          country: string
+          created_at?: string
+          credited_at?: string | null
+          currency: string
+          id?: string
+          status?: string
+          tx_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          country?: string
+          created_at?: string
+          credited_at?: string | null
+          currency?: string
+          id?: string
+          status?: string
+          tx_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "robotpay_deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "fraud_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "robotpay_deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      robotpay_payments: {
+        Row: {
+          amount: number | null
+          country: string | null
+          created_at: string
+          currency: string | null
+          deposit_id: string | null
+          merchant_slug: string | null
+          note: string | null
+          payer: string | null
+          provider: string | null
+          raw_payload: Json | null
+          status: string | null
+          tx_id: string
+        }
+        Insert: {
+          amount?: number | null
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          deposit_id?: string | null
+          merchant_slug?: string | null
+          note?: string | null
+          payer?: string | null
+          provider?: string | null
+          raw_payload?: Json | null
+          status?: string | null
+          tx_id: string
+        }
+        Update: {
+          amount?: number | null
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          deposit_id?: string | null
+          merchant_slug?: string | null
+          note?: string | null
+          payer?: string | null
+          provider?: string | null
+          raw_payload?: Json | null
+          status?: string | null
+          tx_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "robotpay_payments_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "robotpay_deposits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -798,6 +902,10 @@ export type Database = {
       create_wave_manual_deposit: {
         Args: { _amount: number; _payer_phone: string }
         Returns: Json
+      }
+      credit_robotpay_deposit: {
+        Args: { p_deposit_id: string; p_tx_id: string }
+        Returns: undefined
       }
       distribute_commissions: {
         Args: { _amount: number; _user_id: string }
