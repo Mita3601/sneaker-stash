@@ -9,8 +9,8 @@ import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
 import { FinanceHeader, financeButton } from "@/components/FinanceLayout";
 import {
   ManualCheckout,
-  ORANGE_PROVIDER,
-  WAVE_PROVIDER,
+  CI_PROVIDERS,
+  CM_PROVIDERS,
   type ManualProvider,
 } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
