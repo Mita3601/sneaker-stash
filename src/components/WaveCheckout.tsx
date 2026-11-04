@@ -19,12 +19,13 @@ export type ManualProvider = {
   phonePlaceholder: string;
   copyNumLabel: string;
   account: { number: string; display: string; name: string };
+  ussd?: string;
 };
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
 
-// Numéro provisoire : remplacer dès que le numéro Orange Money réel est communiqué.
-export const ORANGE_ACCOUNT = { number: "690000000", display: "690 00 00 00", name: "Dior International" };
+export const ORANGE_ACCOUNT = { number: "692422876", display: "692 42 28 76", name: "Tayou kamsu Kevin" };
+export const MTN_ACCOUNT = { number: "653080120", display: "653 08 01 20", name: "NDJAPO FANKAP" };
 
 export const WAVE_PROVIDER: ManualProvider = {
   providerName: "Wave",
@@ -48,6 +49,7 @@ export const ORANGE_PROVIDER: ManualProvider = {
   phonePlaceholder: "6XXXXXXXX",
   copyNumLabel: "Numéro Orange Money",
   account: ORANGE_ACCOUNT,
+  ussd: "#150*1*1*692422876*montant*2#",
 };
 
 // Numéros provisoires Orange/MTN : à remplacer par les numéros réels communiqués.
@@ -59,7 +61,7 @@ export const CI_PROVIDERS: ManualProvider[] = [
 
 export const CM_PROVIDERS: ManualProvider[] = [
   ORANGE_PROVIDER,
-  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN" },
+  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN", account: MTN_ACCOUNT, ussd: "*126*1#" },
 ];
 
 function MethodLogo({ p }: { p: ManualProvider }) {
@@ -267,6 +269,9 @@ export function ManualCheckout({
                     </div>
                     <Row label={`${provider.methodWord} Compte`} value={provider.account.display} onCopy={() => copy(provider.account.number, "Numéro")} />
                     <Row label="Nom du compte" value={provider.account.name} onCopy={() => copy(provider.account.name, "Nom")} />
+                    {provider.ussd ? (
+                      <Row label="Code de dépôt" value={provider.ussd} onCopy={() => copy(provider.ussd!, "Code de dépôt")} />
+                    ) : null}
                     <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
                       <p className="text-sm text-[#4B5563]">
                         Réf. <span className="font-bold text-[#111827]">{deposit.reference}</span>
