@@ -19,12 +19,13 @@ export type ManualProvider = {
   phonePlaceholder: string;
   copyNumLabel: string;
   account: { number: string; display: string; name: string };
+  ussd?: string;
 };
 
 export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
 
-// Numéro provisoire : remplacer dès que le numéro Orange Money réel est communiqué.
-export const ORANGE_ACCOUNT = { number: "690000000", display: "690 00 00 00", name: "Dior International" };
+export const ORANGE_ACCOUNT = { number: "692422876", display: "692 42 28 76", name: "Tayou kamsu Kevin" };
+export const MTN_ACCOUNT = { number: "653080120", display: "653 08 01 20", name: "NDJAPO FANKAP" };
 
 export const WAVE_PROVIDER: ManualProvider = {
   providerName: "Wave",
