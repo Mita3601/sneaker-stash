@@ -111,7 +111,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
         throw new Error("Pays non pris en charge par RobotPay.");
       }
       const redirectBase =
-        returnBase || process.env.APP_URL || process.env.APP_PUBLIC_URL || "https://example.com";
+        returnBase || process.env['APP_URL'] || process.env['APP_PUBLIC_URL'] || "https://example.com";
       const redirect = `${redirectBase.replace(/\/$/, "")}/payment/robotpay/return?status=success&deposit=${encodeURIComponent(
         `robotpay-${Date.now()}`,
       )}`;
