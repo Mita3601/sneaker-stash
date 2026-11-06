@@ -29,7 +29,7 @@ const steps = [
 const contacts = [
   { icon: Users, label: "Groupe Telegram", href: TELEGRAM.group },
   { icon: Send, label: "Canal Telegram", href: TELEGRAM.channel },
-  { icon: Headphones, label: "Support direct (@usr_marc)", href: TELEGRAM.support },
+  { icon: Headphones, label: "Support direct", href: TELEGRAM.support },
 ];
 
 function Support() {

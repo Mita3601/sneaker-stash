@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_authenticated/app/recharge")({
   component: Recharge,
 });
 
-const PRESETS = [4000, 8000, 1000, 20000, 40000, 75000, 100000, 150000, 250000];
+const PRESETS = [4000, 8000, 10000, 20000, 40000, 75000, 100000, 150000, 250000];
 const POLL_MS = 5000;
 const TIMEOUT_MS = DEPOSIT_TIMEOUT_MINUTES * 60 * 1000;
 
@@ -379,14 +379,10 @@ function Recharge() {
                 Veuillez utiliser les informations de paiement les plus récentes pour chaque dépôt.
               </li>
               <li>Le montant saisi doit correspondre au montant du paiement.</li>
+
               <li>
-                Pour Wave Côte d'Ivoire et Orange Money Cameroun, votre dépôt est crédité après
-                vérification et validation par l'administration.
-              </li>
-              <li>
-                Si votre dépôt n'est pas crédité après validation, veuillez contacter le service
-                client avec votre référence et votre preuve de paiement. Le délai de la demande est
-                de {DEPOSIT_TIMEOUT_MINUTES} minutes.
+                Si votre dépôt n'est pas crédité après validation dans un delai de 15min, veuillez
+                contacter le service client avec votre référence et votre preuve de paiement.
               </li>
             </ol>
             <Link

@@ -191,17 +191,14 @@ function Withdraw() {
           <ol className="mt-6 list-decimal space-y-4 pl-4 text-sm leading-relaxed">
             <li>Vous devez avoir acheté au moins un parfum avant de demander un retrait.</li>
             <li>
-              Le minimum de retrait est de {fcfa(WITHDRAW_MIN)}. Les demandes sont ouvertes 24 h sur
-              24, avec un maximum de 2 retraits par jour.
+              Le minimum de retrait est de {fcfa(WITHDRAW_MIN)}. Les demandes sont ouvertes de 08 h
+              a 17h30, avec un maximum de 2 retraits par jour.
             </li>
             <li>
               Les frais sont de {WITHDRAW_FEE_RATE * 100} %. Le montant net est indiqué avant
               confirmation.
             </li>
-            <li>
-              La demande est transmise à l'administration pour versement manuel. Son enregistrement
-              ne signifie pas que le versement a déjà été effectué.
-            </li>
+            <li>La demande est de retrait est traite dans un delai de 10min a 1h.</li>
             <li>
               Veuillez saisir correctement les informations de votre compte de retrait : toute
               information incorrecte entraînera l'échec du retrait.

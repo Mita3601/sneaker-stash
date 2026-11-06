@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/app/regulation")({
 });
 
 const rules = [
-  "Dépôt minimum : 200 FCFA, crédité après approbation du paiement.",
+  "Dépôt minimum : 4 000 FCFA, crédité après approbation du paiement.",
   "Bonus d'inscription : 1 500 FCFA pour les nouveaux comptes.",
   "Le revenu quotidien, le montant total et la durée sont affichés avant l’achat et enregistrés lors de sa confirmation.",
   "Commissions : 27 % au niveau 1, 2 % au niveau 2 et 1 % au niveau 3, uniquement sur les achats réglés avec de l'argent réel.",
@@ -48,8 +48,8 @@ function Regulation() {
           Parrainage sur les achats réglés : <strong>27 % · 2 % · 1 %</strong>.
         </p>
         <p>
-          Cette plateforme mobile propose une collection de parfums Dior, un espace client et
-          des fonctionnalités dédiées au suivi des produits, à l’équipe et aux informations de
+          Cette plateforme mobile propose une collection de parfums Dior, un espace client et des
+          fonctionnalités dédiées au suivi des produits, à l’équipe et aux informations de
           financement.
         </p>
         <p className="pt-2">Bienvenue sur votre espace Dior Parfums.</p>
@@ -63,15 +63,15 @@ function Regulation() {
         <p className="pt-2">Récompenses de parrainage</p>
         <p>
           Les commissions portent uniquement sur les achats réglés avec de l’argent réel. Aucun
-          versement sur les fonds crédités par l’administration ni sur le bonus de bienvenue.
-          Les fractions de FCFA sont arrondies à l’entier inférieur.
+          versement sur les fonds crédités par l’administration ni sur le bonus de bienvenue. Les
+          fractions de FCFA sont arrondies à l’entier inférieur.
         </p>
 
         <p className="pt-4 text-[13px] leading-relaxed text-muted-foreground">
-          Les revenus des parfums achetés sont crédités sur le solde interne toutes les 24
-          heures, dans les limites de leur montant total et de leur durée. Les parfums offerts
-          par l’administration ne génèrent pas de commission. Les retraits suivent les
-          conditions de la page Retrait.
+          Les revenus des parfums achetés sont crédités sur le solde interne toutes les 24 heures,
+          dans les limites de leur montant total et de leur durée. Les parfums offerts par
+          l’administration ne génèrent pas de commission. Les retraits suivent les conditions de la
+          page Retrait.
         </p>
       </div>
     </div>
