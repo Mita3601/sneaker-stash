@@ -3,7 +3,6 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const ROBOTPAY_COUNTRY_BY_CODE = {
   "+225": { country: "Cote d'Ivoire", currency: "XOF" },
   "+226": { country: "Burkina Faso", currency: "XOF" },
-  "+229": { country: "Benin", currency: "XOF" },
   "+237": { country: "Cameroun", currency: "XAF" },
 } as const;
 
@@ -20,7 +19,6 @@ export function normalizeRobotpayCountryCode(value: string) {
     const map: Record<string, string> = {
       BF: "+226",
       CI: "+225",
-      BJ: "+229",
       CMR: "+237",
     };
     return map[raw.toUpperCase()] ?? null;

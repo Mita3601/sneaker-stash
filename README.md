@@ -254,7 +254,7 @@ PAGE SPECIFICATIONS
 A. AUTHENTICATION
 Register (/auth/register)
 
-Country auto-detection with fallback: Côte d'Ivoire (+225), Burkina Faso (+226), Bénin (+229), Cameroun (+237)
+Country auto-detection with fallback: Côte d'Ivoire (+225), Burkina Faso (+226), Cameroun (+237)
 
 Phone input with country code dropdown
 

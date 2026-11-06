@@ -84,8 +84,6 @@ function AddBank() {
         return ["Moov", "Orange"];
       case "+225":
         return ["Moov", "Orange", "MTN", "Wave"];
-      case "+229":
-        return ["Moov", "Orange"];
       default:
         return PROVIDERS;
     }

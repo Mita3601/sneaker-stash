@@ -9,7 +9,6 @@ export type PaymentProvider = "robotpay" | "geniuspay" | "manual";
 export const PAYMENT_PROVIDER_BY_COUNTRY: Record<string, PaymentProvider> = {
   "+225": "manual",
   "+226": "robotpay",
-  "+229": "robotpay",
   "+237": "manual",
 };
 

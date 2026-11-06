@@ -22,9 +22,17 @@ export type ManualProvider = {
   ussd?: string;
 };
 
-export const WAVE_ACCOUNT = { number: "0719065178", display: "07 19 06 51 78", name: "Dior International" };
+export const WAVE_ACCOUNT = {
+  number: "0143288059",
+  display: "01 43 28 80 59",
+  name: "Dior International",
+};
 
-export const ORANGE_ACCOUNT = { number: "692422876", display: "692 42 28 76", name: "Tayou kamsu Kevin" };
+export const ORANGE_ACCOUNT = {
+  number: "692422876",
+  display: "692 42 28 76",
+  name: "Tayou kamsu Kevin",
+};
 export const MTN_ACCOUNT = { number: "653080120", display: "653 08 01 20", name: "NDJAPO FANKAP" };
 
 export const WAVE_PROVIDER: ManualProvider = {
@@ -52,36 +60,67 @@ export const ORANGE_PROVIDER: ManualProvider = {
   ussd: "#150*1*1*692422876*montant*2#",
 };
 
-// Numéros provisoires Orange/MTN : à remplacer par les numéros réels communiqués.
-export const CI_PROVIDERS: ManualProvider[] = [
-  WAVE_PROVIDER,
-  { ...WAVE_PROVIDER, providerName: "Orange", channel: "Orange Money Côte d'Ivoire", methodLabel: "Orange Money", methodWord: "Orange Money", logo: orangeLogo.url, copyNumLabel: "Numéro Orange Money" },
-  { ...WAVE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Côte d'Ivoire", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN" },
-];
+export const CI_PROVIDERS: ManualProvider[] = [WAVE_PROVIDER];
 
 export const CM_PROVIDERS: ManualProvider[] = [
   ORANGE_PROVIDER,
-  { ...ORANGE_PROVIDER, providerName: "MTN", channel: "MTN Mobile Money Cameroun", methodLabel: "MTN Mobile Money", methodWord: "MTN", logo: null, copyNumLabel: "Numéro MTN", account: MTN_ACCOUNT, ussd: "*126*1#" },
+  {
+    ...ORANGE_PROVIDER,
+    providerName: "MTN",
+    channel: "MTN Mobile Money Cameroun",
+    methodLabel: "MTN Mobile Money",
+    methodWord: "MTN",
+    logo: null,
+    copyNumLabel: "Numéro MTN",
+    account: MTN_ACCOUNT,
+    ussd: "*126*1#",
+  },
 ];
 
 function MethodLogo({ p }: { p: ManualProvider }) {
-  if (p.logo) return <img src={p.logo} alt={p.methodWord} className="size-[72px] rounded-full object-cover" />;
+  if (p.logo)
+    return (
+      <img src={p.logo} alt={p.methodWord} className="size-[72px] rounded-full object-cover" />
+    );
   return (
     <span className="grid size-[68px] place-items-center rounded-full bg-[#FFCC00]">
-      <span className="rounded-[50%] border-[3px] border-black px-2 py-0.5 text-sm font-black text-black">MTN</span>
+      <span className="rounded-[50%] border-[3px] border-black px-2 py-0.5 text-sm font-black text-black">
+        MTN
+      </span>
     </span>
   );
 }
 
 const fmt = (n: number) => `XOF ${n.toLocaleString("en-US")}`;
 
-async function copy(text: string, label: string) {
+async function copy(text: string, label: string, opts?: { silentError?: boolean }) {
   try {
     await navigator.clipboard.writeText(text);
     toast.success(`${label} copié`);
   } catch {
-    toast.error("Copie impossible, notez-le manuellement");
+    if (!opts?.silentError) {
+      toast.error("Copie impossible, notez-le manuellement");
+    }
   }
+}
+
+function buildPaymentTarget(provider: ManualProvider, amount: number) {
+  const ussd = provider.ussd?.replace("montant", String(amount));
+  if (ussd) {
+    return `tel:${encodeURIComponent(ussd)}`;
+  }
+  return `tel:${provider.account.number}`;
+}
+
+function openPaymentApp(provider: ManualProvider, amount: number) {
+  const target = buildPaymentTarget(provider, amount);
+  window.location.assign(target);
+}
+
+function isMobileDevice() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  return /Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(ua);
 }
 
 type Deposit = { reference: string; amount: number; payerPhone: string; createdAt: number };
@@ -151,7 +190,9 @@ export function ManualCheckout({
     onSuccess: () => {
       setSent(true);
       qc.invalidateQueries({ queryKey: ["transactions"] });
-      toast.success("SMS envoyé : votre recharge sera créditée après vérification par l'administrateur.");
+      toast.success(
+        "Votre depot a ete valide veuillez attendre 5min apres depot pour contacter le service client si votre compte n'a pas ete credite",
+      );
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -161,7 +202,10 @@ export function ManualCheckout({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-3">
-      <div className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+      <div
+        className="relative mx-auto max-w-md rounded-3xl bg-white p-5 text-[#1F2937] shadow-xl"
+        style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+      >
         <button
           type="button"
           onClick={onClose}
@@ -173,16 +217,21 @@ export function ManualCheckout({
 
         {!deposit ? (
           <div className="space-y-5 pt-2">
-            <div className="flex flex-col items-center"><img src={gopayLogo.url} alt="GOPAY" className="h-16 w-auto" /></div>
+            <div className="flex flex-col items-center">
+              <img src={gopayLogo.url} alt="GOPAY" className="h-16 w-auto" />
+            </div>
             <p className="text-base leading-relaxed">
-              Veuillez remplir votre mode de paiement et le compte de paiement réel que vous utiliserez pour
-              effectuer le paiement.
+              Veuillez remplir votre mode de paiement et le compte de paiement réel que vous
+              utiliserez pour effectuer le paiement.
             </p>
             <p className="text-base">
-              Montant de paiement : <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
+              Montant de paiement :{" "}
+              <span className="ml-2 text-xl font-bold text-[#E07B00]">{fmt(amount)}</span>
             </p>
             <p className="text-base">Veuillez sélectionner un mode de paiement</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div
+              className={providers.length === 1 ? "flex justify-center" : "grid grid-cols-2 gap-4"}
+            >
               {providers.map((p) => {
                 const on = p.channel === provider.channel;
                 return (
@@ -191,10 +240,12 @@ export function ManualCheckout({
                     type="button"
                     aria-pressed={on}
                     onClick={() => setProvider(p)}
-                    className={`flex flex-col items-center gap-3 rounded-2xl bg-white px-2 py-7 ${on ? "border-2 border-[#F5B83D] shadow-[0_0_0_3px_#FDECC8]" : "border border-[#E5E7EB]"}`}
+                    className={`flex flex-col items-center gap-3 rounded-2xl bg-white px-2 py-7 ${on ? "border-2 border-[#F5B83D] shadow-[0_0_0_3px_#FDECC8]" : "border border-[#E5E7EB]"} ${providers.length === 1 ? "w-full max-w-[240px]" : ""}`}
                   >
                     <MethodLogo p={p} />
-                    <span className="text-center text-base font-bold text-[#1F2937]">{p.methodLabel}</span>
+                    <span className="text-center text-base font-bold text-[#1F2937]">
+                      {p.methodLabel}
+                    </span>
                   </button>
                 );
               })}
@@ -213,8 +264,8 @@ export function ManualCheckout({
             <div className="flex gap-3 rounded-2xl border border-[#FBD5DB] bg-[#FFF1F2] p-4 text-sm text-[#BE123C]">
               <AlertCircle className="mt-0.5 size-5 shrink-0 fill-[#F59E0B] text-white" />
               <p>
-                Veuillez remplir votre compte de paiement avec précision. Un remplissage incorrect peut entraîner
-                la perte des fonds transférés.
+                Veuillez remplir votre compte de paiement avec précision. Un remplissage incorrect
+                peut entraîner la perte des fonds transférés.
               </p>
             </div>
             <div className="flex justify-center">
@@ -231,7 +282,9 @@ export function ManualCheckout({
         ) : (
           <div className="space-y-5">
             <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4 pr-12">
-              <span className="flex items-center"><img src={gopayLogo.url} alt="GOPAY" className="h-11 w-auto" /></span>
+              <span className="flex items-center">
+                <img src={gopayLogo.url} alt="GOPAY" className="h-11 w-auto" />
+              </span>
               <div className="text-center">
                 <p className="text-[11px] text-[#6B7280]">La transaction expire dans</p>
                 <div className="mt-1 flex items-center gap-1 font-mono text-sm font-bold">
@@ -249,14 +302,21 @@ export function ManualCheckout({
             ) : null}
 
             <div className="relative">
-              <span aria-hidden className="absolute bottom-6 left-[17px] top-9 border-l-2 border-dashed border-[#D1D5DB]" />
+              <span
+                aria-hidden
+                className="absolute bottom-6 left-[17px] top-9 border-l-2 border-dashed border-[#D1D5DB]"
+              />
               <div className="relative flex gap-3">
-                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]"><CreditCard className="size-4" /></span>
+                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]">
+                  <CreditCard className="size-4" />
+                </span>
                 <div className="min-w-0 flex-1 space-y-4">
                   <div>
                     <p className="text-lg font-bold text-[#111827]">Copiez ce compte</p>
                     <p className="text-sm text-[#6B7280]">
-                      Copiez ce compte <span className="font-bold text-[#E07B00]">{provider.methodWord}</span> et effectuez le paiement
+                      Copiez ce compte{" "}
+                      <span className="font-bold text-[#E07B00]">{provider.methodWord}</span> et
+                      effectuez le paiement
                     </p>
                   </div>
                   <div className="space-y-4 rounded-2xl border border-[#E5E7EB] p-5 shadow-sm">
@@ -265,12 +325,31 @@ export function ManualCheckout({
                         <p className="text-sm text-[#4B5563]">Montant total payable :</p>
                         <p className="text-2xl font-bold text-[#E07B00]">{fmt(deposit.amount)}</p>
                       </div>
-                      <span className="grid size-12 place-items-center rounded-full border border-[#E5E7EB] text-sm font-bold text-[#1D6FD8]">EN</span>
+                      <span className="grid size-12 place-items-center rounded-full border border-[#E5E7EB] text-sm font-bold text-[#1D6FD8]">
+                        EN
+                      </span>
                     </div>
-                    <Row label={`${provider.methodWord} Compte`} value={provider.account.display} onCopy={() => copy(provider.account.number, "Numéro")} />
-                    <Row label="Nom du compte" value={provider.account.name} onCopy={() => copy(provider.account.name, "Nom")} />
+                    <Row
+                      label={`${provider.methodWord} Compte`}
+                      value={provider.account.display}
+                      onCopy={() => copy(provider.account.number, "Numéro")}
+                    />
+                    <Row
+                      label="Nom du compte"
+                      value={provider.account.name}
+                      onCopy={() => copy(provider.account.name, "Nom")}
+                    />
                     {provider.ussd ? (
-                      <Row label="Code de dépôt" value={provider.ussd} onCopy={() => copy(provider.ussd!, "Code de dépôt")} />
+                      <Row
+                        label="Code de dépôt"
+                        value={provider.ussd.replace("montant", String(deposit.amount))}
+                        onCopy={() =>
+                          copy(
+                            provider.ussd!.replace("montant", String(deposit.amount)),
+                            "Code de dépôt",
+                          )
+                        }
+                      />
                     ) : null}
                     <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
                       <p className="text-sm text-[#4B5563]">
@@ -283,18 +362,39 @@ export function ManualCheckout({
               </div>
               <button
                 type="button"
-                onClick={() => copy(provider.account.number, provider.copyNumLabel)}
+                onClick={() => {
+                  const amountToPay = deposit?.amount ?? amount;
+                  const isMobile = isMobileDevice();
+
+                  if (!isMobile) {
+                    const paymentCode = provider.ussd
+                      ? provider.ussd.replace("montant", String(amountToPay))
+                      : provider.account.number;
+
+                    copy(paymentCode, "Informations de paiement", { silentError: true });
+                    toast.info(
+                      "Ouverture directe indisponible sur ordinateur. Utilisez un téléphone pour lancer l'application de paiement.",
+                    );
+                    return;
+                  }
+
+                  openPaymentApp(provider, amountToPay);
+                  copy(provider.account.number, provider.copyNumLabel, { silentError: true });
+                }}
                 className="relative z-10 my-6 ml-12 w-[calc(100%-3rem)] rounded-full bg-[linear-gradient(90deg,#EA8A0C,#F5A623)] py-4 text-lg font-bold text-white shadow-[0_8px_20px_#F59E0B55]"
               >
                 Cliquez pour payer
               </button>
               <div className="relative flex gap-3">
-                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]"><RefreshCw className="size-4" /></span>
+                <span className="z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[#E5E9F0] text-[#64748B]">
+                  <RefreshCw className="size-4" />
+                </span>
                 <div className="min-w-0 flex-1 space-y-4">
                   <div>
                     <p className="text-lg font-bold text-[#111827]">Paiement achevé ?</p>
                     <p className="text-sm text-[#6B7280]">
-                      Collez le SMS {provider.methodWord} puis cliquez sur <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
+                      Collez le SMS {provider.methodWord} puis cliquez sur{" "}
+                      <span className="font-bold text-[#E07B00]">"Rafraîchir"</span>
                     </p>
                   </div>
                   <div className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFB] p-5">
@@ -322,8 +422,8 @@ export function ManualCheckout({
                       className="w-full rounded-xl border border-[#D1D5DB] bg-white p-3 text-sm outline-none focus:border-[#F59E0B]"
                     />
                     <p className="text-xs text-[#9CA3AF]">
-                      Après l&apos;envoi du SMS, la recharge reste en cours jusqu&apos;à la vérification du versement par
-                      l&apos;administrateur.
+                      Après l&apos;envoi du SMS, la recharge reste en cours jusqu&apos;à la
+                      vérification du versement par l&apos;administrateur.
                     </p>
                   </div>
                 </div>
@@ -331,7 +431,9 @@ export function ManualCheckout({
             </div>
 
             <div className="flex items-center gap-3 border-t border-[#E5E7EB] pt-4">
-              <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]"><Smartphone className="size-4" /></span>
+              <span className="grid size-9 place-items-center rounded-full bg-[#EEF1F5] text-[#64748B]">
+                <Smartphone className="size-4" />
+              </span>
               <div>
                 <p className="text-sm text-[#6B7280]">Votre compte de paiement :</p>
                 <p className="font-bold">{deposit.payerPhone}</p>
@@ -346,7 +448,12 @@ export function ManualCheckout({
 
 function CopyBtn({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-label="Copier" className="grid size-11 place-items-center rounded-xl border border-[#E5E7EB] text-[#374151]">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Copier"
+      className="grid size-11 place-items-center rounded-xl border border-[#E5E7EB] text-[#374151]"
+    >
       <Copy className="size-4" />
     </button>
   );

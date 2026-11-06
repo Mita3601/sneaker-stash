@@ -79,7 +79,7 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   },
 );
 
-/** Crée un paiement et enregistre le dépôt en attente. RobotPay est activé par défaut pour les 4 pays ciblés. */
+/** Crée un paiement et enregistre le dépôt en attente. RobotPay est activé par défaut pour les pays pris en charge. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => validate(raw))
@@ -111,7 +111,10 @@ export const initiateDeposit = createServerFn({ method: "POST" })
         throw new Error("Pays non pris en charge par RobotPay.");
       }
       const redirectBase =
-        returnBase || process.env['APP_URL'] || process.env['APP_PUBLIC_URL'] || "https://example.com";
+        returnBase ||
+        process.env["APP_URL"] ||
+        process.env["APP_PUBLIC_URL"] ||
+        "https://example.com";
       const redirect = `${redirectBase.replace(/\/$/, "")}/payment/robotpay/return?status=success&deposit=${encodeURIComponent(
         `robotpay-${Date.now()}`,
       )}`;

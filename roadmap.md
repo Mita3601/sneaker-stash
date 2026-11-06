@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Intégrer RobotPay pour les dépôts BF, CI, Cameroun et Bénin ; conserver les anciens parcours
+- [ ] Intégrer RobotPay pour les dépôts BF, CI et Cameroun ; conserver les anciens parcours
 - [ ] Garantir le rattachement sécurisé de chaque paiement à son utilisateur (attend une confirmation sur les références RobotPay)
 - [ ] Configurer les secrets et le webhook RobotPay, puis vérifier les crédits uniques et les retours
 
