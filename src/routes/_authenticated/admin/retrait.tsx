@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Btn, Card, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { fcfa, shortDate, TX_LABELS } from "@/lib/app";
+import { inZone, ZoneSummary, ZoneTabs, type AdminZone } from "@/components/AdminZones";
 
 export const Route = createFileRoute("/_authenticated/admin/retrait")({
   head: () => ({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/retrait")({
 
 function AdminRetrait() {
   const qc = useQueryClient();
+  const [zone, setZone] = useState<AdminZone>("bfci");
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<"date" | "amount" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
@@ -39,7 +41,9 @@ function AdminRetrait() {
     },
   });
 
-  const filteredWithdrawals = withdrawals.filter((tx) => {
+  const zoneWithdrawals = withdrawals.filter((tx) => inZone(tx.profiles?.country_code, zone));
+
+  const filteredWithdrawals = zoneWithdrawals.filter((tx) => {
     const metadata = (tx.metadata as Record<string, unknown> | null) ?? {};
     const matchesQuery = [
       tx.profiles?.phone,
@@ -73,10 +77,10 @@ function AdminRetrait() {
   }, [filteredWithdrawals, sortKey, sortOrder]);
 
   const counts = {
-    total: filteredWithdrawals.length,
-    pending: filteredWithdrawals.filter((tx) => tx.status === "pending").length,
-    approved: filteredWithdrawals.filter((tx) => tx.status === "approved").length,
-    rejected: filteredWithdrawals.filter((tx) => tx.status === "rejected").length,
+    total: zoneWithdrawals.length,
+    pending: zoneWithdrawals.filter((tx) => tx.status === "pending").length,
+    approved: zoneWithdrawals.filter((tx) => tx.status === "approved").length,
+    rejected: zoneWithdrawals.filter((tx) => tx.status === "rejected").length,
   };
 
   const review = useMutation({
@@ -90,6 +94,7 @@ function AdminRetrait() {
     onSuccess: () => {
       toast.success("Retrait mis à jour");
       qc.invalidateQueries({ queryKey: ["admin-retrait"] });
+      qc.invalidateQueries({ queryKey: ["admin-zone-summary"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -98,6 +103,8 @@ function AdminRetrait() {
     <div>
       <SubHeader title="Retraits" to="/admin" />
       <div className="space-y-4 p-4">
+        <ZoneTabs zone={zone} onChange={setZone} />
+        <ZoneSummary zone={zone} />
         <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
           <Card className="p-3">
             <input
