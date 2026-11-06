@@ -60,7 +60,19 @@ export const ORANGE_PROVIDER: ManualProvider = {
   ussd: "#150*1*1*692422876*montant*2#",
 };
 
+export const BF_WAVE_PROVIDER: ManualProvider = {
+  ...WAVE_PROVIDER,
+  providerName: "Wave",
+  channel: "Wave Burkina Faso",
+  methodLabel: "Wave Burkina Faso",
+  methodWord: "Wave",
+  dial: "+226",
+  phonePlaceholder: "XX XXXXXXX",
+  copyNumLabel: "Numéro Wave",
+};
+
 export const CI_PROVIDERS: ManualProvider[] = [WAVE_PROVIDER];
+export const BF_PROVIDERS: ManualProvider[] = [BF_WAVE_PROVIDER];
 
 export const CM_PROVIDERS: ManualProvider[] = [
   ORANGE_PROVIDER,

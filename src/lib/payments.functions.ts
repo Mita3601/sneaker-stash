@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { ensureServerEnvLoaded } from "@/lib/server-env";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   MIN_DEPOSIT,
@@ -10,8 +11,11 @@ import {
 import {
   buildRobotpayCheckoutUrl,
   getRobotpayCountry,
+  isRobotpayConfigured,
   normalizeRobotpayCountryCode,
-} from "@/lib/robotpay.server";
+} from "@/lib/robotpay.config";
+
+ensureServerEnvLoaded();
 
 type Input = {
   amount: number;
@@ -29,11 +33,12 @@ function validate(raw: unknown): Input {
   }
 
   const countryCode = String(data.country_code ?? data.country ?? "").trim();
+  const defaultProvider = isRobotpayConfigured() ? "robotpay" : "geniuspay";
   const provider = countryCode
     ? (PAYMENT_PROVIDER_BY_COUNTRY[countryCode] ??
       PAYMENT_PROVIDER_BY_COUNTRY[normalizeRobotpayCountryCode(countryCode) ?? ""] ??
-      "geniuspay")
-    : "geniuspay";
+      defaultProvider)
+    : defaultProvider;
 
   const phone = String(data.phone ?? "").replace(/[^\d+]/g, "");
   if (provider !== "robotpay" && phone.replace(/\D/g, "").length < 8) {
@@ -65,16 +70,12 @@ function newReference() {
 /** Disponibilité de la passerelle et montant minimum. */
 export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ minDeposit: number; gatewayConfigured: boolean }> => {
-    const geniuspayReady = ["GENIUSPAY_API_KEY", "GENIUSPAY_API_SECRET"].every((k) =>
-      Boolean((process.env[k] ?? "").trim()),
-    );
-    const robotpayReady = ["ROBOTPAY_MERCHANT_SLUG", "ROBOTPAY_WEBHOOK_SECRET"].every((k) =>
-      Boolean((process.env[k] ?? "").trim()),
-    );
+    const { isRobotpayConfigured } = await import("@/lib/robotpay.config");
+    const { isGeniusPayConfigured } = await import("@/lib/geniuspay.server");
 
     return {
       minDeposit: MIN_DEPOSIT,
-      gatewayConfigured: geniuspayReady || robotpayReady,
+      gatewayConfigured: isRobotpayConfigured() || isGeniusPayConfigured(),
     };
   },
 );
@@ -82,70 +83,90 @@ export const getPaymentOptions = createServerFn({ method: "GET" }).handler(
 /** Crée un paiement et enregistre le dépôt en attente. RobotPay est activé par défaut pour les pays pris en charge. */
 export const initiateDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => validate(raw))
+  .validator((raw: unknown) => validate(raw))
   .handler(async ({ data, context }): Promise<DepositInit> => {
     const provider =
       PAYMENT_PROVIDER_BY_COUNTRY[data.country_code ?? data.country ?? ""] ??
       PAYMENT_PROVIDER_BY_COUNTRY[
         normalizeRobotpayCountryCode(data.country_code ?? data.country ?? "") ?? ""
       ] ??
-      "geniuspay";
+      (isRobotpayConfigured() ? "robotpay" : "geniuspay");
 
     if (provider === "robotpay") {
-      const { getRequest } = await import("@tanstack/react-start/server");
-      const req = getRequest();
-      const url = req?.headers.get("origin") || req?.headers.get("referer") || "";
-      let returnBase = "";
       try {
-        const parsed = new URL(url);
-        if (parsed.protocol === "https:" || parsed.hostname === "localhost")
-          returnBase = parsed.origin;
-      } catch {
-        returnBase = "";
-      }
+        const { getRequest } = await import("@tanstack/react-start/server");
+        const req = getRequest();
+        const url = req?.headers.get("origin") || req?.headers.get("referer") || "";
+        let returnBase = "";
+        try {
+          const parsed = new URL(url);
+          if (parsed.protocol === "https:" || parsed.hostname === "localhost")
+            returnBase = parsed.origin;
+        } catch {
+          returnBase = "";
+        }
 
-      const countryCode =
-        normalizeRobotpayCountryCode(data.country_code ?? data.country ?? "") ?? "+226";
-      const country = getRobotpayCountry(countryCode);
-      if (!country) {
-        throw new Error("Pays non pris en charge par RobotPay.");
-      }
-      const redirectBase =
-        returnBase ||
-        process.env["APP_URL"] ||
-        process.env["APP_PUBLIC_URL"] ||
-        "https://example.com";
-      const redirect = `${redirectBase.replace(/\/$/, "")}/payment/robotpay/return?status=success&deposit=${encodeURIComponent(
-        `robotpay-${Date.now()}`,
-      )}`;
-      const paymentLink = buildRobotpayCheckoutUrl({
-        amount: data.amount,
-        country: country.country,
-        redirect,
-      });
-      const reference = `OP-${Math.random().toString(36).slice(2, 8).toUpperCase()}${Date.now().toString(36).toUpperCase()}`;
+        const countryCode =
+          normalizeRobotpayCountryCode(data.country_code ?? data.country ?? "") ?? "+226";
+        const country = getRobotpayCountry(countryCode);
+        if (!country) {
+          throw new Error("Pays non pris en charge par RobotPay.");
+        }
 
-      const { error } = await context.supabase.rpc("create_gateway_deposit", {
-        _amount: data.amount,
-        _reference: reference,
-        _metadata: {
-          gateway: "robotpay",
-          country_code: countryCode,
+        const configuredBase =
+          returnBase || process.env["APP_URL"] || process.env["APP_PUBLIC_URL"] || "";
+
+        const redirectBase = configuredBase.trim();
+        if (
+          !redirectBase ||
+          /^http:\/\//i.test(redirectBase) ||
+          /localhost|127\.0\.0\.1/i.test(redirectBase)
+        ) {
+          throw new Error(
+            "RobotPay exige une URL de retour publique HTTPS. Configure APP_URL sur un domaine public ou utilisez le dépôt manuel.",
+          );
+        }
+
+        const redirect = `${redirectBase.replace(/\/$/, "")}/payment/robotpay/return?status=success&deposit=${encodeURIComponent(
+          `robotpay-${Date.now()}`,
+        )}`;
+        const paymentLink = buildRobotpayCheckoutUrl({
+          amount: data.amount,
           country: country.country,
-          currency: country.currency,
-          checkout_url: paymentLink,
           redirect,
-          status: "pending",
-        },
-      });
-      if (error) throw new Error(error.message);
+        });
+        const reference = `OP-${Math.random().toString(36).slice(2, 8).toUpperCase()}${Date.now().toString(36).toUpperCase()}`;
 
-      return {
-        reference,
-        paymentLink,
-        amount: data.amount,
-        message: "Finalisez le paiement sur la page RobotPay qui s'ouvre.",
-      };
+        const { error } = await context.supabase.rpc("create_gateway_deposit", {
+          _amount: data.amount,
+          _reference: reference,
+          _metadata: {
+            gateway: "robotpay",
+            country_code: countryCode,
+            country: country.country,
+            currency: country.currency,
+            checkout_url: paymentLink,
+            redirect,
+            status: "pending",
+          },
+        });
+        if (error) throw new Error(error.message);
+
+        return {
+          reference,
+          paymentLink,
+          amount: data.amount,
+          message: "Finalisez le paiement sur la page RobotPay qui s'ouvre.",
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error ?? "");
+        if (/503|temporair|unavailable|gateway|checkout|robotpay/i.test(message)) {
+          throw new Error(
+            "RobotPay est temporairement indisponible. Utilisez le dépôt manuel pour finaliser votre recharge.",
+          );
+        }
+        throw error;
+      }
     }
 
     const { createPayment } = await import("@/lib/geniuspay.server");
@@ -211,7 +232,7 @@ export const initiateDeposit = createServerFn({ method: "POST" })
 /** Statut interne du dépôt : vérifie la passerelle et applique la règle des 15 minutes. */
 export const checkDepositStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => ({
+  .validator((raw: unknown) => ({
     reference: String((raw as { reference?: string })?.reference ?? "")
       .trim()
       .slice(0, 120),
@@ -233,7 +254,7 @@ export const checkDepositStatus = createServerFn({ method: "POST" })
 
 /** Appelé au retour de la page de paiement : vérifie côté passerelle avant de créditer. */
 export const confirmSuccessfulDeposit = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => ({
+  .validator((raw: unknown) => ({
     reference: String((raw as { reference?: string })?.reference ?? "")
       .trim()
       .slice(0, 120),

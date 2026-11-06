@@ -8,9 +8,10 @@ import { toast } from "sonner";
 import { Btn, Card, Field, inputClass } from "@/components/ui-kit";
 import { FinanceHeader, financeButton } from "@/components/FinanceLayout";
 import {
-  ManualCheckout,
+  BF_PROVIDERS,
   CI_PROVIDERS,
   CM_PROVIDERS,
+  ManualCheckout,
   type ManualProvider,
 } from "@/components/WaveCheckout";
 import { useCurrentUser } from "@/hooks/useSession";
@@ -23,6 +24,7 @@ import {
   PAYMENT_PROVIDER_BY_COUNTRY,
   type DepositInit,
 } from "@/lib/payments";
+import { isRobotpayConfigured } from "@/lib/robotpay.config";
 
 export const Route = createFileRoute("/_authenticated/app/recharge")({
   head: () => ({
@@ -116,7 +118,8 @@ function Recharge() {
 
   const pay = useMutation({
     mutationFn: () => {
-      const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
+      const provider =
+        PAYMENT_PROVIDER_BY_COUNTRY[country] ?? (isRobotpayConfigured() ? "robotpay" : "geniuspay");
       const digits = phone.replace(/\D/g, "");
       const ccDigits = country.replace(/\D/g, "");
       const intl = phone.startsWith("+")
@@ -146,7 +149,25 @@ function Recharge() {
         toast.success(result.message);
       }
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      const provider =
+        PAYMENT_PROVIDER_BY_COUNTRY[country] ?? (isRobotpayConfigured() ? "robotpay" : "geniuspay");
+      const message = String(error.message ?? "").toLowerCase();
+
+      if (
+        provider === "robotpay" &&
+        /503|temporair|unavailable|gateway|robotpay|https|public.*url|localhost|APP_URL/i.test(
+          message,
+        )
+      ) {
+        setManualProvider(
+          country === "+225" ? CI_PROVIDERS : country === "+226" ? BF_PROVIDERS : CM_PROVIDERS,
+        );
+        return;
+      }
+
+      toast.error(error.message);
+    },
   });
 
   // Polling du statut interne toutes les 5 s, arrêté au bout de 15 minutes.
@@ -195,9 +216,12 @@ function Recharge() {
       toast.error(`Montant minimum : ${MIN_DEPOSIT} FCFA`);
       return;
     }
-    const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
+    const provider =
+      PAYMENT_PROVIDER_BY_COUNTRY[country] ?? (isRobotpayConfigured() ? "robotpay" : "geniuspay");
     if (provider === "manual") {
-      setManualProvider(country === "+225" ? CI_PROVIDERS : CM_PROVIDERS);
+      setManualProvider(
+        country === "+225" ? CI_PROVIDERS : country === "+226" ? BF_PROVIDERS : CM_PROVIDERS,
+      );
       return;
     }
     if (provider !== "robotpay" && phone.replace(/\D/g, "").length < 8) {
@@ -211,7 +235,8 @@ function Recharge() {
     pay.mutate();
   }
 
-  const provider = PAYMENT_PROVIDER_BY_COUNTRY[country] ?? "geniuspay";
+  const provider =
+    PAYMENT_PROVIDER_BY_COUNTRY[country] ?? (isRobotpayConfigured() ? "robotpay" : "geniuspay");
   const isManual = provider === "manual";
   const isRobotpay = provider === "robotpay";
 

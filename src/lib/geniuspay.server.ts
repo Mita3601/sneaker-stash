@@ -1,10 +1,12 @@
 // GeniusPay — API marchand (server only). Mode checkout : pas de payment_method.
 import { createHmac, timingSafeEqual } from "crypto";
 
+import { getServerEnv } from "@/lib/server-env";
+
 const BASE_URL = "https://geniuspay.ci/api/v1/merchant";
 
 function env(name: string) {
-  return (process.env[name] ?? "").trim();
+  return getServerEnv(name);
 }
 
 export function isGeniusPayConfigured() {
@@ -12,7 +14,10 @@ export function isGeniusPayConfigured() {
 }
 
 export function getAppUrl() {
-  return (env("APP_URL") || env("APP_PUBLIC_URL") || "https://diorparfum.lovable.app").replace(/\/$/, "");
+  return (env("APP_URL") || env("APP_PUBLIC_URL") || "https://diorparfum.lovable.app").replace(
+    /\/$/,
+    "",
+  );
 }
 
 function headers() {
@@ -61,11 +66,15 @@ export async function createPayment(input: {
   if (!res.ok || body["success"] !== true) {
     console.error("GeniusPay create failed", res.status, body);
     const err = (body["error"] as Record<string, unknown> | undefined) ?? {};
-    throw new Error(String(err["message"] ?? body["message"] ?? "") || "Impossible de créer le paiement. Réessayez.");
+    throw new Error(
+      String(err["message"] ?? body["message"] ?? "") ||
+        "Impossible de créer le paiement. Réessayez.",
+    );
   }
   const reference = String(data["reference"] ?? "");
   const checkoutUrl = String(data["checkout_url"] ?? data["payment_url"] ?? "");
-  if (!reference || !checkoutUrl) throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
+  if (!reference || !checkoutUrl)
+    throw new Error("La passerelle n'a pas renvoyé de lien de paiement.");
   return { reference, checkoutUrl, amount: Number(data["amount"] ?? input.amount) };
 }
 
@@ -79,7 +88,9 @@ export type GeniusPayment = {
 };
 
 export async function getPayment(reference: string): Promise<GeniusPayment | null> {
-  const res = await fetch(`${BASE_URL}/payments/${encodeURIComponent(reference)}`, { headers: headers() });
+  const res = await fetch(`${BASE_URL}/payments/${encodeURIComponent(reference)}`, {
+    headers: headers(),
+  });
   const body = await parse(res);
   if (!res.ok || body["success"] !== true) return null;
   const d = (body["data"] as Record<string, unknown> | undefined) ?? {};
@@ -107,8 +118,12 @@ export function verifyWebhook(rawBody: string, signature: string | null, timesta
   const secret = env("GENIUSPAY_WEBHOOK_SECRET");
   if (!secret || !signature || !timestamp) return { ok: false, reason: "missing" };
   const ts = Number(timestamp);
-  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return { ok: false, reason: "timestamp" };
-  const sig = signature.trim().toLowerCase().replace(/^sha256=/, "");
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300)
+    return { ok: false, reason: "timestamp" };
+  const sig = signature
+    .trim()
+    .toLowerCase()
+    .replace(/^sha256=/, "");
   // Le corps brut est prioritaire ; variantes JSON (Node / PHP json_encode) en secours.
   const candidates = [rawBody];
   try {
