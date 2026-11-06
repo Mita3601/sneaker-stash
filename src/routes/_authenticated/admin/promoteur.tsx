@@ -32,6 +32,7 @@ function AdminPromoteur() {
 
   const { data: roles = [] } = useQuery({
     queryKey: ["admin-promoteur-roles"],
+    refetchOnMount: "always",
     queryFn: async () => {
       const { data, error } = await supabase.from("user_roles").select("user_id, role");
       if (error) throw error;
