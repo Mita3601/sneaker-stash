@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Btn, Card, StatusPill, SubHeader } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { fcfa, shortDate, TX_LABELS } from "@/lib/app";
+import { inZone, ZoneSummary, ZoneTabs, type AdminZone } from "@/components/AdminZones";
 
 export const Route = createFileRoute("/_authenticated/admin/depots")({
   head: () => ({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/depots")({
 
 function AdminDepots() {
   const qc = useQueryClient();
+  const [zone, setZone] = useState<AdminZone>("bfci");
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<"date" | "amount" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
@@ -31,7 +33,7 @@ function AdminDepots() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
-        .select("*, profiles(phone)")
+        .select("*, profiles(phone, country_code)")
         .eq("type", "deposit")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -39,20 +41,9 @@ function AdminDepots() {
     },
   });
 
-  const { data: withdrawals = [] } = useQuery({
-    queryKey: ["admin-depots-withdrawals"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("type", "withdraw")
-        .eq("status", "approved");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+  const zoneDeposits = deposits.filter((tx) => inZone(tx.profiles?.country_code, zone));
 
-  const filteredDeposits = deposits.filter((tx) => {
+  const filteredDeposits = zoneDeposits.filter((tx) => {
     const matchesQuery = [
       tx.profiles?.phone,
       tx.reference,
@@ -83,18 +74,11 @@ function AdminDepots() {
   }, [filteredDeposits, sortKey, sortOrder]);
 
   const counts = {
-    total: deposits.filter((tx) => tx.status !== "rejected").length,
-    approved: deposits.filter((tx) => tx.status === "approved").length,
-    pending: deposits.filter((tx) => tx.status === "pending").length,
-    rejected: deposits.filter((tx) => tx.status === "rejected").length,
+    total: zoneDeposits.filter((tx) => tx.status !== "rejected").length,
+    approved: zoneDeposits.filter((tx) => tx.status === "approved").length,
+    pending: zoneDeposits.filter((tx) => tx.status === "pending").length,
+    rejected: zoneDeposits.filter((tx) => tx.status === "rejected").length,
   };
-
-  const totalDepositsApproved = deposits
-    .filter((tx) => tx.status === "approved")
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-
-  const totalWithdrawalsApproved = withdrawals.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-  const remaining = totalDepositsApproved - totalWithdrawalsApproved;
 
   const review = useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
@@ -107,6 +91,7 @@ function AdminDepots() {
     onSuccess: () => {
       toast.success("Dépôt mis à jour");
       qc.invalidateQueries({ queryKey: ["admin-depots"] });
+      qc.invalidateQueries({ queryKey: ["admin-zone-summary"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -115,23 +100,8 @@ function AdminDepots() {
     <div>
       <SubHeader title="Dépôts" to="/admin" />
       <div className="space-y-4 p-4">
-        <div className="grid grid-cols-3 gap-2">
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">Dépôts validés</p>
-            <p className="text-2xl font-black">{fcfa(totalDepositsApproved)}</p>
-            <p className="text-xs text-muted-foreground">Montant total</p>
-          </Card>
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">Retraits validés</p>
-            <p className="text-2xl font-black">{fcfa(totalWithdrawalsApproved)}</p>
-            <p className="text-xs text-muted-foreground">Déboursé</p>
-          </Card>
-          <Card className="text-center p-4">
-            <p className="text-xs opacity-90">Reste</p>
-            <p className="text-2xl font-black">{fcfa(remaining)}</p>
-            <p className="text-xs text-muted-foreground">En réserve</p>
-          </Card>
-        </div>
+        <ZoneTabs zone={zone} onChange={setZone} />
+        <ZoneSummary zone={zone} />
 
         <div className="flex flex-wrap gap-2">
           {[
