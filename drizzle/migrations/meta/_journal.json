@@ -15,6 +15,13 @@
       "when": 1793373734663,
       "tag": "0001_manual_deposit_generic",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793978524541,
+      "tag": "0002_fix_user_roles_admin_select",
+      "breakpoints": true
     }
   ]
 }
